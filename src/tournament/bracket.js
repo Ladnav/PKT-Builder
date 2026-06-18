@@ -1,0 +1,140 @@
+// src/tournament/bracket.js
+// Lógica do torneio mata-mata de 8 times
+
+import { simulateBattle } from '../engine/battle.js';
+
+export const ROUNDS_NAMES = {
+  quarters: 'Quartas de Final',
+  semis: 'Semifinal',
+  final: 'Final',
+  done: 'Encerrado',
+};
+
+// Cria o bracket inicial com 8 times
+// times: array de { slot, name, isPlayer, pokemon }
+export function createBracket(teams) {
+  // Embaralha preservando o jogador na posição 0
+  const player = teams.find(t => t.isPlayer);
+  const bots = teams.filter(t => !t.isPlayer).sort(() => Math.random() - 0.5);
+  const shuffled = [player, ...bots];
+
+  return {
+    teams: shuffled,
+    round: 'quarters',
+    matches: {
+      quarters: [
+        createMatch(shuffled[0], shuffled[1], 'QF1'),
+        createMatch(shuffled[2], shuffled[3], 'QF2'),
+        createMatch(shuffled[4], shuffled[5], 'QF3'),
+        createMatch(shuffled[6], shuffled[7], 'QF4'),
+      ],
+      semis: [
+        createMatch(null, null, 'SF1'),
+        createMatch(null, null, 'SF2'),
+      ],
+      final: [
+        createMatch(null, null, 'F1'),
+      ],
+    },
+    winner: null,
+    battleLogs: {},
+  };
+}
+
+function createMatch(team1, team2, id) {
+  return {
+    id,
+    team1: team1 || null,
+    team2: team2 || null,
+    winner: null,
+    loser: null,
+    log: null,
+    simulated: false,
+  };
+}
+
+// Simula todos os confrontos de um round
+export function simulateRound(bracket, roundName) {
+  const matches = bracket.matches[roundName];
+  const results = [];
+
+  for (const match of matches) {
+    if (!match.team1 || !match.team2 || match.simulated) continue;
+
+    const seed = Date.now() + Math.random() * 1000;
+    const result = simulateBattle(match.team1.pokemon, match.team2.pokemon, seed);
+
+    match.winner = result.winner === 1 ? match.team1 : match.team2;
+    match.loser  = result.winner === 1 ? match.team2 : match.team1;
+    match.log    = result.log;
+    match.simulated = true;
+    match.totalTurns = result.totalTurns;
+
+    bracket.battleLogs[match.id] = result.log;
+    results.push({ match, result });
+  }
+
+  return results;
+}
+
+// Avança para o próximo round populando com os vencedores
+export function advanceRound(bracket) {
+  const { round, matches } = bracket;
+
+  if (round === 'quarters') {
+    matches.semis[0].team1 = matches.quarters[0].winner;
+    matches.semis[0].team2 = matches.quarters[1].winner;
+    matches.semis[1].team1 = matches.quarters[2].winner;
+    matches.semis[1].team2 = matches.quarters[3].winner;
+    bracket.round = 'semis';
+  } else if (round === 'semis') {
+    matches.final[0].team1 = matches.semis[0].winner;
+    matches.final[0].team2 = matches.semis[1].winner;
+    bracket.round = 'final';
+  } else if (round === 'final') {
+    bracket.winner = matches.final[0].winner;
+    bracket.round = 'done';
+  }
+
+  return bracket;
+}
+
+// Verifica se todos os confrontos de um round foram simulados
+export function isRoundComplete(bracket, roundName) {
+  return bracket.matches[roundName].every(m => m.simulated || (!m.team1 || !m.team2));
+}
+
+// Retorna o confronto do jogador em um round específico
+export function getPlayerMatch(bracket, roundName) {
+  return bracket.matches[roundName]?.find(
+    m => m.team1?.isPlayer || m.team2?.isPlayer
+  ) || null;
+}
+
+// Verifica se o jogador ainda está no torneio
+export function isPlayerAlive(bracket) {
+  const round = bracket.round;
+  if (round === 'done') {
+    return bracket.winner?.isPlayer === true;
+  }
+  const prevRounds = { semis: 'quarters', final: 'semis' };
+  const prev = prevRounds[round];
+  if (!prev) return true;
+  return bracket.matches[prev].some(m => m.winner?.isPlayer === true);
+}
+
+// Simula o torneio inteiro e retorna o bracket completo
+export function simulateFullTournament(teams) {
+  let bracket = createBracket(teams);
+
+  simulateRound(bracket, 'quarters');
+  advanceRound(bracket);
+
+  simulateRound(bracket, 'semis');
+  advanceRound(bracket);
+
+  simulateRound(bracket, 'final');
+  advanceRound(bracket);
+
+  return bracket;
+}

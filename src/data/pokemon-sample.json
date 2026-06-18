@@ -1,0 +1,1278 @@
+[
+  {
+    "id": 3,
+    "name": "venusaur",
+    "displayName": "Venusaur",
+    "generation": 1,
+    "types": ["grass", "poison"],
+    "stats": {
+      "hp": 80,
+      "attack": 82,
+      "defense": 83,
+      "spAtk": 100,
+      "spDef": 100,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "energy-ball", "displayName": "Energy Ball", "type": "grass", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "sludge-bomb", "displayName": "Sludge Bomb", "type": "poison", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "solar-beam", "displayName": "Solar Beam", "type": "grass", "power": 120, "accuracy": 100, "damage_class": "special" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png"
+  },
+  {
+    "id": 6,
+    "name": "charizard",
+    "displayName": "Charizard",
+    "generation": 1,
+    "types": ["fire", "flying"],
+    "stats": {
+      "hp": 78,
+      "attack": 84,
+      "defense": 78,
+      "spAtk": 109,
+      "spDef": 85,
+      "speed": 100
+    },
+    "moves": [
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "air-slash", "displayName": "Air Slash", "type": "flying", "power": 75, "accuracy": 100, "damage_class": "special" },
+      { "name": "dragon-claw", "displayName": "Dragon Claw", "type": "dragon", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "solar-beam", "displayName": "Solar Beam", "type": "grass", "power": 120, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
+  },
+  {
+    "id": 9,
+    "name": "blastoise",
+    "displayName": "Blastoise",
+    "generation": 1,
+    "types": ["water"],
+    "stats": {
+      "hp": 79,
+      "attack": 83,
+      "defense": 100,
+      "spAtk": 85,
+      "spDef": 105,
+      "speed": 78
+    },
+    "moves": [
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "flash-cannon", "displayName": "Flash Cannon", "type": "steel", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png"
+  },
+  {
+    "id": 25,
+    "name": "pikachu",
+    "displayName": "Pikachu",
+    "generation": 1,
+    "types": ["electric"],
+    "stats": {
+      "hp": 35,
+      "attack": 55,
+      "defense": 40,
+      "spAtk": 50,
+      "spDef": 50,
+      "speed": 90
+    },
+    "moves": [
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "iron-tail", "displayName": "Iron Tail", "type": "steel", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "quick-attack", "displayName": "Quick Attack", "type": "normal", "power": 40, "accuracy": 100, "damage_class": "physical" },
+      { "name": "thunder", "displayName": "Thunder", "type": "electric", "power": 110, "accuracy": 70, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
+  },
+  {
+    "id": 36,
+    "name": "clefable",
+    "displayName": "Clefable",
+    "generation": 1,
+    "types": ["normal", "fairy"],
+    "stats": {
+      "hp": 95,
+      "attack": 70,
+      "defense": 73,
+      "spAtk": 95,
+      "spDef": 90,
+      "speed": 60
+    },
+    "moves": [
+      { "name": "moonblast", "displayName": "Moonblast", "type": "fairy", "power": 95, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/36.png"
+  },
+  {
+    "id": 38,
+    "name": "ninetales",
+    "displayName": "Ninetales",
+    "generation": 1,
+    "types": ["fire"],
+    "stats": {
+      "hp": 73,
+      "attack": 76,
+      "defense": 75,
+      "spAtk": 81,
+      "spDef": 100,
+      "speed": 100
+    },
+    "moves": [
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "energy-ball", "displayName": "Energy Ball", "type": "grass", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "fire-blast", "displayName": "Fire Blast", "type": "fire", "power": 110, "accuracy": 85, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/38.png"
+  },
+  {
+    "id": 59,
+    "name": "arcanine",
+    "displayName": "Arcanine",
+    "generation": 1,
+    "types": ["fire"],
+    "stats": {
+      "hp": 90,
+      "attack": 110,
+      "defense": 80,
+      "spAtk": 100,
+      "spDef": 80,
+      "speed": 95
+    },
+    "moves": [
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "extreme-speed", "displayName": "Extreme Speed", "type": "normal", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "crunch", "displayName": "Crunch", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/59.png"
+  },
+  {
+    "id": 65,
+    "name": "alakazam",
+    "displayName": "Alakazam",
+    "generation": 1,
+    "types": ["psychic"],
+    "stats": {
+      "hp": 55,
+      "attack": 50,
+      "defense": 45,
+      "spAtk": 135,
+      "spDef": 95,
+      "speed": 120
+    },
+    "moves": [
+      { "name": "psychic", "displayName": "Psychic", "type": "psychic", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" },
+      { "name": "energy-ball", "displayName": "Energy Ball", "type": "grass", "power": 90, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png"
+  },
+  {
+    "id": 68,
+    "name": "machamp",
+    "displayName": "Machamp",
+    "generation": 1,
+    "types": ["fighting"],
+    "stats": {
+      "hp": 90,
+      "attack": 130,
+      "defense": 80,
+      "spAtk": 65,
+      "spDef": 85,
+      "speed": 55
+    },
+    "moves": [
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/68.png"
+  },
+  {
+    "id": 76,
+    "name": "golem",
+    "displayName": "Golem",
+    "generation": 1,
+    "types": ["rock", "ground"],
+    "stats": {
+      "hp": 80,
+      "attack": 120,
+      "defense": 130,
+      "spAtk": 55,
+      "spDef": 65,
+      "speed": 45
+    },
+    "moves": [
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "fire-punch", "displayName": "Fire Punch", "type": "fire", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "body-slam", "displayName": "Body Slam", "type": "normal", "power": 85, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png"
+  },
+  {
+    "id": 80,
+    "name": "slowbro",
+    "displayName": "Slowbro",
+    "generation": 1,
+    "types": ["water", "psychic"],
+    "stats": {
+      "hp": 95,
+      "attack": 75,
+      "defense": 110,
+      "spAtk": 100,
+      "spDef": 80,
+      "speed": 30
+    },
+    "moves": [
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "psychic", "displayName": "Psychic", "type": "psychic", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "fire-blast", "displayName": "Fire Blast", "type": "fire", "power": 110, "accuracy": 85, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/80.png"
+  },
+  {
+    "id": 94,
+    "name": "gengar",
+    "displayName": "Gengar",
+    "generation": 1,
+    "types": ["ghost", "poison"],
+    "stats": {
+      "hp": 60,
+      "attack": 65,
+      "defense": 60,
+      "spAtk": 130,
+      "spDef": 75,
+      "speed": 110
+    },
+    "moves": [
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "sludge-bomb", "displayName": "Sludge Bomb", "type": "poison", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png"
+  },
+  {
+    "id": 106,
+    "name": "hitmonlee",
+    "displayName": "Hitmonlee",
+    "generation": 1,
+    "types": ["fighting"],
+    "stats": {
+      "hp": 50,
+      "attack": 120,
+      "defense": 53,
+      "spAtk": 35,
+      "spDef": 110,
+      "speed": 87
+    },
+    "moves": [
+      { "name": "high-jump-kick", "displayName": "High Jump Kick", "type": "fighting", "power": 130, "accuracy": 90, "damage_class": "physical" },
+      { "name": "blaze-kick", "displayName": "Blaze Kick", "type": "fire", "power": 85, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/106.png"
+  },
+  {
+    "id": 107,
+    "name": "hitmonchan",
+    "displayName": "Hitmonchan",
+    "generation": 1,
+    "types": ["fighting"],
+    "stats": {
+      "hp": 50,
+      "attack": 105,
+      "defense": 79,
+      "spAtk": 35,
+      "spDef": 110,
+      "speed": 76
+    },
+    "moves": [
+      { "name": "fire-punch", "displayName": "Fire Punch", "type": "fire", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "thunder-punch", "displayName": "Thunder Punch", "type": "electric", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/107.png"
+  },
+  {
+    "id": 123,
+    "name": "scyther",
+    "displayName": "Scyther",
+    "generation": 1,
+    "types": ["bug", "flying"],
+    "stats": {
+      "hp": 70,
+      "attack": 110,
+      "defense": 80,
+      "spAtk": 55,
+      "spDef": 80,
+      "speed": 105
+    },
+    "moves": [
+      { "name": "x-scissor", "displayName": "X-Scissor", "type": "bug", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "aerial-ace", "displayName": "Aerial Ace", "type": "flying", "power": 60, "accuracy": 100, "damage_class": "physical" },
+      { "name": "night-slash", "displayName": "Night Slash", "type": "dark", "power": 70, "accuracy": 100, "damage_class": "physical" },
+      { "name": "steel-wing", "displayName": "Steel Wing", "type": "steel", "power": 70, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/123.png"
+  },
+  {
+    "id": 124,
+    "name": "jynx",
+    "displayName": "Jynx",
+    "generation": 1,
+    "types": ["ice", "psychic"],
+    "stats": {
+      "hp": 65,
+      "attack": 50,
+      "defense": 35,
+      "spAtk": 115,
+      "spDef": 95,
+      "speed": 95
+    },
+    "moves": [
+      { "name": "blizzard", "displayName": "Blizzard", "type": "ice", "power": 110, "accuracy": 70, "damage_class": "special" },
+      { "name": "psychic", "displayName": "Psychic", "type": "psychic", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "energy-ball", "displayName": "Energy Ball", "type": "grass", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/124.png"
+  },
+  {
+    "id": 125,
+    "name": "electabuzz",
+    "displayName": "Electabuzz",
+    "generation": 1,
+    "types": ["electric"],
+    "stats": {
+      "hp": 65,
+      "attack": 83,
+      "defense": 57,
+      "spAtk": 95,
+      "spDef": 85,
+      "speed": 105
+    },
+    "moves": [
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "fire-punch", "displayName": "Fire Punch", "type": "fire", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "cross-chop", "displayName": "Cross Chop", "type": "fighting", "power": 100, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/125.png"
+  },
+  {
+    "id": 126,
+    "name": "magmar",
+    "displayName": "Magmar",
+    "generation": 1,
+    "types": ["fire"],
+    "stats": {
+      "hp": 65,
+      "attack": 95,
+      "defense": 57,
+      "spAtk": 100,
+      "spDef": 85,
+      "speed": 93
+    },
+    "moves": [
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "solar-beam", "displayName": "Solar Beam", "type": "grass", "power": 120, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/126.png"
+  },
+  {
+    "id": 131,
+    "name": "lapras",
+    "displayName": "Lapras",
+    "generation": 1,
+    "types": ["water", "ice"],
+    "stats": {
+      "hp": 130,
+      "attack": 85,
+      "defense": 80,
+      "spAtk": 85,
+      "spDef": 95,
+      "speed": 60
+    },
+    "moves": [
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "body-slam", "displayName": "Body Slam", "type": "normal", "power": 85, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/131.png"
+  },
+  {
+    "id": 134,
+    "name": "vaporeon",
+    "displayName": "Vaporeon",
+    "generation": 1,
+    "types": ["water"],
+    "stats": {
+      "hp": 130,
+      "attack": 65,
+      "defense": 60,
+      "spAtk": 110,
+      "spDef": 95,
+      "speed": 65
+    },
+    "moves": [
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "hydro-pump", "displayName": "Hydro Pump", "type": "water", "power": 110, "accuracy": 80, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/134.png"
+  },
+  {
+    "id": 135,
+    "name": "jolteon",
+    "displayName": "Jolteon",
+    "generation": 1,
+    "types": ["electric"],
+    "stats": {
+      "hp": 65,
+      "attack": 65,
+      "defense": 60,
+      "spAtk": 110,
+      "spDef": 95,
+      "speed": 130
+    },
+    "moves": [
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "signal-beam", "displayName": "Signal Beam", "type": "bug", "power": 75, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunder", "displayName": "Thunder", "type": "electric", "power": 110, "accuracy": 70, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/135.png"
+  },
+  {
+    "id": 136,
+    "name": "flareon",
+    "displayName": "Flareon",
+    "generation": 1,
+    "types": ["fire"],
+    "stats": {
+      "hp": 65,
+      "attack": 130,
+      "defense": 60,
+      "spAtk": 95,
+      "spDef": 110,
+      "speed": 65
+    },
+    "moves": [
+      { "name": "flare-blitz", "displayName": "Flare Blitz", "type": "fire", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "fire-blast", "displayName": "Fire Blast", "type": "fire", "power": 110, "accuracy": 85, "damage_class": "special" },
+      { "name": "superpower", "displayName": "Superpower", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "body-slam", "displayName": "Body Slam", "type": "normal", "power": 85, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/136.png"
+  },
+  {
+    "id": 143,
+    "name": "snorlax",
+    "displayName": "Snorlax",
+    "generation": 1,
+    "types": ["normal"],
+    "stats": {
+      "hp": 160,
+      "attack": 110,
+      "defense": 65,
+      "spAtk": 65,
+      "spDef": 110,
+      "speed": 30
+    },
+    "moves": [
+      { "name": "body-slam", "displayName": "Body Slam", "type": "normal", "power": 85, "accuracy": 100, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "crunch", "displayName": "Crunch", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png"
+  },
+  {
+    "id": 149,
+    "name": "dragonite",
+    "displayName": "Dragonite",
+    "generation": 1,
+    "types": ["dragon", "flying"],
+    "stats": {
+      "hp": 91,
+      "attack": 134,
+      "defense": 95,
+      "spAtk": 100,
+      "spDef": 100,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "outrage", "displayName": "Outrage", "type": "dragon", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "extreme-speed", "displayName": "Extreme Speed", "type": "normal", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "fire-punch", "displayName": "Fire Punch", "type": "fire", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "thunder-punch", "displayName": "Thunder Punch", "type": "electric", "power": 75, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png"
+  },
+  {
+    "id": 150,
+    "name": "mewtwo",
+    "displayName": "Mewtwo",
+    "generation": 1,
+    "types": ["psychic"],
+    "stats": {
+      "hp": 106,
+      "attack": 110,
+      "defense": 90,
+      "spAtk": 154,
+      "spDef": 90,
+      "speed": 130
+    },
+    "moves": [
+      { "name": "psychic", "displayName": "Psychic", "type": "psychic", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "fire-blast", "displayName": "Fire Blast", "type": "fire", "power": 110, "accuracy": 85, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png"
+  },
+  {
+    "id": 154,
+    "name": "meganium",
+    "displayName": "Meganium",
+    "generation": 2,
+    "types": ["grass"],
+    "stats": {
+      "hp": 80,
+      "attack": 82,
+      "defense": 100,
+      "spAtk": 83,
+      "spDef": 100,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "energy-ball", "displayName": "Energy Ball", "type": "grass", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "body-slam", "displayName": "Body Slam", "type": "normal", "power": 85, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ancient-power", "displayName": "Ancient Power", "type": "rock", "power": 60, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/154.png"
+  },
+  {
+    "id": 157,
+    "name": "typhlosion",
+    "displayName": "Typhlosion",
+    "generation": 2,
+    "types": ["fire"],
+    "stats": {
+      "hp": 78,
+      "attack": 84,
+      "defense": 78,
+      "spAtk": 109,
+      "spDef": 85,
+      "speed": 100
+    },
+    "moves": [
+      { "name": "eruption", "displayName": "Eruption", "type": "fire", "power": 150, "accuracy": 100, "damage_class": "special" },
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" },
+      { "name": "solar-beam", "displayName": "Solar Beam", "type": "grass", "power": 120, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/157.png"
+  },
+  {
+    "id": 160,
+    "name": "feraligatr",
+    "displayName": "Feraligatr",
+    "generation": 2,
+    "types": ["water"],
+    "stats": {
+      "hp": 85,
+      "attack": 105,
+      "defense": 100,
+      "spAtk": 79,
+      "spDef": 83,
+      "speed": 78
+    },
+    "moves": [
+      { "name": "waterfall", "displayName": "Waterfall", "type": "water", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "crunch", "displayName": "Crunch", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/160.png"
+  },
+  {
+    "id": 196,
+    "name": "espeon",
+    "displayName": "Espeon",
+    "generation": 2,
+    "types": ["psychic"],
+    "stats": {
+      "hp": 65,
+      "attack": 65,
+      "defense": 60,
+      "spAtk": 130,
+      "spDef": 95,
+      "speed": 110
+    },
+    "moves": [
+      { "name": "psychic", "displayName": "Psychic", "type": "psychic", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "signal-beam", "displayName": "Signal Beam", "type": "bug", "power": 75, "accuracy": 100, "damage_class": "special" },
+      { "name": "dazzling-gleam", "displayName": "Dazzling Gleam", "type": "fairy", "power": 80, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png"
+  },
+  {
+    "id": 197,
+    "name": "umbreon",
+    "displayName": "Umbreon",
+    "generation": 2,
+    "types": ["dark"],
+    "stats": {
+      "hp": 95,
+      "attack": 65,
+      "defense": 110,
+      "spAtk": 60,
+      "spDef": 130,
+      "speed": 65
+    },
+    "moves": [
+      { "name": "dark-pulse", "displayName": "Dark Pulse", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "payback", "displayName": "Payback", "type": "dark", "power": 50, "accuracy": 100, "damage_class": "physical" },
+      { "name": "body-slam", "displayName": "Body Slam", "type": "normal", "power": 85, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/197.png"
+  },
+  {
+    "id": 214,
+    "name": "heracross",
+    "displayName": "Heracross",
+    "generation": 2,
+    "types": ["bug", "fighting"],
+    "stats": {
+      "hp": 80,
+      "attack": 125,
+      "defense": 75,
+      "spAtk": 40,
+      "spDef": 95,
+      "speed": 85
+    },
+    "moves": [
+      { "name": "megahorn", "displayName": "Megahorn", "type": "bug", "power": 120, "accuracy": 85, "damage_class": "physical" },
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "night-slash", "displayName": "Night Slash", "type": "dark", "power": 70, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/214.png"
+  },
+  {
+    "id": 229,
+    "name": "houndoom",
+    "displayName": "Houndoom",
+    "generation": 2,
+    "types": ["dark", "fire"],
+    "stats": {
+      "hp": 75,
+      "attack": 90,
+      "defense": 50,
+      "spAtk": 110,
+      "spDef": 80,
+      "speed": 95
+    },
+    "moves": [
+      { "name": "dark-pulse", "displayName": "Dark Pulse", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/229.png"
+  },
+  {
+    "id": 230,
+    "name": "kingdra",
+    "displayName": "Kingdra",
+    "generation": 2,
+    "types": ["water", "dragon"],
+    "stats": {
+      "hp": 75,
+      "attack": 95,
+      "defense": 95,
+      "spAtk": 95,
+      "spDef": 95,
+      "speed": 85
+    },
+    "moves": [
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "dragon-pulse", "displayName": "Dragon Pulse", "type": "dragon", "power": 85, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "hydro-pump", "displayName": "Hydro Pump", "type": "water", "power": 110, "accuracy": 80, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/230.png"
+  },
+  {
+    "id": 242,
+    "name": "blissey",
+    "displayName": "Blissey",
+    "generation": 2,
+    "types": ["normal"],
+    "stats": {
+      "hp": 255,
+      "attack": 10,
+      "defense": 10,
+      "spAtk": 75,
+      "spDef": 135,
+      "speed": 55
+    },
+    "moves": [
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/242.png"
+  },
+  {
+    "id": 248,
+    "name": "tyranitar",
+    "displayName": "Tyranitar",
+    "generation": 2,
+    "types": ["rock", "dark"],
+    "stats": {
+      "hp": 100,
+      "attack": 134,
+      "defense": 110,
+      "spAtk": 95,
+      "spDef": 100,
+      "speed": 61
+    },
+    "moves": [
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "crunch", "displayName": "Crunch", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/248.png"
+  },
+  {
+    "id": 254,
+    "name": "sceptile",
+    "displayName": "Sceptile",
+    "generation": 3,
+    "types": ["grass"],
+    "stats": {
+      "hp": 70,
+      "attack": 85,
+      "defense": 65,
+      "spAtk": 105,
+      "spDef": 85,
+      "speed": 120
+    },
+    "moves": [
+      { "name": "leaf-blade", "displayName": "Leaf Blade", "type": "grass", "power": 90, "accuracy": 100, "damage_class": "physical" },
+      { "name": "energy-ball", "displayName": "Energy Ball", "type": "grass", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "dragon-pulse", "displayName": "Dragon Pulse", "type": "dragon", "power": 85, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/254.png"
+  },
+  {
+    "id": 257,
+    "name": "blaziken",
+    "displayName": "Blaziken",
+    "generation": 3,
+    "types": ["fire", "fighting"],
+    "stats": {
+      "hp": 80,
+      "attack": 120,
+      "defense": 70,
+      "spAtk": 110,
+      "spDef": 70,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "flare-blitz", "displayName": "Flare Blitz", "type": "fire", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "blaze-kick", "displayName": "Blaze Kick", "type": "fire", "power": 85, "accuracy": 100, "damage_class": "physical" },
+      { "name": "sky-uppercut", "displayName": "Sky Uppercut", "type": "fighting", "power": 85, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/257.png"
+  },
+  {
+    "id": 260,
+    "name": "swampert",
+    "displayName": "Swampert",
+    "generation": 3,
+    "types": ["water", "ground"],
+    "stats": {
+      "hp": 100,
+      "attack": 110,
+      "defense": 90,
+      "spAtk": 85,
+      "spDef": 90,
+      "speed": 60
+    },
+    "moves": [
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "waterfall", "displayName": "Waterfall", "type": "water", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/260.png"
+  },
+  {
+    "id": 282,
+    "name": "gardevoir",
+    "displayName": "Gardevoir",
+    "generation": 3,
+    "types": ["psychic", "fairy"],
+    "stats": {
+      "hp": 68,
+      "attack": 65,
+      "defense": 65,
+      "spAtk": 125,
+      "spDef": 115,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "moonblast", "displayName": "Moonblast", "type": "fairy", "power": 95, "accuracy": 100, "damage_class": "special" },
+      { "name": "psychic", "displayName": "Psychic", "type": "psychic", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/282.png"
+  },
+  {
+    "id": 350,
+    "name": "milotic",
+    "displayName": "Milotic",
+    "generation": 3,
+    "types": ["water"],
+    "stats": {
+      "hp": 95,
+      "attack": 60,
+      "defense": 79,
+      "spAtk": 100,
+      "spDef": 125,
+      "speed": 81
+    },
+    "moves": [
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "hydro-pump", "displayName": "Hydro Pump", "type": "water", "power": 110, "accuracy": 80, "damage_class": "special" },
+      { "name": "dragon-pulse", "displayName": "Dragon Pulse", "type": "dragon", "power": 85, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/350.png"
+  },
+  {
+    "id": 359,
+    "name": "absol",
+    "displayName": "Absol",
+    "generation": 3,
+    "types": ["dark"],
+    "stats": {
+      "hp": 65,
+      "attack": 130,
+      "defense": 60,
+      "spAtk": 75,
+      "spDef": 60,
+      "speed": 75
+    },
+    "moves": [
+      { "name": "night-slash", "displayName": "Night Slash", "type": "dark", "power": 70, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "psycho-cut", "displayName": "Psycho Cut", "type": "psychic", "power": 70, "accuracy": 100, "damage_class": "physical" },
+      { "name": "megahorn", "displayName": "Megahorn", "type": "bug", "power": 120, "accuracy": 85, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/359.png"
+  },
+  {
+    "id": 373,
+    "name": "salamence",
+    "displayName": "Salamence",
+    "generation": 3,
+    "types": ["dragon", "flying"],
+    "stats": {
+      "hp": 95,
+      "attack": 135,
+      "defense": 80,
+      "spAtk": 110,
+      "spDef": 80,
+      "speed": 100
+    },
+    "moves": [
+      { "name": "outrage", "displayName": "Outrage", "type": "dragon", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "dragon-claw", "displayName": "Dragon Claw", "type": "dragon", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "fire-blast", "displayName": "Fire Blast", "type": "fire", "power": 110, "accuracy": 85, "damage_class": "special" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/373.png"
+  },
+  {
+    "id": 376,
+    "name": "metagross",
+    "displayName": "Metagross",
+    "generation": 3,
+    "types": ["steel", "psychic"],
+    "stats": {
+      "hp": 80,
+      "attack": 135,
+      "defense": 130,
+      "spAtk": 95,
+      "spDef": 90,
+      "speed": 70
+    },
+    "moves": [
+      { "name": "meteor-mash", "displayName": "Meteor Mash", "type": "steel", "power": 90, "accuracy": 100, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "psychic", "displayName": "Psychic", "type": "psychic", "power": 90, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/376.png"
+  },
+  {
+    "id": 384,
+    "name": "rayquaza",
+    "displayName": "Rayquaza",
+    "generation": 3,
+    "types": ["dragon", "flying"],
+    "stats": {
+      "hp": 105,
+      "attack": 150,
+      "defense": 90,
+      "spAtk": 150,
+      "spDef": 90,
+      "speed": 95
+    },
+    "moves": [
+      { "name": "outrage", "displayName": "Outrage", "type": "dragon", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "air-slash", "displayName": "Air Slash", "type": "flying", "power": 75, "accuracy": 100, "damage_class": "special" },
+      { "name": "extreme-speed", "displayName": "Extreme Speed", "type": "normal", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "fire-blast", "displayName": "Fire Blast", "type": "fire", "power": 110, "accuracy": 85, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/384.png"
+  },
+  {
+    "id": 389,
+    "name": "torterra",
+    "displayName": "Torterra",
+    "generation": 4,
+    "types": ["grass", "ground"],
+    "stats": {
+      "hp": 95,
+      "attack": 109,
+      "defense": 105,
+      "spAtk": 75,
+      "spDef": 85,
+      "speed": 56
+    },
+    "moves": [
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "wood-hammer", "displayName": "Wood Hammer", "type": "grass", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "crunch", "displayName": "Crunch", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/389.png"
+  },
+  {
+    "id": 392,
+    "name": "infernape",
+    "displayName": "Infernape",
+    "generation": 4,
+    "types": ["fire", "fighting"],
+    "stats": {
+      "hp": 76,
+      "attack": 104,
+      "defense": 71,
+      "spAtk": 104,
+      "spDef": 71,
+      "speed": 108
+    },
+    "moves": [
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunder-punch", "displayName": "Thunder Punch", "type": "electric", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "u-turn", "displayName": "U-Turn", "type": "bug", "power": 70, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/392.png"
+  },
+  {
+    "id": 395,
+    "name": "empoleon",
+    "displayName": "Empoleon",
+    "generation": 4,
+    "types": ["water", "steel"],
+    "stats": {
+      "hp": 84,
+      "attack": 86,
+      "defense": 88,
+      "spAtk": 111,
+      "spDef": 101,
+      "speed": 60
+    },
+    "moves": [
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "flash-cannon", "displayName": "Flash Cannon", "type": "steel", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "ice-beam", "displayName": "Ice Beam", "type": "ice", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/395.png"
+  },
+  {
+    "id": 445,
+    "name": "garchomp",
+    "displayName": "Garchomp",
+    "generation": 4,
+    "types": ["dragon", "ground"],
+    "stats": {
+      "hp": 108,
+      "attack": 130,
+      "defense": 95,
+      "spAtk": 80,
+      "spDef": 85,
+      "speed": 102
+    },
+    "moves": [
+      { "name": "outrage", "displayName": "Outrage", "type": "dragon", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "fire-fang", "displayName": "Fire Fang", "type": "fire", "power": 65, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/445.png"
+  },
+  {
+    "id": 448,
+    "name": "lucario",
+    "displayName": "Lucario",
+    "generation": 4,
+    "types": ["fighting", "steel"],
+    "stats": {
+      "hp": 70,
+      "attack": 110,
+      "defense": 70,
+      "spAtk": 115,
+      "spDef": 70,
+      "speed": 90
+    },
+    "moves": [
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "aura-sphere", "displayName": "Aura Sphere", "type": "fighting", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "iron-tail", "displayName": "Iron Tail", "type": "steel", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "dragon-pulse", "displayName": "Dragon Pulse", "type": "dragon", "power": 85, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png"
+  },
+  {
+    "id": 461,
+    "name": "weavile",
+    "displayName": "Weavile",
+    "generation": 4,
+    "types": ["dark", "ice"],
+    "stats": {
+      "hp": 70,
+      "attack": 120,
+      "defense": 65,
+      "spAtk": 45,
+      "spDef": 85,
+      "speed": 125
+    },
+    "moves": [
+      { "name": "night-slash", "displayName": "Night Slash", "type": "dark", "power": 70, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-punch", "displayName": "Ice Punch", "type": "ice", "power": 75, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-shard", "displayName": "Ice Shard", "type": "ice", "power": 40, "accuracy": 100, "damage_class": "physical" },
+      { "name": "brick-break", "displayName": "Brick Break", "type": "fighting", "power": 75, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/461.png"
+  },
+  {
+    "id": 468,
+    "name": "togekiss",
+    "displayName": "Togekiss",
+    "generation": 4,
+    "types": ["normal", "flying"],
+    "stats": {
+      "hp": 85,
+      "attack": 50,
+      "defense": 95,
+      "spAtk": 120,
+      "spDef": 115,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "air-slash", "displayName": "Air Slash", "type": "flying", "power": 75, "accuracy": 100, "damage_class": "special" },
+      { "name": "aura-sphere", "displayName": "Aura Sphere", "type": "fighting", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "flamethrower", "displayName": "Flamethrower", "type": "fire", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/468.png"
+  },
+  {
+    "id": 473,
+    "name": "mamoswine",
+    "displayName": "Mamoswine",
+    "generation": 4,
+    "types": ["ice", "ground"],
+    "stats": {
+      "hp": 110,
+      "attack": 130,
+      "defense": 80,
+      "spAtk": 70,
+      "spDef": 60,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "ice-shard", "displayName": "Ice Shard", "type": "ice", "power": 40, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" },
+      { "name": "body-slam", "displayName": "Body Slam", "type": "normal", "power": 85, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/473.png"
+  },
+  {
+    "id": 475,
+    "name": "gallade",
+    "displayName": "Gallade",
+    "generation": 4,
+    "types": ["psychic", "fighting"],
+    "stats": {
+      "hp": 68,
+      "attack": 125,
+      "defense": 65,
+      "spAtk": 65,
+      "spDef": 115,
+      "speed": 80
+    },
+    "moves": [
+      { "name": "close-combat", "displayName": "Close Combat", "type": "fighting", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "psycho-cut", "displayName": "Psycho Cut", "type": "psychic", "power": 70, "accuracy": 100, "damage_class": "physical" },
+      { "name": "night-slash", "displayName": "Night Slash", "type": "dark", "power": 70, "accuracy": 100, "damage_class": "physical" },
+      { "name": "stone-edge", "displayName": "Stone Edge", "type": "rock", "power": 100, "accuracy": 80, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/475.png"
+  },
+  {
+    "id": 483,
+    "name": "dialga",
+    "displayName": "Dialga",
+    "generation": 4,
+    "types": ["steel", "dragon"],
+    "stats": {
+      "hp": 100,
+      "attack": 120,
+      "defense": 120,
+      "spAtk": 150,
+      "spDef": 100,
+      "speed": 90
+    },
+    "moves": [
+      { "name": "draco-meteor", "displayName": "Draco Meteor", "type": "dragon", "power": 130, "accuracy": 90, "damage_class": "special" },
+      { "name": "flash-cannon", "displayName": "Flash Cannon", "type": "steel", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "fire-blast", "displayName": "Fire Blast", "type": "fire", "power": 110, "accuracy": 85, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/483.png"
+  },
+  {
+    "id": 487,
+    "name": "giratina",
+    "displayName": "Giratina",
+    "generation": 4,
+    "types": ["ghost", "dragon"],
+    "stats": {
+      "hp": 150,
+      "attack": 100,
+      "defense": 120,
+      "spAtk": 100,
+      "spDef": 120,
+      "speed": 90
+    },
+    "moves": [
+      { "name": "shadow-force", "displayName": "Shadow Force", "type": "ghost", "power": 120, "accuracy": 100, "damage_class": "physical" },
+      { "name": "dragon-claw", "displayName": "Dragon Claw", "type": "dragon", "power": 80, "accuracy": 100, "damage_class": "physical" },
+      { "name": "earthquake", "displayName": "Earthquake", "type": "ground", "power": 100, "accuracy": 100, "damage_class": "physical" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/487.png"
+  },
+  {
+    "id": 491,
+    "name": "darkrai",
+    "displayName": "Darkrai",
+    "generation": 4,
+    "types": ["dark"],
+    "stats": {
+      "hp": 70,
+      "attack": 90,
+      "defense": 90,
+      "spAtk": 135,
+      "spDef": 90,
+      "speed": 125
+    },
+    "moves": [
+      { "name": "dark-pulse", "displayName": "Dark Pulse", "type": "dark", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "shadow-ball", "displayName": "Shadow Ball", "type": "ghost", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" },
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/491.png"
+  },
+  {
+    "id": 26,
+    "name": "raichu",
+    "displayName": "Raichu",
+    "generation": 1,
+    "types": ["electric"],
+    "stats": {
+      "hp": 60,
+      "attack": 90,
+      "defense": 55,
+      "spAtk": 90,
+      "spDef": 80,
+      "speed": 110
+    },
+    "moves": [
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "focus-blast", "displayName": "Focus Blast", "type": "fighting", "power": 120, "accuracy": 70, "damage_class": "special" },
+      { "name": "surf", "displayName": "Surf", "type": "water", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "iron-tail", "displayName": "Iron Tail", "type": "steel", "power": 100, "accuracy": 100, "damage_class": "physical" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/26.png"
+  },
+  {
+    "id": 82,
+    "name": "magneton",
+    "displayName": "Magneton",
+    "generation": 1,
+    "types": ["electric", "steel"],
+    "stats": {
+      "hp": 50,
+      "attack": 60,
+      "defense": 95,
+      "spAtk": 120,
+      "spDef": 70,
+      "speed": 70
+    },
+    "moves": [
+      { "name": "thunderbolt", "displayName": "Thunderbolt", "type": "electric", "power": 90, "accuracy": 100, "damage_class": "special" },
+      { "name": "flash-cannon", "displayName": "Flash Cannon", "type": "steel", "power": 80, "accuracy": 100, "damage_class": "special" },
+      { "name": "signal-beam", "displayName": "Signal Beam", "type": "bug", "power": 75, "accuracy": 100, "damage_class": "special" },
+      { "name": "tri-attack", "displayName": "Tri Attack", "type": "normal", "power": 80, "accuracy": 100, "damage_class": "special" }
+    ],
+    "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/82.png"
+  }
+]
