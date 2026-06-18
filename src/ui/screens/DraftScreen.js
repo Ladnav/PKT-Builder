@@ -3,112 +3,325 @@ import { navigate } from '../router.js';
 import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
 import { TYPE_NAMES_PT, TYPE_ICONS, ALL_TYPES } from '../../engine/types.js';
-import {
-  initDraftState, generateTypeOptions, generateRandomOptions,
-  executePick, isPlayerTurn, botChooseType, botChoosePokemon,
-  getDraftProgress, DRAFT_MODES, ROUNDS
-} from '../../engine/draft.js';
+import { DRAFT_MODES, ROUNDS, botChooseType, botChoosePokemon, getDraftProgress } from '../../engine/draft.js';
+import { createBracket } from '../../tournament/bracket.js';
+import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 
-let state = null;
+let roomId = null;
+let roomCode = null;
+let currentUserId = null;
+let isHost = false;
 let container = null;
+
+let draftState = null;
+let participants = [];
+let room = null;
+
+let draftStateSubscription = null;
+let participantsSubscription = null;
+let roomSubscription = null;
+
+let loading = false;
+let errorMsg = '';
+let botTurnInProgress = false;
 let botTimer = null;
 
-export function render(cont, { mode }) {
+export async function render(cont, params) {
   container = cont;
-  state = initDraftState(pokemonData, mode);
+  roomCode = params.code;
+  roomId = params.roomId;
+  isHost = params.isHost;
+  loading = true;
+  errorMsg = '';
+  botTurnInProgress = false;
 
-  // Inicia o draft no primeiro turno
-  renderDraftScreen();
-  processTurn();
+  renderLayout();
+
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      navigate('auth');
+      return;
+    }
+    currentUserId = user.id;
+
+    // Busca dados da sala
+    const { data: rData, error: rErr } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('id', roomId)
+      .single();
+
+    if (rErr) throw rErr;
+    room = rData;
+
+    // Busca participantes
+    await fetchParticipants();
+
+    // Busca estado do draft
+    await fetchDraftState();
+
+    // Configura realtime
+    setupSubscriptions();
+
+    // Inicia lógica de turnos
+    processTurn();
+
+  } catch (err) {
+    console.error('Erro ao iniciar draft:', err);
+    errorMsg = err.message || 'Erro ao carregar dados do draft.';
+  } finally {
+    loading = false;
+    updateUI();
+  }
 }
 
-function renderDraftScreen() {
-  const isPlayer = isPlayerTurn(state);
-  const progress = getDraftProgress(state);
-  const currentTeam = state.teams[state.currentSlot];
-  const playerTeam = state.teams[0];
+async function fetchParticipants() {
+  const { data, error } = await supabase
+    .from('room_participants')
+    .select(`
+      *,
+      profile:profiles(username, avatar_url)
+    `)
+    .eq('room_id', roomId)
+    .order('slot', { ascending: true });
 
+  if (error) throw error;
+  participants = data || [];
+}
+
+async function fetchDraftState() {
+  const { data, error } = await supabase
+    .from('draft_state')
+    .select('*')
+    .eq('room_id', roomId)
+    .single();
+
+  if (error) throw error;
+  draftState = data;
+}
+
+function setupSubscriptions() {
+  cleanup();
+
+  // Inscrição do draft_state
+  draftStateSubscription = supabase
+    .channel('draft-state-changes')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'draft_state',
+      filter: `room_id=eq.${roomId}`
+    }, async (payload) => {
+      draftState = payload.new;
+      await fetchParticipants(); // Pega times atualizados
+      updateUI();
+      processTurn();
+    })
+    .subscribe();
+
+  // Inscrição dos participantes
+  participantsSubscription = supabase
+    .channel('draft-participants-changes')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'room_participants',
+      filter: `room_id=eq.${roomId}`
+    }, async () => {
+      await fetchParticipants();
+      updateUI();
+    })
+    .subscribe();
+
+  // Inscrição de sala (para redirecionar ao campeonato)
+  roomSubscription = supabase
+    .channel('draft-room-changes')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'rooms',
+      filter: `id=eq.${roomId}`
+    }, (payload) => {
+      room = payload.new;
+      if (room.status === 'tournament') {
+        cleanup();
+        goToTournament();
+      }
+    })
+    .subscribe();
+}
+
+function renderLayout() {
   container.innerHTML = `
     <div class="draft-layout">
-
       <!-- HEADER -->
       <header class="draft-header">
         <div class="draft-title">
-          <span class="draft-badge">⚡ DRAFT</span>
-          <span class="draft-mode-label">${getModeLabel(state.mode)}</span>
+          <span class="draft-badge">⚡ DRAFT ONLINE</span>
+          <span class="draft-mode-label" id="mode-label">Carregando...</span>
         </div>
         <div class="draft-progress-wrap">
-          <div class="draft-progress-bar" style="width:${progress}%"></div>
-          <span class="draft-progress-text">Rodada ${state.round + 1}/${ROUNDS} • ${progress}%</span>
+          <div class="draft-progress-bar" id="progress-bar" style="width:0%"></div>
+          <span class="draft-progress-text" id="progress-text">Rodada 1/6 • 0%</span>
         </div>
-        <div class="draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}">
-          ${isPlayer ? '🎯 SUA VEZ!' : `🤖 Vez do ${currentTeam.name}`}
+        <div class="draft-turn-info" id="turn-info">
+          Buscando turno...
         </div>
       </header>
 
       <!-- BODY -->
       <div class="draft-body">
-
         <!-- COLUNA ESQUERDA: times adversários -->
         <aside class="draft-teams-sidebar" id="sidebar-left">
           <h3 class="sidebar-title">📋 Times</h3>
           <div class="teams-list" id="teams-list">
-            ${renderTeamsSidebar()}
+            <!-- Renderizado dinamicamente -->
           </div>
         </aside>
 
         <!-- CENTRO: opções de pick -->
         <main class="draft-main" id="draft-main">
-          ${renderDraftMain()}
+          <div class="loading-wrap" style="padding: 4rem 0">
+            <div class="thinking-spinner"></div>
+            <p>Sincronizando estado do draft...</p>
+          </div>
         </main>
 
         <!-- COLUNA DIREITA: seu time -->
         <aside class="draft-my-team" id="sidebar-right">
           <h3 class="sidebar-title">🎒 Seu Time</h3>
           <div class="my-team-slots" id="my-team-slots">
-            ${renderMyTeam(playerTeam)}
+            <div class="empty-team">Carregando time...</div>
           </div>
-          <div class="my-team-stats">
-            <span>${playerTeam.pokemon.length}/6 Pokémons</span>
+          <div class="my-team-stats" id="my-team-stats">
+            <span>0/6 Pokémons</span>
           </div>
         </aside>
-
       </div>
     </div>
   `;
-
-  attachDraftEvents();
 }
 
-function renderDraftMain() {
-  if (state.phase === 'done') {
-    return `<div class="draft-done-msg">
-      <div class="done-icon">✅</div>
-      <h2>Draft Concluído!</h2>
-      <p>Todos os times foram montados. Iniciando campeonato...</p>
-    </div>`;
+function updateUI() {
+  if (!draftState || participants.length === 0 || !room) return;
+
+  const playerPart = participants.find(p => p.user_id === currentUserId);
+  const currentSlot = draftState.current_slot;
+  const currentPart = participants.find(p => p.slot === currentSlot);
+  
+  if (!playerPart || !currentPart) return;
+
+  const isPlayer = currentPart.user_id === currentUserId;
+  const progress = getDraftProgress({
+    numTeams: 8,
+    history: draftState.picks_history
+  });
+
+  // 1. Atualiza modo
+  const modeLabel = container.querySelector('#mode-label');
+  if (modeLabel) modeLabel.textContent = getModeLabel(room.mode);
+
+  // 2. Atualiza progresso
+  const bar = container.querySelector('#progress-bar');
+  if (bar) bar.style.width = `${progress}%`;
+  const txt = container.querySelector('#progress-text');
+  if (txt) txt.textContent = `Rodada ${Math.min(draftState.current_round, ROUNDS)}/${ROUNDS} • ${progress}%`;
+
+  // 3. Info de turno
+  const turnInfo = container.querySelector('#turn-info');
+  if (turnInfo) {
+    turnInfo.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
+    const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
+    turnInfo.textContent = isPlayer ? '🎯 SUA VEZ!' : `⌛ Vez do ${name}`;
   }
 
-  const isPlayer = isPlayerTurn(state);
+  // 4. Sidebar esquerda: todos os times
+  const teamsList = container.querySelector('#teams-list');
+  if (teamsList) {
+    const showTeams = room.mode !== DRAFT_MODES.BLIND;
+    teamsList.innerHTML = participants.map(p => {
+      const active = p.slot === currentSlot;
+      const isMe = p.user_id === currentUserId;
+      const name = p.is_bot ? p.bot_name : (p.profile?.username || 'Treinador');
+      const teamList = p.team || [];
+      return `
+        <div class="team-item ${active ? 'active' : ''} ${isMe ? 'player-team' : ''}">
+          <div class="team-header">
+            <span class="team-icon">${p.is_bot ? '🤖' : '👤'}</span>
+            <span class="team-name">${name}</span>
+            <span class="team-count">${teamList.length}/6</span>
+          </div>
+          ${showTeams || isMe ? `
+            <div class="team-pokemon-row">
+              ${teamList.map(poke => `
+                <img class="team-mini-sprite" src="${poke.sprite}" alt="${poke.displayName}" title="${poke.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${poke.id}.png'">
+              `).join('')}
+              ${Array(6 - teamList.length).fill('<div class="team-mini-empty"></div>').join('')}
+            </div>
+          ` : `<div class="team-hidden">🫣 Times ocultos</div>`}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 5. Sidebar direita: seu time
+  const myTeamSlots = container.querySelector('#my-team-slots');
+  if (myTeamSlots) {
+    const myPokemon = playerPart.team || [];
+    if (myPokemon.length === 0) {
+      myTeamSlots.innerHTML = `<div class="empty-team">Nenhum Pokémon ainda</div>`;
+    } else {
+      myTeamSlots.innerHTML = myPokemon.map(p => PokemonMiniCard(p)).join('');
+    }
+  }
+
+  const myTeamStats = container.querySelector('#my-team-stats span');
+  if (myTeamStats) {
+    myTeamStats.textContent = `${playerPart.team?.length || 0}/6 Pokémons`;
+  }
+
+  // 6. Painel central
+  const mainPanel = container.querySelector('#draft-main');
+  if (mainPanel) {
+    mainPanel.innerHTML = renderDraftMain(isPlayer);
+    attachDraftEvents();
+  }
+}
+
+function renderDraftMain(isPlayer) {
+  const currentSlot = draftState.current_slot;
+  const currentPart = participants.find(p => p.slot === currentSlot);
+
+  if (draftState.current_round > ROUNDS) {
+    return `
+      <div class="draft-done-msg">
+        <div class="done-icon">✅</div>
+        <h2>Draft Concluído!</h2>
+        <p>Todos os times foram montados. Criando campeonato...</p>
+      </div>
+    `;
+  }
 
   if (!isPlayer) {
-    return `<div class="bot-thinking">
-      <div class="thinking-spinner"></div>
-      <p>${state.teams[state.currentSlot].name} está escolhendo...</p>
-    </div>`;
+    const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
+    return `
+      <div class="bot-thinking">
+        <div class="thinking-spinner"></div>
+        <p>${name} está decidindo seu pick...</p>
+      </div>
+    `;
   }
 
-  // Turno do jogador
-  if (state.mode !== DRAFT_MODES.RANDOM && state.phase === 'type-select') {
+  // É a vez do jogador
+  if (room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type) {
+    // Escolher tipo
     return renderTypeSelect();
   }
 
-  if (state.currentOptions.length > 0 || state.mode === DRAFT_MODES.RANDOM) {
-    return renderPokemonOptions();
-  }
-
-  return renderTypeSelect();
+  // Escolher pokémon
+  return renderPokemonOptions();
 }
 
 function renderTypeSelect() {
@@ -119,7 +332,7 @@ function renderTypeSelect() {
       <div class="type-grid" id="type-grid">
         ${ALL_TYPES.map(type => {
           const available = pokemonData.filter(
-            p => p.types.includes(type) && !state.usedIds.has(p.id)
+            p => p.types.includes(type) && !draftState.available_pool.includes(p.id) === false
           ).length;
           return `
             <button class="type-btn ${available === 0 ? 'disabled' : ''}" data-type="${type}" ${available === 0 ? 'disabled' : ''}>
@@ -135,51 +348,24 @@ function renderTypeSelect() {
 }
 
 function renderPokemonOptions() {
-  const options = state.currentOptions;
+  const options = draftState.current_options || [];
   return `
     <div class="pokemon-options-wrap">
       <div class="options-header">
         <h2 class="pick-title">
-          ${state.selectedType ? `${TYPE_ICONS[state.selectedType]} Pokémons do tipo ${TYPE_NAMES_PT[state.selectedType]}` : '🎲 Pokémons Aleatórios'}
+          ${draftState.selected_type ? `${TYPE_ICONS[draftState.selected_type]} Pokémons do tipo ${TYPE_NAMES_PT[draftState.selected_type]}` : '🎲 Pokémons Aleatórios'}
         </h2>
-        <p class="pick-sub">Escolha 1 Pokémon para o seu time (Slot ${state.teams[0].pokemon.length + 1}/6)</p>
+        <p class="pick-sub">Escolha 1 Pokémon para o seu time (Slot ${participants.find(p => p.user_id === currentUserId)?.team?.length + 1}/6)</p>
       </div>
       <div class="options-grid" id="options-grid">
-        ${options.map(p => PokemonCard(p, { selectable: true })).join('')}
+        ${options.length === 0 ? `
+          <div class="bot-thinking" style="grid-column: 1/-1">
+            <p>Gerando opções de Pokémons...</p>
+          </div>
+        ` : options.map(p => PokemonCard(p, { selectable: true })).join('')}
       </div>
     </div>
   `;
-}
-
-function renderTeamsSidebar() {
-  const showTeams = state.mode !== DRAFT_MODES.BLIND;
-  return state.teams.map((team, i) => {
-    const isActive = state.currentSlot === i;
-    return `
-      <div class="team-item ${isActive ? 'active' : ''} ${team.isPlayer ? 'player-team' : ''}">
-        <div class="team-header">
-          <span class="team-icon">${team.isPlayer ? '🎮' : '🤖'}</span>
-          <span class="team-name">${team.name}</span>
-          <span class="team-count">${team.pokemon.length}/6</span>
-        </div>
-        ${showTeams || team.isPlayer ? `
-          <div class="team-pokemon-row">
-            ${team.pokemon.map(p => `
-              <img class="team-mini-sprite" src="${p.sprite}" alt="${p.displayName}" title="${p.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
-            `).join('')}
-            ${Array(6 - team.pokemon.length).fill('<div class="team-mini-empty"></div>').join('')}
-          </div>
-        ` : `<div class="team-hidden">🫣 Times ocultos</div>`}
-      </div>
-    `;
-  }).join('');
-}
-
-function renderMyTeam(team) {
-  if (team.pokemon.length === 0) {
-    return `<div class="empty-team">Nenhum Pokémon ainda</div>`;
-  }
-  return team.pokemon.map(p => PokemonMiniCard(p)).join('');
 }
 
 function attachDraftEvents() {
@@ -195,134 +381,304 @@ function attachDraftEvents() {
   container.querySelectorAll('.pokemon-card.selectable').forEach(card => {
     card.addEventListener('click', () => {
       const id = parseInt(card.dataset.id);
-      const pokemon = state.currentOptions.find(p => p.id === id);
+      const pokemon = draftState.current_options.find(p => p.id === id);
       if (pokemon) selectPokemon(pokemon);
     });
   });
 }
 
-function selectType(type) {
-  state.selectedType = type;
-  state.currentOptions = generateTypeOptions(state, type);
-  state.phase = 'pokemon-select';
-  updateDraftMain();
+async function selectType(type) {
+  if (loading) return;
+  
+  // Filtra disponíveis
+  const available = pokemonData.filter(
+    p => p.types.includes(type) && !draftState.available_pool.includes(p.id) === false
+  );
+  const currentOptions = [...available].sort(() => Math.random() - 0.5).slice(0, 8);
+
+  try {
+    const { error } = await supabase
+      .from('draft_state')
+      .update({
+        selected_type: type,
+        current_options: currentOptions,
+        updated_at: new Date().toISOString()
+      })
+      .eq('room_id', roomId);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Erro ao escolher tipo:', err);
+  }
 }
 
-function selectPokemon(pokemon) {
-  state = executePick(state, pokemon);
+async function selectPokemon(pokemon) {
+  if (loading) return;
+  loading = true;
 
-  if (state.phase === 'done') {
-    updateUI();
-    setTimeout(() => goToTournament(), 1200);
-    return;
+  try {
+    const currentSlot = draftState.current_slot;
+    const currentPart = participants.find(p => p.slot === currentSlot);
+    const updatedTeam = [...(currentPart.team || []), pokemon];
+
+    // 1. Atualiza time do participante
+    const { error: partErr } = await supabase
+      .from('room_participants')
+      .update({ team: updatedTeam })
+      .eq('id', currentPart.id);
+
+    if (partErr) throw partErr;
+
+    // 2. Calcula próximo turno no snake draft
+    let nextSlot = draftState.current_slot;
+    let nextRound = draftState.current_round;
+    let nextDirection = draftState.snake_direction;
+
+    if (nextDirection === 1) {
+      if (nextSlot < 7) {
+        nextSlot++;
+      } else {
+        nextRound++;
+        nextDirection = -1;
+      }
+    } else {
+      if (nextSlot > 0) {
+        nextSlot--;
+      } else {
+        nextRound++;
+        nextDirection = 1;
+      }
+    }
+
+    const isDone = nextRound > ROUNDS;
+
+    const nextHistory = [
+      ...(draftState.picks_history || []),
+      {
+        round: draftState.current_round,
+        slot: draftState.current_slot,
+        teamName: currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador'),
+        pokemon,
+        isPlayer: currentPart.user_id === currentUserId
+      }
+    ];
+
+    const nextAvailablePool = draftState.available_pool.filter(id => id !== pokemon.id);
+
+    // 3. Atualiza estado global do draft
+    const { error: draftErr } = await supabase
+      .from('draft_state')
+      .update({
+        current_round: nextRound,
+        current_slot: nextSlot,
+        snake_direction: nextDirection,
+        available_pool: nextAvailablePool,
+        selected_type: null,
+        current_options: [],
+        picks_history: nextHistory,
+        updated_at: new Date().toISOString()
+      })
+      .eq('room_id', roomId);
+
+    if (draftErr) throw draftErr;
+
+    // 4. Se concluiu tudo e for host, cria o chaveamento
+    if (isDone && isHost) {
+      await createBracketAndTransitionRoom();
+    }
+
+  } catch (err) {
+    console.error('Erro ao escolher Pokémon:', err);
+  } finally {
+    loading = false;
   }
+}
 
-  updateUI();
-  processTurn();
+async function createBracketAndTransitionRoom() {
+  try {
+    // Busca participantes completos para o bracket
+    const { data: parts, error: partErr } = await supabase
+      .from('room_participants')
+      .select('*')
+      .eq('room_id', roomId);
+
+    if (partErr) throw partErr;
+
+    // Mapeia para formato do motor do torneio
+    const mappedTeams = parts.map(p => ({
+      id: p.id,
+      slot: p.slot,
+      name: p.is_bot ? p.bot_name : (p.bot_name || 'Treinador'), // fallback
+      isPlayer: p.user_id !== null,
+      user_id: p.user_id,
+      pokemon: p.team
+    }));
+
+    // Busca usernames dos perfis para preencher o name
+    const { data: profs } = await supabase
+      .from('profiles')
+      .select('id, username')
+      .in('id', parts.map(p => p.user_id).filter(Boolean));
+
+    const profMap = {};
+    profs?.forEach(p => { profMap[p.id] = p.username; });
+
+    mappedTeams.forEach(t => {
+      if (!t.isPlayer) return;
+      const userPart = parts.find(p => p.slot === t.slot);
+      if (userPart?.user_id) {
+        t.name = profMap[userPart.user_id] || 'Treinador';
+      }
+    });
+
+    const initialBracket = createBracket(mappedTeams);
+
+    // Salva o chaveamento
+    const { error: brkErr } = await supabase
+      .from('brackets')
+      .insert({
+        room_id: roomId,
+        matches: initialBracket.matches,
+        round: 'quarters'
+      });
+
+    if (brkErr) throw brkErr;
+
+    // Atualiza status da sala
+    const { error: roomErr } = await supabase
+      .from('rooms')
+      .update({ status: 'tournament' })
+      .eq('id', roomId);
+
+    if (roomErr) throw roomErr;
+
+  } catch (err) {
+    console.error('Erro ao criar bracket do torneio:', err);
+  }
 }
 
 function processTurn() {
-  if (state.phase === 'done') {
-    setTimeout(() => goToTournament(), 1000);
+  if (!draftState || draftState.current_round > ROUNDS) return;
+
+  const currentSlot = draftState.current_slot;
+  const currentPart = participants.find(p => p.slot === currentSlot);
+  if (!currentPart) return;
+
+  const isPlayer = currentPart.user_id === currentUserId;
+
+  // Se for o modo Random e opções estiverem vazias, o HOST é responsável por gerar
+  if (room.mode === DRAFT_MODES.RANDOM && draftState.current_options.length === 0 && isHost) {
+    generateRandomOptionsAndSave();
     return;
   }
 
-  if (isPlayerTurn(state)) {
-    // Turno do jogador: mostra seleção de tipo ou opções aleatórias
-    if (state.mode === DRAFT_MODES.RANDOM) {
-      state.currentOptions = generateRandomOptions(state);
-      state.phase = 'pokemon-select';
+  // Turno do BOT (somente o host roda a IA e grava)
+  if (currentPart.is_bot && isHost) {
+    if (botTurnInProgress) return;
+    botTurnInProgress = true;
+
+    clearTimeout(botTimer);
+    botTimer = setTimeout(() => executeBotTurn(currentPart), 1000 + Math.random() * 800);
+  }
+}
+
+async function generateRandomOptionsAndSave() {
+  const available = pokemonData.filter(p => !draftState.available_pool.includes(p.id) === false);
+  const currentOptions = [...available].sort(() => Math.random() - 0.5).slice(0, 8);
+
+  try {
+    const { error } = await supabase
+      .from('draft_state')
+      .update({
+        current_options: currentOptions,
+        updated_at: new Date().toISOString()
+      })
+      .eq('room_id', roomId);
+    if (error) throw error;
+  } catch (err) {
+    console.error('Erro ao gerar opções aleatórias:', err);
+  }
+}
+
+async function executeBotTurn(botParticipant) {
+  try {
+    let options = [];
+
+    // Modo 1 ou 3: escolhe tipo → escolhe pokemon
+    if (room.mode !== DRAFT_MODES.RANDOM) {
+      if (!draftState.selected_type) {
+        // Escolhe tipo
+        const usedIdsSet = new Set();
+        participants.forEach(p => {
+          p.team?.forEach(poke => usedIdsSet.add(poke.id));
+        });
+        const type = botChooseType(botParticipant, pokemonData, usedIdsSet);
+        
+        // Salva tipo e gera opções
+        const available = pokemonData.filter(p => !draftState.available_pool.includes(p.id) === false);
+        const typeOptions = available.filter(p => p.types.includes(type)).sort(() => Math.random() - 0.5).slice(0, 8);
+
+        const { error } = await supabase
+          .from('draft_state')
+          .update({
+            selected_type: type,
+            current_options: typeOptions,
+            updated_at: new Date().toISOString()
+          })
+          .eq('room_id', roomId);
+
+        if (error) throw error;
+        botTurnInProgress = false;
+        return;
+      } else {
+        options = draftState.current_options;
+      }
     } else {
-      state.phase = 'type-select';
+      // Modo aleatório
+      options = draftState.current_options;
     }
-    updateDraftMain();
-    return;
-  }
 
-  // Turno do BOT
-  updateDraftMain(); // Mostra "bot pensando"
-  clearTimeout(botTimer);
-  botTimer = setTimeout(() => executeBotTurn(), 800 + Math.random() * 600);
-}
-
-function executeBotTurn() {
-  if (state.phase === 'done' || isPlayerTurn(state)) return;
-
-  const team = state.teams[state.currentSlot];
-  let options;
-
-  if (state.mode === DRAFT_MODES.RANDOM) {
-    options = generateRandomOptions(state);
-  } else {
-    const type = botChooseType(team, pokemonData, state.usedIds);
-    options = generateTypeOptions(state, type);
-    if (options.length === 0) options = generateRandomOptions(state);
-  }
-
-  const picked = botChoosePokemon(options, team);
-  if (!picked) {
-    // Pool vazio para esse tipo — pega qualquer disponível
-    const any = pokemonData.find(p => !state.usedIds.has(p.id));
-    if (any) {
-      state = executePick(state, any);
+    // Escolhe Pokémon
+    const picked = botChoosePokemon(options, botParticipant);
+    if (!picked) {
+      // Fallback se nada estiver disponível
+      const any = pokemonData.find(p => draftState.available_pool.includes(p.id));
+      if (any) await selectPokemon(any);
+    } else {
+      await selectPokemon(picked);
     }
-  } else {
-    state = executePick(state, picked);
-  }
-
-  if (state.phase === 'done') {
-    updateUI();
-    setTimeout(() => goToTournament(), 1500);
-    return;
-  }
-
-  updateUI();
-  processTurn();
-}
-
-function updateUI() {
-  const sidebar = container.querySelector('#teams-list');
-  if (sidebar) sidebar.innerHTML = renderTeamsSidebar();
-
-  const myTeam = container.querySelector('#my-team-slots');
-  if (myTeam) myTeam.innerHTML = renderMyTeam(state.teams[0]);
-
-  const stats = container.querySelector('.my-team-stats span');
-  if (stats) stats.textContent = `${state.teams[0].pokemon.length}/6 Pokémons`;
-
-  const header = container.querySelector('.draft-turn-info');
-  const isPlayer = isPlayerTurn(state);
-  if (header) {
-    header.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
-    header.textContent = isPlayer ? '🎯 SUA VEZ!' : `🤖 Vez do ${state.teams[state.currentSlot]?.name}`;
-  }
-
-  const progress = getDraftProgress(state);
-  const bar = container.querySelector('.draft-progress-bar');
-  if (bar) bar.style.width = `${progress}%`;
-  const txt = container.querySelector('.draft-progress-text');
-  if (txt) txt.textContent = `Rodada ${Math.min(state.round + 1, ROUNDS)}/${ROUNDS} • ${progress}%`;
-
-  updateDraftMain();
-}
-
-function updateDraftMain() {
-  const main = container.querySelector('#draft-main');
-  if (main) {
-    main.innerHTML = renderDraftMain();
-    attachDraftEvents();
+  } catch (err) {
+    console.error('Erro na rodada do bot:', err);
+  } finally {
+    botTurnInProgress = false;
   }
 }
 
 function goToTournament() {
-  navigate('bracket', { teams: state.teams });
+  navigate('bracket', { code: roomCode, roomId, isHost });
 }
 
 function getModeLabel(mode) {
   const labels = { type: '🎯 Por Tipo', random: '🎲 Aleatório', blind: '🫣 Cego' };
-  return labels[mode] || mode;
+  return labels[mode] || mode || '';
+}
+
+function cleanup() {
+  clearTimeout(botTimer);
+  if (draftStateSubscription) {
+    draftStateSubscription.unsubscribe();
+    draftStateSubscription = null;
+  }
+  if (participantsSubscription) {
+    participantsSubscription.unsubscribe();
+    participantsSubscription = null;
+  }
+  if (roomSubscription) {
+    roomSubscription.unsubscribe();
+    roomSubscription = null;
+  }
 }
 
 export function destroy() {
-  clearTimeout(botTimer);
+  cleanup();
 }
