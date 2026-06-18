@@ -612,7 +612,7 @@ async function executeBotTurn(botParticipant) {
         participants.forEach(p => {
           p.team?.forEach(poke => usedIdsSet.add(poke.id));
         });
-        const type = botChooseType(botParticipant, pokemonData, usedIdsSet);
+                const type = botChooseType({ pokemon: botParticipant.team || [] }, pokemonData, usedIdsSet);
         
         // Salva tipo e gera opções
         const available = pokemonData.filter(p => !draftState.available_pool.includes(p.id) === false);
@@ -639,7 +639,7 @@ async function executeBotTurn(botParticipant) {
     }
 
     // Escolhe Pokémon
-    const picked = botChoosePokemon(options, botParticipant);
+    const picked = botChoosePokemon(options, { pokemon: botParticipant.team || [] });
     if (!picked) {
       // Fallback se nada estiver disponível
       const any = pokemonData.find(p => draftState.available_pool.includes(p.id));
