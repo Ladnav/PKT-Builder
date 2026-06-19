@@ -466,21 +466,27 @@ function renderScreen() {
           <h1 class="hs-logo-text">Poke<span>Champion</span></h1>
         </div>
 
-        <div class="hs-profile-card">
-          <div class="hs-avatar">&#128100;</div>
-          <div class="hs-profile-info" style="cursor:pointer;" id="btn-open-profile" title="Ver Perfil Completo">
-            <span class="hs-profile-name">${profile?.username || 'Treinador'}</span>
-            <span class="hs-profile-stats">
-              <span class="hs-champ">&#127942; ${profile?.championships || 0}</span>
-              <span class="hs-stat-sep">&#183;</span>
-              <span class="hs-wins">${profile?.wins || 0}V</span>
-              <span class="hs-stat-sep">/</span>
-              <span class="hs-losses">${profile?.losses || 0}D</span>
-              <span class="hs-stat-sep">&#183;</span>
-              <span class="hs-wr">${winRate}%</span>
-            </span>
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <button id="btn-glory" style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s;">
+            <span style="font-size:1.1rem;">🏆</span> Ranking e Glória
+          </button>
+          
+          <div class="hs-profile-card">
+            <div class="hs-avatar">&#128100;</div>
+            <div class="hs-profile-info" style="cursor:pointer;" id="btn-open-profile" title="Ver Perfil Completo">
+              <span class="hs-profile-name">${profile?.username || 'Treinador'}</span>
+              <span class="hs-profile-stats">
+                <span class="hs-champ">&#127942; ${profile?.championships || 0}</span>
+                <span class="hs-stat-sep">&#183;</span>
+                <span class="hs-wins">${profile?.wins || 0}V</span>
+                <span class="hs-stat-sep">/</span>
+                <span class="hs-losses">${profile?.losses || 0}D</span>
+                <span class="hs-stat-sep">&#183;</span>
+                <span class="hs-wr">${winRate}%</span>
+              </span>
+            </div>
+            <button class="hs-btn-logout" id="btn-logout" title="Sair da conta">&#x1F6AA;</button>
           </div>
-          <button class="hs-btn-logout" id="btn-logout" title="Sair da conta">&#x1F6AA;</button>
         </div>
       </header>
 

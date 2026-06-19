@@ -147,7 +147,7 @@ function renderLobby() {
   });
 
   container.innerHTML = `
-    <div class="lobby-bg home-bg">
+    <div class="lobby-layout">
       <div class="home-particles" id="lobby-particles"></div>
       
       <!-- HEADER -->
