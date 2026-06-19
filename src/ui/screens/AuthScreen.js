@@ -101,8 +101,8 @@ function attachEvents() {
             const username = container.querySelector('#username').value.trim();
       const password = container.querySelector('#password').value;
       
-      // Gera o e-mail fantasma correspondente
-      const dummyEmail = `${cleanUsernameForEmail(username)}@pkt.com`;
+      // Gera o e-mail fantasma correspondente (usamos gmail.com pois é um domínio garantidamente válido para qualquer validador)
+      const dummyEmail = `${cleanUsernameForEmail(username)}@gmail.com`;
       // Gera uma senha complexa interna para satisfazer a política do Supabase (Letra Maiúscula, Minúscula, Número, Símbolo)
       const securePassword = `${password}Pkt@123`;
 
