@@ -38,10 +38,25 @@ html { font-size: 16px; scroll-behavior: smooth; }
 
 body {
   font-family: 'Outfit', system-ui, sans-serif;
-  background: var(--bg-0);
+  background-color: var(--bg-0);
+  background-image: url('/bg-pattern.png');
+  background-repeat: repeat;
+  background-size: 400px;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
   color: var(--text-1);
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--bg-0);
+  opacity: 0.6; /* Dim the pattern slightly */
+  z-index: -1;
+  pointer-events: none;
 }
 
 #app { min-height: 100vh; }
@@ -64,7 +79,7 @@ a { color: var(--accent-2); }
   min-height: 100vh;
   background: radial-gradient(ellipse at 20% 20%, rgba(124,111,255,0.15) 0%, transparent 60%),
               radial-gradient(ellipse at 80% 80%, rgba(167,139,250,0.1) 0%, transparent 60%),
-              var(--bg-0);
+              transparent;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -269,7 +284,7 @@ a { color: var(--accent-2); }
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-0);
+  background: transparent;
 }
 
 /* Header */
@@ -752,7 +767,7 @@ a { color: var(--accent-2); }
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-0);
+  background: transparent;
 }
 
 .bracket-header {
@@ -1157,7 +1172,7 @@ a { color: var(--accent-2); }
 .auth-bg {
   min-height: 100vh;
   width: 100vw;
-  background: radial-gradient(ellipse at 50% 50%, rgba(108,99,255,0.15) 0%, transparent 70%), var(--bg-0);
+  background: radial-gradient(ellipse at 50% 50%, rgba(108,99,255,0.15) 0%, transparent 70%), transparent;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -1510,7 +1525,7 @@ a { color: var(--accent-2); }
 .lobby-layout {
   min-height: 100vh;
   width: 100vw;
-  background: radial-gradient(ellipse at 50% 15%, rgba(124,111,255,0.1) 0%, transparent 60%), var(--bg-0);
+  background: radial-gradient(ellipse at 50% 15%, rgba(124,111,255,0.1) 0%, transparent 60%), transparent;
   position: relative;
   overflow: hidden;
   padding: 2rem;
