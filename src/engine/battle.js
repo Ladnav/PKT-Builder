@@ -31,8 +31,8 @@ function calcDamage(attacker, defender, move) {
 export function createBattleState(team1, team2, seed = Date.now()) {
   return {
     seed,
-    team1: team1.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false })),
-    team2: team2.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false })),
+    team1: team1.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
+    team2: team2.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
     active1: 0,
     active2: 0,
     turn: 0,
@@ -91,7 +91,9 @@ function executeTurn(state) {
   // Primeiro ataque
   if (!first.fainted && !second.fainted) {
     const result1 = calcDamage(first, second, moveFirst);
+    const actualDmg = Math.min(second.currentHp, result1.damage);
     second.currentHp = Math.max(0, second.currentHp - result1.damage);
+    first.damageDealt += actualDmg;
 
     const effText = getEffectivenessText(result1.effectiveness);
     const stabText = result1.stab > 1 ? ' (STAB)' : '';
@@ -102,6 +104,7 @@ function executeTurn(state) {
 
     if (second.currentHp <= 0) {
       second.fainted = true;
+      first.kos++;
       log(state, `  💀 <b>${second.displayName}</b> desmaiou!`, 'faint');
     }
   }
@@ -109,7 +112,9 @@ function executeTurn(state) {
   // Segundo ataque (se ainda em pé)
   if (!second.fainted && !first.fainted) {
     const result2 = calcDamage(second, first, moveSecond);
+    const actualDmg = Math.min(first.currentHp, result2.damage);
     first.currentHp = Math.max(0, first.currentHp - result2.damage);
+    second.damageDealt += actualDmg;
 
     const effText = getEffectivenessText(result2.effectiveness);
     const stabText = result2.stab > 1 ? ' (STAB)' : '';
@@ -120,6 +125,7 @@ function executeTurn(state) {
 
     if (first.currentHp <= 0) {
       first.fainted = true;
+      second.kos++;
       log(state, `  💀 <b>${first.displayName}</b> desmaiou!`, 'faint');
     }
   }
@@ -174,13 +180,13 @@ export function simulateBattle(team1, team2, seed) {
     log(state, `🔴 <b>${team1[0].displayName}</b> vs 🔵 <b>${team2[0].displayName}</b>`, 'matchup');
   }
 
-  while (!state.winner && state.turn < MAX_TURNS) {
+  let failsafe = 0;
+  while (!state.winner && failsafe < MAX_TURNS) {
     executeTurn(state);
+    failsafe++;
 
     // Anuncia nova dupla quando muda
     if (!state.winner) {
-      const p1 = state.team1[state.active1];
-      const p2 = state.team2[state.active2];
       const lastLog = state.log[state.log.length - 1];
       if (lastLog?.type === 'switch') {
         log(state, `🔴 <b>${state.team1[state.active1].displayName}</b> vs 🔵 <b>${state.team2[state.active2].displayName}</b>`, 'matchup');

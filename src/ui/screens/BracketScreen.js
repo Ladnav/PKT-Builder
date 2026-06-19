@@ -285,6 +285,20 @@ function renderChampionBanner(isPlayer) {
         <h2 class="champion-title">${isPlayer ? '🎉 VOCÊ É O CAMPEÃO!' : '🏆 CAMPEÃO!'}</h2>
         <div class="champion-name">${isPlayer ? '🎮 Você' : `🤖 ${champ?.name}`}</div>
         ${sprite ? `<img class="champion-sprite" src="${sprite}" alt="campeão">` : ''}
+        
+        ${finalMatch?.mvp ? `
+          <div class="champion-mvp" style="margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 215, 0, 0.1); border-radius: var(--radius-md); border: 1px solid gold; display: flex; flex-direction: column; align-items: center;">
+            <h4 style="color: gold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">⭐ MVP da Final ⭐</h4>
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+              <img src="${finalMatch.mvp.sprite}" style="width: 50px; height: 50px; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));">
+              <div style="text-align: left;">
+                <div style="font-weight: bold; font-size: 1.1rem;">${finalMatch.mvp.displayName}</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;">KOs: ${finalMatch.mvp.kos || 0} | Dano: ${finalMatch.mvp.damageDealt || 0}</div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
         <div class="champion-team">
           ${champ?.pokemon?.map(p => `
             <div class="champion-pokemon">
@@ -446,11 +460,23 @@ async function simulateMatchAndSave(match, roundName) {
 
     const winner = result.winner === 1 ? match.team1 : match.team2;
     const loser = result.winner === 1 ? match.team2 : match.team1;
+    const finalWinnerTeam = result.winner === 1 ? result.team1Final : result.team2Final;
+
+    // Calcula MVP: pokemon vivo ou morto com maior pontuação (KOs * 100 + dano)
+    let mvp = null;
+    if (finalWinnerTeam && finalWinnerTeam.length > 0) {
+      mvp = finalWinnerTeam.reduce((best, p) => {
+        const score = ((p.kos || 0) * 100) + (p.damageDealt || 0);
+        const bestScore = ((best.kos || 0) * 100) + (best.damageDealt || 0);
+        return score > bestScore ? p : best;
+      }, finalWinnerTeam[0]);
+    }
 
     match.winner = winner;
     match.loser = loser;
     match.simulated = true;
     match.totalTurns = result.totalTurns;
+    match.mvp = mvp;
 
     // 1. Grava log de batalha
     const { error: logErr } = await supabase
