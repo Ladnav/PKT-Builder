@@ -29,6 +29,8 @@ let simulationInProgress = false;
 let simulationTimer = null;
 let loading = false;
 let errorMsg = '';
+let animatedMatchIds = new Set();
+let activeAnimations = {};
 
 export async function render(cont, params) {
   container = cont;
@@ -71,6 +73,19 @@ export async function render(cont, params) {
 
     // Busca bracket
     await fetchBracket();
+
+    // Popula as partidas já simuladas para não re-animar no load inicial
+    if (bracket && bracket.matches) {
+      for (const round of ['quarters', 'semis', 'final']) {
+        if (bracket.matches[round]) {
+          bracket.matches[round].forEach(m => {
+            if (m.simulated) {
+              animatedMatchIds.add(m.id);
+            }
+          });
+        }
+      }
+    }
 
     // Configura realtime
     setupSubscription();
@@ -152,6 +167,75 @@ function renderLayout() {
 
 function updateUI() {
   if (!bracket) return;
+
+  // Dispara animações para partidas novas simuladas
+  if (bracket && bracket.matches) {
+    for (const round of ['quarters', 'semis', 'final']) {
+      if (bracket.matches[round]) {
+        bracket.matches[round].forEach(m => {
+          if (m.simulated && !animatedMatchIds.has(m.id) && !activeAnimations[m.id]) {
+            startMatchAnimation(m);
+          }
+        });
+      }
+    }
+  }
+
+  // Processa estatísticas individuais de partidas do jogador (anti-RLS-block)
+  if (bracket && bracket.matches) {
+    for (const round of ['quarters', 'semis', 'final']) {
+      if (bracket.matches[round]) {
+        bracket.matches[round].forEach(m => {
+          if (m.simulated) {
+            const myTeam = m.team1?.user_id === currentUserId ? 1 : (m.team2?.user_id === currentUserId ? 2 : 0);
+            if (myTeam > 0) {
+              const statKey = `stat_processed_match_${m.id}`;
+              if (localStorage.getItem(statKey) !== 'true') {
+                localStorage.setItem(statKey, 'true');
+                (async () => {
+                  try {
+                    const isWinner = (myTeam === 1 && m.winner?.user_id === currentUserId) || (myTeam === 2 && m.winner?.user_id === currentUserId);
+                    const field = isWinner ? 'wins' : 'losses';
+                    const { data: prof } = await supabase.from('profiles').select(field).eq('id', currentUserId).single();
+                    if (prof) {
+                      await supabase.from('profiles').update({
+                        [field]: (prof[field] || 0) + 1
+                      }).eq('id', currentUserId);
+                    }
+                  } catch (e) {
+                    console.error('Erro ao atualizar estatísticas da partida:', e);
+                  }
+                })();
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  // Incrementa tournaments_played de forma segura para o jogador atual ao final do campeonato
+  if (bracket.round === 'done') {
+    const isParticipant = participants.some(p => p.user_id === currentUserId);
+    if (isParticipant) {
+      const playedKey = `tournament_played_room_${roomId}`;
+      if (localStorage.getItem(playedKey) !== 'true') {
+        localStorage.setItem(playedKey, 'true');
+        (async () => {
+          try {
+            const { data: prof } = await supabase.from('profiles').select('tournaments_played').eq('id', currentUserId).single();
+            if (prof) {
+              await supabase.from('profiles').update({ 
+                tournaments_played: (prof.tournaments_played || 0) + 1 
+              }).eq('id', currentUserId);
+            }
+          } catch (e) {
+            console.error('Erro ao incrementar torneios jogados:', e);
+          }
+        })();
+      }
+    }
+  }
 
   const playerPart = participants.find(p => p.user_id === currentUserId);
   
@@ -256,16 +340,34 @@ function renderBracketRounds() {
 }
 
 function renderMatch(match, isFinal = false) {
-  const hasResult = match.simulated;
-  const team1Win = match.winner?.name === match.team1?.name;
-  const team2Win = match.winner?.name === match.team2?.name;
+  const anim = activeAnimations[match.id];
+  const isAnimating = !!anim;
 
-  const renderTeam = (team, isWinner) => {
+  // Se está animando, não mostramos os resultados estáticos ainda
+  const hasResult = isAnimating ? false : match.simulated;
+  const team1Win = isAnimating ? false : (match.winner?.name === match.team1?.name);
+  const team2Win = isAnimating ? false : (match.winner?.name === match.team2?.name);
+
+  const renderTeam = (team, isWinner, teamNum) => {
     if (!team) return `<div class="match-team tbd"><span>TBD</span></div>`;
     const sprite = team.pokemon[0]?.sprite || '';
     const color = TYPE_COLORS[team.pokemon[0]?.types[0]] || '#6c63ff';
+
+    // Determina o estado dos pokemon (para quando recriar o HTML durante animação)
+    const getPokeClasses = (p, idx) => {
+      if (isAnimating && anim && !anim.loading) {
+        const animTeam = teamNum === 1 ? anim.t1 : anim.t2;
+        const animPoke = animTeam[idx];
+        if (animPoke) {
+          if (animPoke.fainted) return 'fainted';
+          if (animPoke.active) return 'active';
+        }
+      }
+      return '';
+    };
+
     return `
-      <div class="match-team ${isWinner ? 'winner' : hasResult ? 'loser' : ''} ${team.isPlayer ? 'player' : ''}" style="--team-color: ${color}">
+      <div class="match-team ${isWinner ? 'winner' : hasResult ? 'loser' : ''} ${team.isPlayer ? 'player' : ''}" data-team="${teamNum}" style="--team-color: ${color}">
         ${sprite ? `<img class="match-sprite" src="${sprite}" alt="${team.name}" onerror="this.style.display='none'">` : ''}
         <div class="match-team-info">
           <span class="match-team-name" style="display: flex; align-items: center; gap: 6px;">
@@ -275,7 +377,10 @@ function renderMatch(match, isFinal = false) {
             <span>${team.name}</span>
           </span>
           <div class="match-team-types">
-            ${team.pokemon.slice(0,3).map(p => `<img class="match-mini-sprite" src="${p.sprite}" alt="${p.displayName}" title="${p.displayName}" onerror="this.style.display='none'">`).join('')}
+            ${team.pokemon.slice(0, 6).map((p, idx) => {
+              const extraClass = getPokeClasses(p, idx);
+              return `<img class="match-mini-sprite ${extraClass}" src="${p.sprite}" alt="${p.displayName}" title="${p.displayName}" data-poke-name="${p.displayName}" data-poke-idx="${idx}" onerror="this.style.display='none'">`;
+            }).join('')}
           </div>
         </div>
         ${isWinner ? '<span class="winner-crown">👑</span>' : ''}
@@ -284,11 +389,20 @@ function renderMatch(match, isFinal = false) {
   };
 
   return `
-    <div class="match-card ${hasResult ? 'has-result' : 'pending'} ${isFinal ? 'final-match' : ''}" data-matchid="${match.id}">
-      ${renderTeam(match.team1, team1Win)}
+    <div class="match-card ${isAnimating ? 'animating' : hasResult ? 'has-result' : 'pending'} ${isFinal ? 'final-match' : ''}" data-matchid="${match.id}">
+      ${renderTeam(match.team1, team1Win, 1)}
       <div class="match-vs">VS</div>
-      ${renderTeam(match.team2, team2Win)}
-      ${hasResult ? '<div class="match-click-hint">👁 Ver batalha</div>' : '<div class="match-pending-hint">⏳ Aguardando</div>'}
+      ${renderTeam(match.team2, team2Win, 2)}
+      ${isAnimating ? `
+        <div class="match-animating-hint">
+          <span class="thinking-spinner" style="width: 12px; height: 12px; border-width: 2px; margin-right: 6px;"></span>
+          ${anim.loading ? 'Conectando...' : 'Simulando...'}
+        </div>
+      ` : hasResult ? `
+        <div class="match-click-hint">👁 Ver batalha</div>
+      ` : `
+        <div class="match-pending-hint">⏳ Aguardando</div>
+      `}
     </div>
   `;
 }
@@ -312,6 +426,11 @@ function renderChampionBanner(isPlayer) {
         ${isPlayer ? `
           <div style="margin-top: 1rem; color: var(--gold); font-weight: 900; font-size: 1.1rem; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); display: flex; align-items: center; justify-content: center; gap: 6px; animation: pulse 1.5s infinite;">
             <span>📦</span> VOCÊ GANHOU 1 BOOSTER PACK!
+          </div>
+          <div style="margin-top: 1rem; display: flex; justify-content: center;" id="claim-rewards-container">
+            <button id="btn-claim-rewards" style="padding: 0.8rem 2rem; background: linear-gradient(135deg, var(--gold), #f59e0b); border: none; color: black; border-radius: var(--radius-md); cursor: pointer; font-weight: 900; box-shadow: 0 0 15px rgba(245, 158, 11, 0.6); font-size: 1rem; text-transform: uppercase; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
+              <span>Resgatar Recompensas 🎁</span>
+            </button>
           </div>
         ` : ''}
         ${sprite ? `<img class="champion-sprite" src="${sprite}" alt="campeão">` : ''}
@@ -414,6 +533,87 @@ function attachEvents() {
   container.querySelector('#modal-close')?.addEventListener('click', () => {
     document.getElementById('battle-modal').style.display = 'none';
   });
+
+  // Claim Rewards Button
+  const btnClaim = container.querySelector('#btn-claim-rewards');
+  if (btnClaim) {
+    const alreadyClaimed = localStorage.getItem(`claimed_rewards_room_${roomId}`);
+    if (alreadyClaimed === 'true') {
+      btnClaim.disabled = true;
+      btnClaim.style.background = 'var(--bg-3)';
+      btnClaim.style.color = 'var(--text-3)';
+      btnClaim.style.boxShadow = 'none';
+      btnClaim.style.cursor = 'not-allowed';
+      btnClaim.textContent = 'Recompensas Reivindicadas ✓';
+    }
+
+    btnClaim.addEventListener('click', async () => {
+      btnClaim.disabled = true;
+      btnClaim.textContent = 'Processando...';
+      
+      try {
+        const finalMatch = bracket.matches.final[0];
+        const winnerMatch = finalMatch?.winner;
+        
+        if (winnerMatch && winnerMatch.user_id === currentUserId) {
+          // 1. Hall of Fame
+          await supabase.from('hall_of_fame').insert({
+            user_id: currentUserId,
+            room_name: room?.code || 'Torneio',
+            team_json: winnerMatch.pokemon
+          });
+
+          // 2. Incrementar championships e boosters_count
+          const { data: prof, error: getErr } = await supabase
+            .from('profiles')
+            .select('championships, boosters_count')
+            .eq('id', currentUserId)
+            .single();
+
+          if (getErr) throw getErr;
+
+          const { error: updErr } = await supabase
+            .from('profiles')
+            .update({ 
+              championships: (prof.championships || 0) + 1,
+              boosters_count: (prof.boosters_count || 0) + 1
+            })
+            .eq('id', currentUserId);
+
+          if (updErr) throw updErr;
+
+          // 3. Registrar Shinies do Time
+          const myParticipant = participants.find(p => p.user_id === currentUserId);
+          if (myParticipant) {
+            const shinies = myParticipant.team.filter(poke => poke.isShiny && poke.stats);
+            for (const shiny of shinies) {
+              await supabase.from('user_shinies').insert({
+                user_id: currentUserId,
+                pokemon_id: shiny.id,
+                pokemon_data: shiny
+              });
+            }
+          }
+
+          // Salva no localStorage para não poder resgatar novamente
+          localStorage.setItem(`claimed_rewards_room_${roomId}`, 'true');
+
+          btnClaim.style.background = 'var(--success)';
+          btnClaim.style.color = 'white';
+          btnClaim.style.boxShadow = 'none';
+          btnClaim.style.cursor = 'not-allowed';
+          btnClaim.textContent = 'Recompensas Recebidas! 📦✓';
+          
+          alert('Recompensas coletadas! 1 Booster Pack foi adicionado ao seu perfil.');
+        }
+      } catch (err) {
+        console.error('Erro ao reivindicar recompensas:', err);
+        btnClaim.disabled = false;
+        btnClaim.textContent = 'Tentar Novamente 🎁';
+        alert('Erro ao coletar recompensas: ' + err.message);
+      }
+    });
+  }
 }
 
 async function handleGoHome() {
@@ -564,18 +764,18 @@ async function advanceRoundAndSave(roundName) {
         .update({ status: 'finished', finished_at: new Date().toISOString() })
         .eq('id', roomId);
 
-      // Só o Host processa as recompensas para não duplicar inserts
+      // Só o Host processa as recompensas para si mesmo (para outros, cada cliente processa a si próprio)
       if (isHost) {
         try {
           const winnerMatch = bracket.matches.final[0].winner;
           
-          // 1. Hall of Fame e Estatísticas do Vencedor
-          if (winnerMatch && winnerMatch.user_id) {
+          // 1. Hall of Fame e Estatísticas do Vencedor (apenas se o host for o próprio vencedor)
+          if (winnerMatch && winnerMatch.user_id && winnerMatch.user_id === currentUserId) {
             // Insere no Hall da Fama
             await supabase.from('hall_of_fame').insert({
               user_id: winnerMatch.user_id,
               room_name: room?.code || 'Torneio',
-              team_json: winnerMatch.pokemon // Guarda só IDs ou o objeto todo? O DB espera JSONB, vamos guardar o objeto inteiro para preservar estado (como nickname se tivesse)
+              team_json: winnerMatch.pokemon
             });
 
             // Incrementa wins e boosters_count do vencedor
@@ -588,16 +788,16 @@ async function advanceRoundAndSave(roundName) {
             }
           }
 
-          // 2. Incrementar tournaments_played para todos os jogadores reais e checar Shinies
+          // 2. Incrementar tournaments_played e checar Shinies (apenas se for o próprio host)
           for (const p of participants) {
-            if (p.user_id && !p.is_bot) {
+            if (p.user_id && !p.is_bot && p.user_id === currentUserId) {
               const { data: prof } = await supabase.from('profiles').select('tournaments_played').eq('id', p.user_id).single();
               if (prof) {
                 await supabase.from('profiles').update({ tournaments_played: (prof.tournaments_played || 0) + 1 }).eq('id', p.user_id);
               }
 
               // Checa shinies no time do jogador
-              const shinies = p.team.filter(poke => poke.isShiny && poke.stats); // Garante que é pokemon e é shiny
+              const shinies = p.team.filter(poke => poke.isShiny && poke.stats);
               for (const shiny of shinies) {
                 await supabase.from('user_shinies').insert({
                   user_id: p.user_id,
@@ -625,7 +825,8 @@ async function updateUserStats(winner, loser, isChampionship = false, mvp = null
     const winnerUserId = winner?.user_id;
     const loserUserId = loser?.user_id;
 
-    if (winnerUserId) {
+    // Só o próprio cliente altera o seu profile (evita erro de RLS)
+    if (winnerUserId && winnerUserId === currentUserId) {
       const { data: p } = await supabase.from('profiles').select('wins, championships, shinies, hall_of_fame').eq('id', winnerUserId).single();
       if (p) {
         let newShinies = p.shinies || [];
@@ -657,7 +858,7 @@ async function updateUserStats(winner, loser, isChampionship = false, mvp = null
           .eq('id', winnerUserId);
       }
     }
-    if (loserUserId) {
+    if (loserUserId && loserUserId === currentUserId) {
       const { data: p } = await supabase.from('profiles').select('losses').eq('id', loserUserId).single();
       if (p) {
         await supabase.from('profiles')
@@ -672,6 +873,16 @@ async function updateUserStats(winner, loser, isChampionship = false, mvp = null
 
 function cleanup() {
   clearTimeout(simulationTimer);
+  
+  // Limpa todos os timers de animação ativos
+  for (const matchId in activeAnimations) {
+    if (activeAnimations[matchId].interval) {
+      clearInterval(activeAnimations[matchId].interval);
+    }
+  }
+  activeAnimations = {};
+  animatedMatchIds.clear();
+
   if (bracketSubscription) {
     bracketSubscription.unsubscribe();
     bracketSubscription = null;
@@ -680,4 +891,176 @@ function cleanup() {
 
 export function destroy() {
   cleanup();
+}
+
+async function startMatchAnimation(match) {
+  // Marca temporariamente como loading para evitar requisições redundantes
+  activeAnimations[match.id] = { loading: true };
+  
+  try {
+    const { data, error } = await supabase
+      .from('battle_logs')
+      .select('log')
+      .eq('bracket_id', bracket.id)
+      .eq('participant1_id', match.team1.id)
+      .eq('participant2_id', match.team2.id)
+      .single();
+      
+    if (error) throw error;
+    if (!data || !data.log) throw new Error('Nenhum log encontrado');
+    
+    const logs = data.log;
+    
+    // Inicializa o estado dos times para a animação
+    const t1 = match.team1.pokemon.map((p, i) => ({ ...p, fainted: false, active: i === 0 }));
+    const t2 = match.team2.pokemon.map((p, i) => ({ ...p, fainted: false, active: i === 0 }));
+    
+    activeAnimations[match.id] = {
+      loading: false,
+      logs: logs,
+      logIndex: 0,
+      t1: t1,
+      t2: t2,
+      match: match
+    };
+    
+    // Atualiza a interface daquela partida específica
+    updateMatchCardDOM(match.id);
+    
+    // Configura o intervalo para avançar a animação
+    activeAnimations[match.id].interval = setInterval(() => {
+      advanceMatchAnimation(match.id);
+    }, 450);
+    
+  } catch (err) {
+    console.error('Erro ao buscar logs para animação no bracket:', err);
+    // Se der erro, considera animado e renderiza estático
+    delete activeAnimations[match.id];
+    animatedMatchIds.add(match.id);
+    updateUI();
+  }
+}
+
+function advanceMatchAnimation(matchId) {
+  const anim = activeAnimations[matchId];
+  if (!anim) return;
+  
+  if (anim.logIndex >= anim.logs.length) {
+    // Terminou a simulação da partida!
+    clearInterval(anim.interval);
+    delete activeAnimations[matchId];
+    animatedMatchIds.add(matchId);
+    
+    // Redesenha toda a UI no estado final
+    updateUI();
+    return;
+  }
+  
+  const event = anim.logs[anim.logIndex];
+  
+  if (event.type === 'faint') {
+    const pokeName = extractBoldName(event.message);
+    if (pokeName) {
+      let p = anim.t1.find(x => x.displayName === pokeName && !x.fainted);
+      if (p) {
+        p.fainted = true;
+        p.active = false;
+      } else {
+        p = anim.t2.find(x => x.displayName === pokeName && !x.fainted);
+        if (p) {
+          p.fainted = true;
+          p.active = false;
+        }
+      }
+    }
+  } else if (event.type === 'switch') {
+    const pokeName = extractBoldName(event.message);
+    if (pokeName && event.message.includes('entra em campo')) {
+      let isT1 = false;
+      let p = anim.t1.find(x => x.displayName === pokeName && !x.fainted);
+      if (p) {
+        isT1 = true;
+      } else {
+        p = anim.t2.find(x => x.displayName === pokeName && !x.fainted);
+      }
+      
+      if (p) {
+        if (isT1) {
+          anim.t1.forEach(x => x.active = false);
+        } else {
+          anim.t2.forEach(x => x.active = false);
+        }
+        p.active = true;
+      }
+    }
+  }
+  
+  anim.logIndex++;
+  updateMatchCardDOM(matchId);
+}
+
+function updateMatchCardDOM(matchId) {
+  const anim = activeAnimations[matchId];
+  if (!anim || anim.loading) return;
+  
+  const cardEl = container.querySelector(`.match-card[data-matchid="${matchId}"]`);
+  if (!cardEl) return;
+  
+  cardEl.classList.remove('pending', 'has-result');
+  cardEl.classList.add('animating');
+  
+  const hintEl = cardEl.querySelector('.match-pending-hint') || cardEl.querySelector('.match-click-hint') || cardEl.querySelector('.match-animating-hint');
+  if (hintEl) {
+    hintEl.className = 'match-animating-hint';
+    hintEl.innerHTML = '<span class="thinking-spinner" style="width: 12px; height: 12px; border-width: 2px; margin-right: 6px;"></span>Simulando...';
+  }
+  
+  const t1El = cardEl.querySelector('.match-team[data-team="1"]');
+  if (t1El) {
+    t1El.classList.remove('winner', 'loser');
+    const crown = t1El.querySelector('.winner-crown');
+    if (crown) crown.style.display = 'none';
+    
+    anim.t1.forEach((p, idx) => {
+      const spriteEl = t1El.querySelector(`.match-mini-sprite[data-poke-idx="${idx}"]`);
+      if (spriteEl) {
+        if (p.fainted) {
+          spriteEl.classList.add('fainted');
+          spriteEl.classList.remove('active');
+        } else if (p.active) {
+          spriteEl.classList.add('active');
+          spriteEl.classList.remove('fainted');
+        } else {
+          spriteEl.classList.remove('active', 'fainted');
+        }
+      }
+    });
+  }
+  
+  const t2El = cardEl.querySelector('.match-team[data-team="2"]');
+  if (t2El) {
+    t2El.classList.remove('winner', 'loser');
+    const crown = t2El.querySelector('.winner-crown');
+    if (crown) crown.style.display = 'none';
+    
+    anim.t2.forEach((p, idx) => {
+      const spriteEl = t2El.querySelector(`.match-mini-sprite[data-poke-idx="${idx}"]`);
+      if (spriteEl) {
+        if (p.fainted) {
+          spriteEl.classList.add('fainted');
+          spriteEl.classList.remove('active');
+        } else if (p.active) {
+          spriteEl.classList.add('active');
+          spriteEl.classList.remove('fainted');
+        } else {
+          spriteEl.classList.remove('active', 'fainted');
+        }
+      }
+    });
+  }
+}
+
+function extractBoldName(msg) {
+  const match = msg.match(/<b>(.*?)<\/b>/);
+  return match ? match[1] : null;
 }

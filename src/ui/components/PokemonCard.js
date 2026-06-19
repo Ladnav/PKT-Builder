@@ -20,8 +20,9 @@ export function PokemonCard(pokemon, options = {}) {
       <div class="stat-row"><span>HP</span><div class="stat-bar"><div class="stat-fill hp" style="width:${Math.min(100, pokemon.stats.hp / 2.55)}%"></div></div><span>${pokemon.stats.hp}</span></div>
       <div class="stat-row"><span>ATK</span><div class="stat-bar"><div class="stat-fill atk" style="width:${Math.min(100, pokemon.stats.attack / 2.55)}%"></div></div><span>${pokemon.stats.attack}</span></div>
       <div class="stat-row"><span>DEF</span><div class="stat-bar"><div class="stat-fill def" style="width:${Math.min(100, pokemon.stats.defense / 2.55)}%"></div></div><span>${pokemon.stats.defense}</span></div>
-      <div class="stat-row"><span>SPC</span><div class="stat-bar"><div class="stat-fill spa" style="width:${Math.min(100, pokemon.stats.spAtk / 2.55)}%"></div></div><span>${pokemon.stats.spAtk}</span></div>
-      <div class="stat-row"><span>SPD</span><div class="stat-bar"><div class="stat-fill spd" style="width:${Math.min(100, pokemon.stats.speed / 2.55)}%"></div></div><span>${pokemon.stats.speed}</span></div>
+      <div class="stat-row"><span>SPA</span><div class="stat-bar"><div class="stat-fill spa" style="width:${Math.min(100, pokemon.stats.spAtk / 2.55)}%"></div></div><span>${pokemon.stats.spAtk}</span></div>
+      <div class="stat-row"><span>SPD</span><div class="stat-bar"><div class="stat-fill spd" style="width:${Math.min(100, pokemon.stats.spDef / 2.55)}%"></div></div><span>${pokemon.stats.spDef}</span></div>
+      <div class="stat-row"><span>SPE</span><div class="stat-bar"><div class="stat-fill spe" style="width:${Math.min(100, pokemon.stats.speed / 2.55)}%"></div></div><span>${pokemon.stats.speed}</span></div>
     </div>
   ` : '';
 
@@ -116,6 +117,9 @@ export function PokemonRosterCard(pokemon, options = {}) {
         <div class="roster-move-pill" title="${m.displayName} (${m.damage_class === 'physical' ? 'Físico' : 'Especial'}, Power: ${m.power || '-'})">
           <span class="roster-move-icon">${TYPE_ICONS[m.type] || '✨'}</span>
           <span class="roster-move-name">${m.displayName}</span>
+          <span class="roster-move-class ${m.damage_class}">
+            ${m.damage_class === 'physical' ? 'Fís' : 'Esp'}
+          </span>
         </div>
       `).join('')}
     </div>

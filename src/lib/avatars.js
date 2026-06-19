@@ -33,9 +33,11 @@ export function getTrainerAvatar(participant) {
   );
 
   if (isBot) {
-    // Procura correspondência nos nomes conhecidos
+    // Procura correspondência por palavra exata nos nomes conhecidos
     for (const [key, val] of Object.entries(BOT_AVATARS)) {
-      if (name.toLowerCase().includes(key.toLowerCase())) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp('\\b' + escapedKey + '\\b', 'i');
+      if (regex.test(name)) {
         return val;
       }
     }

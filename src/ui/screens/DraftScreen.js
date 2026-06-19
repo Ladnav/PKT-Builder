@@ -34,6 +34,7 @@ let turnTimerInterval = null;
 let turnTimeLeft = 0;
 let lastActiveSlot = null;
 let lastActiveRound = null;
+let lastHistoryLength = 0;
 let lastProcessedSlot = null;
 let lastProcessedRound = null;
 let lastProcessedBotSlot = null;
@@ -51,6 +52,11 @@ export async function render(cont, params) {
   isHost = params.isHost;
   loading = true;
   errorMsg = '';
+  lastActiveSlot = null;
+  lastActiveRound = null;
+  lastHistoryLength = 0;
+  lastProcessedSlot = null;
+  lastProcessedRound = null;
   
   if (!botTimerWorker) {
     botTimerWorker = new Worker(new URL('../../lib/timerWorker.js', import.meta.url));
@@ -796,10 +802,17 @@ function processTurn() {
 
   const currentSlot = draftState.current_slot;
   const currentRound = draftState.current_round;
+  const currentHistoryLength = draftState.picks_history?.length || 0;
 
-  const isNewTurn = lastActiveSlot !== currentSlot || lastActiveRound !== currentRound;
+  const isNewTurn = lastActiveSlot !== currentSlot || lastActiveRound !== currentRound || lastHistoryLength !== currentHistoryLength;
+  
+  // Flag para detectar primeiro carregamento antes de atualizar os valores
+  const isFirstLoad = lastActiveSlot === null;
+  
   lastActiveSlot = currentSlot;
   lastActiveRound = currentRound;
+  lastHistoryLength = currentHistoryLength;
+  
   let currentPart = participants.find(p => p.slot === currentSlot);
   
   if (!currentPart) {
@@ -830,15 +843,15 @@ function processTurn() {
     
     const timerSetting = room?.settings?.turnTimer ?? 45;
     if (timerSetting > 0) {
-      const isFirstLoad = lastActiveSlot === null;
-      if (isFirstLoad) {
+      const isFirstPickOfDraft = currentRound === 1 && currentSlot === 0;
+      if (isFirstLoad && !isFirstPickOfDraft) {
         const startMs = draftState.updated_at ? Date.parse(draftState.updated_at) : Date.now();
         const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
         const calculatedLeft = timerSetting - elapsedSeconds;
         // Garante pelo menos 5 segundos no carregamento inicial para tolerar desvios de relógio
         turnTimeLeft = Math.max(5, Math.min(timerSetting, calculatedLeft));
       } else {
-        // Turnos em tempo real iniciam com o tempo cheio
+        // Turnos em tempo real ou o primeiríssimo pick do draft iniciam com o tempo cheio
         turnTimeLeft = timerSetting;
       }
       
