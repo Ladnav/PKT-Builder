@@ -4,6 +4,27 @@ import { destroyEmotes } from '../components/Emotes.js';
 import { DRAFT_MODES_INFO } from '../../engine/draft.js';
 import { initGloryModal, openGloryModal } from '../components/GloryModal.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
+import pokemonData from '../../data/pokemon-sample.json';
+import itemsData from '../../data/items-sample.json';
+
+const getPokemonOrItemDetails = (p) => {
+  if (typeof p === 'number') {
+    return pokemonData.find(x => x.id === p) || { displayName: `ID ${p}`, sprite: '' };
+  }
+  if (typeof p === 'string' && p.startsWith('item-')) {
+    return itemsData.find(x => x.id === p) || { displayName: p, icon: '🎒' };
+  }
+  if (p && typeof p === 'object') {
+    if (!p.displayName && p.id) {
+      if (typeof p.id === 'number') {
+        return pokemonData.find(x => x.id === p.id) || p;
+      } else {
+        return itemsData.find(x => x.id === p.id) || p;
+      }
+    }
+  }
+  return p;
+};
 let selectedMode = 'type';
 let activeView = 'home'; // 'home' | 'profile'
 let container = null;
@@ -17,6 +38,8 @@ export async function render(cont) {
   loading = true;
   errorMsg = '';
   renderScreen();
+
+  initGloryModal(document.body);
 
   try {
     const user = await getCurrentUser();
@@ -565,19 +588,20 @@ function renderScreen() {
                     <span style="font-size: 0.8rem; color: var(--text-3);">${new Date(hof.created_at).toLocaleDateString()}</span>
                   </div>
                   <div style="display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                    ${hof.team_json.map(p => {
+                    ${hof.team_json.map(rawPoke => {
+                      const p = getPokemonOrItemDetails(rawPoke);
                       if (!p.stats) {
                         return `
                           <div style="text-align: center; width: 50px;">
-                            <div style="font-size: 2rem;">${p.icon}</div>
-                            <div style="font-size: 0.6rem; color: var(--text-2); margin-top: 0.3rem;">${p.displayName}</div>
+                            <div style="font-size: 2rem;">${p.icon || '🎒'}</div>
+                            <div style="font-size: 0.6rem; color: var(--text-2); margin-top: 0.3rem;">${p.displayName || p.name || ''}</div>
                           </div>
                         `;
                       }
                       return `
                       <div class="pokemon-mini-card" style="--card-color: ${p.isShiny ? '#fbbf24' : 'var(--accent)'};" data-tooltip-info='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
-                        <img src="${p.sprite}" alt="${p.displayName}">
-                        <span class="mini-name">${p.displayName}</span>
+                        <img src="${p.sprite}" alt="${p.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
+                        <span class="mini-name">${p.displayName || p.name || ''}</span>
                       </div>
                     `}).join('')}
                   </div>
@@ -608,8 +632,9 @@ function renderScreen() {
               <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tempo por Turno</label>
                 <select id="settings-timer" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
-                  <option value="45">45 Segundos (Padrão)</option>
+                  <option value="10">10 Segundos (Ultra Rápido)</option>
                   <option value="30">30 Segundos (Rápido)</option>
+                  <option value="45">45 Segundos (Padrão)</option>
                   <option value="60">60 Segundos (Longo)</option>
                   <option value="0">Sem Limite de Tempo</option>
                 </select>
@@ -757,7 +782,7 @@ function attachEvents() {
   }
 
   const btnGlory = container.querySelector('#btn-glory');
-  if (btnGlory) btnGlory.addEventListener('click', renderGloryModal);
+  if (btnGlory) btnGlory.addEventListener('click', openGloryModal);
 
   const btnLogout = container.querySelector('#btn-logout');
   if (btnLogout) {

@@ -86,8 +86,14 @@ export function createBattleState(team1, team2, seed = Date.now(), settings = {}
   return {
     seed,
     weather,
-    team1: t1.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
-    team2: t2.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
+    team1: t1.map(p => {
+      const maxHp = p.stats.hp * 2 + 50;
+      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0 };
+    }),
+    team2: t2.map(p => {
+      const maxHp = p.stats.hp * 2 + 50;
+      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0 };
+    }),
     active1: 0,
     active2: 0,
     turn: 0,
@@ -129,7 +135,7 @@ function processAttack(state, attacker, defender, move) {
   
   // Focus Sash Logic
   let isFatal = result.damage >= defender.currentHp;
-  if (isFatal && defender.currentHp === defender.stats.hp && defender.item?.name === 'focus-sash') {
+  if (isFatal && defender.currentHp === defender.maxHp && defender.item?.name === 'focus-sash') {
     result.damage = defender.currentHp - 1;
     log(state, `  🧣 O Focus Sash salvou <b>${defender.displayName}</b>!`, 'eff-super');
   }
@@ -143,18 +149,18 @@ function processAttack(state, attacker, defender, move) {
 
   log(state, `⚡ <b>${attacker.displayName}</b> usa <span class="move-name">${move.displayName}</span>${stabText}!`, 'attack');
   if (effText.text) log(state, `  ${effText.text}`, effText.class);
-  log(state, `  💥 <b>${defender.displayName}</b> perde ${result.damage} HP [${Math.max(0,defender.currentHp)}/${defender.stats.hp} HP]`, 'damage');
+  log(state, `  💥 <b>${defender.displayName}</b> perde ${result.damage} HP [${Math.max(0,defender.currentHp)}/${defender.maxHp} HP]`, 'damage');
 
   // Life Orb recoil
   if (attacker.item?.name === 'life-orb') {
-    const recoil = Math.floor(attacker.stats.hp * 0.1);
+    const recoil = Math.floor(attacker.maxHp * 0.1);
     attacker.currentHp = Math.max(0, attacker.currentHp - recoil);
     log(state, `  🔮 <b>${attacker.displayName}</b> perde ${recoil} HP pelo Life Orb!`, 'damage');
   }
 
   // Rocky Helmet
   if (defender.item?.name === 'rocky-helmet' && move.damage_class === 'physical') {
-    const recoil = Math.floor(attacker.stats.hp / 6);
+    const recoil = Math.floor(attacker.maxHp / 6);
     attacker.currentHp = Math.max(0, attacker.currentHp - recoil);
     log(state, `  🪖 <b>${attacker.displayName}</b> se machucou no Rocky Helmet (${recoil} HP)!`, 'damage');
   }
@@ -211,9 +217,9 @@ function executeTurn(state) {
 
   // End of turn effects (Leftovers)
   const applyEndTurn = (p) => {
-    if (!p.fainted && p.currentHp < p.stats.hp && p.item?.name === 'leftovers') {
-      const heal = Math.floor(p.stats.hp * 0.06) || 1;
-      p.currentHp = Math.min(p.stats.hp, p.currentHp + heal);
+    if (!p.fainted && p.currentHp < p.maxHp && p.item?.name === 'leftovers') {
+      const heal = Math.floor(p.maxHp * 0.06) || 1;
+      p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
       log(state, `  🍎 <b>${p.displayName}</b> recuperou ${heal} HP com Leftovers!`, 'heal');
     }
   }

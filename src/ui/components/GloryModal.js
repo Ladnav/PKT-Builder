@@ -1,4 +1,6 @@
 import { supabase } from '../../lib/supabase.js';
+import pokemonData from '../../data/pokemon-sample.json';
+import itemsData from '../../data/items-sample.json';
 
 let container = null;
 let activeTab = 'leaderboard'; // 'leaderboard' | 'hall'
@@ -6,7 +8,31 @@ let leaderboardData = [];
 let hallData = [];
 let loading = false;
 
+const getPokemonOrItemDetails = (p) => {
+  if (typeof p === 'number') {
+    return pokemonData.find(x => x.id === p) || { displayName: `ID ${p}`, sprite: '' };
+  }
+  if (typeof p === 'string' && p.startsWith('item-')) {
+    return itemsData.find(x => x.id === p) || { displayName: p, icon: '🎒' };
+  }
+  if (p && typeof p === 'object') {
+    if (!p.displayName && p.id) {
+      if (typeof p.id === 'number') {
+        return pokemonData.find(x => x.id === p.id) || p;
+      } else {
+        return itemsData.find(x => x.id === p.id) || p;
+      }
+    }
+  }
+  return p;
+};
+
 export function initGloryModal(parent) {
+  let existing = parent.querySelector('.glory-modal-overlay');
+  if (existing) {
+    container = existing;
+    return;
+  }
   container = document.createElement('div');
   container.className = 'glory-modal-overlay';
   container.style.cssText = `
@@ -140,20 +166,21 @@ function renderHall() {
           </div>
           
           <div style="padding: 1.5rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; position: relative; z-index: 1;">
-            ${h.team_json.map(poke => {
+            ${h.team_json.map(rawPoke => {
+              const poke = getPokemonOrItemDetails(rawPoke);
               if (!poke.stats) {
                 // Item
                 return `
                   <div style="text-align: center; width: 60px;">
-                    <div style="font-size: 2.5rem;">${poke.icon}</div>
-                    <div style="font-size: 0.65rem; color: var(--text-2); margin-top: 0.3rem;">${poke.displayName}</div>
+                    <div style="font-size: 2.5rem;">${poke.icon || '🎒'}</div>
+                    <div style="font-size: 0.65rem; color: var(--text-2); margin-top: 0.3rem;">${poke.displayName || poke.name || ''}</div>
                   </div>
                 `;
               }
               return `
                 <div style="text-align: center; width: 60px;" data-tooltip-info='${JSON.stringify(poke).replace(/'/g, "&apos;")}'>
-                  <img src="${poke.sprite}" style="width: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
-                  <div style="font-size: 0.65rem; color: var(--text-2); margin-top: 0.3rem;">${poke.displayName} ${poke.isShiny?'✨':''}</div>
+                  <img src="${poke.sprite}" style="width: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${poke.id}.png'">
+                  <div style="font-size: 0.65rem; color: var(--text-2); margin-top: 0.3rem;">${poke.displayName || poke.name || ''} ${poke.isShiny?'✨':''}</div>
                 </div>
               `;
             }).join('')}

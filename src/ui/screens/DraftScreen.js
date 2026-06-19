@@ -1,7 +1,7 @@
 // src/ui/screens/DraftScreen.js
 import { navigate } from '../router.js';
 import { initEmotes, destroyEmotes } from '../components/Emotes.js';
-import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
+import { PokemonCard, PokemonMiniCard, PokemonRosterCard } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
 import { TYPE_NAMES_PT, TYPE_ICONS, TYPE_COLORS, ALL_TYPES, getTotalEffectiveness } from '../../engine/types.js';
 import { DRAFT_MODES, botChooseType, botChoosePokemon, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
@@ -33,6 +33,11 @@ let turnTimerInterval = null;
 let turnTimeLeft = 0;
 let lastActiveSlot = null;
 let lastActiveRound = null;
+let lastProcessedSlot = null;
+let lastProcessedRound = null;
+let lastProcessedBotSlot = null;
+let lastProcessedBotRound = null;
+let lastProcessedBotPhase = null;
 
 function getAvailablePool() {
   return draftState?.available_pool || pokemonData.map(p => p.id);
@@ -269,11 +274,10 @@ function updateUI() {
   if (turnInfo) {
     turnInfo.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
     const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
-        if (isPlayer) {
-      turnInfo.textContent = '🎯 SUA VEZ!';
+    if (isPlayer) {
       turnInfo.innerHTML = `🎯 SUA VEZ! <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>`;
     } else {
-      turnInfo.textContent = `⌛ Vez do ${name}`;
+      turnInfo.innerHTML = `⌛ Vez do ${name} <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>`;
     }
   }
 
@@ -316,7 +320,7 @@ function updateUI() {
     if (myPokemon.length === 0) {
       myTeamSlots.innerHTML = `<div class="empty-team">Nenhum Pokémon ainda</div>`;
     } else {
-      myTeamSlots.innerHTML = myPokemon.map(p => PokemonMiniCard(p)).join('');
+      myTeamSlots.innerHTML = myPokemon.map(p => PokemonRosterCard(p)).join('');
     }
   }
 
@@ -577,7 +581,8 @@ function attachDraftEvents() {
 }
 
 async function selectType(type) {
-  if (loading) return;
+  if (loading || (draftState && draftState.selected_type)) return;
+  loading = true;
   
   // Filtra disponíveis
   const available = pokemonData.filter(
@@ -593,20 +598,32 @@ async function selectType(type) {
         current_options: currentOptions,
         updated_at: new Date().toISOString()
       })
-      .eq('room_id', roomId);
+      .eq('room_id', roomId)
+      .eq('current_slot', draftState.current_slot)
+      .eq('current_round', draftState.current_round);
 
     if (error) throw error;
   } catch (err) {
     console.error('Erro ao escolher tipo:', err);
+  } finally {
+    loading = false;
   }
 }
 
 async function selectPokemon(pokemon) {
+  const currentSlot = draftState.current_slot;
+  const currentRound = draftState.current_round;
+
   if (loading) return;
+  if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound) {
+    console.log('Turno já processado por este cliente:', { currentSlot, currentRound });
+    return;
+  }
   loading = true;
+  lastProcessedSlot = currentSlot;
+  lastProcessedRound = currentRound;
 
   try {
-    const currentSlot = draftState.current_slot;
     const currentPart = participants.find(p => p.slot === currentSlot);
     const updatedTeam = [...(currentPart.team || []), pokemon];
 
@@ -656,7 +673,7 @@ async function selectPokemon(pokemon) {
 
     const nextAvailablePool = getAvailablePool().filter(id => id !== pokemon.id);
 
-    // 3. Atualiza estado global do draft
+    // 3. Atualiza estado global do draft com bloqueio otimista
     const { error: draftErr } = await supabase
       .from('draft_state')
       .update({
@@ -669,7 +686,9 @@ async function selectPokemon(pokemon) {
         picks_history: nextHistory,
         updated_at: new Date().toISOString()
       })
-      .eq('room_id', roomId);
+      .eq('room_id', roomId)
+      .eq('current_slot', currentSlot)
+      .eq('current_round', currentRound);
 
     if (draftErr) throw draftErr;
 
@@ -680,6 +699,8 @@ async function selectPokemon(pokemon) {
 
   } catch (err) {
     console.error('Erro ao escolher Pokémon:', err);
+    lastProcessedSlot = null;
+    lastProcessedRound = null;
   } finally {
     loading = false;
   }
@@ -781,32 +802,33 @@ function processTurn() {
 
   const isPlayer = currentPart.user_id === currentUserId;
 
-  if (!isPlayer) {
+  // Inicia ou reseta o timer apenas se for um turno novo ou o timer não estiver rodando
+  if (isNewTurn || !turnTimerInterval) {
     if (turnTimerInterval) {
       clearInterval(turnTimerInterval);
       turnTimerInterval = null;
     }
-  } else {
-    // Inicia ou reseta o timer apenas se for um turno novo ou o timer não estiver rodando
-    if (isNewTurn || !turnTimerInterval) {
-      if (turnTimerInterval) clearInterval(turnTimerInterval);
+    
+    const timerSetting = room?.settings?.turnTimer ?? 45;
+    if (timerSetting > 0) {
+      const startMs = draftState.updated_at ? Date.parse(draftState.updated_at) : Date.now();
+      const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+      turnTimeLeft = Math.min(timerSetting, Math.max(0, timerSetting - elapsedSeconds));
       
-      const timerSetting = room?.settings?.turnTimer ?? 45;
-      if (timerSetting > 0) {
-        turnTimeLeft = timerSetting;
-        
+      const display = document.getElementById('timer-display');
+      if (display) display.textContent = `(${turnTimeLeft}s)`;
+      
+      turnTimerInterval = setInterval(() => {
+        turnTimeLeft--;
         const display = document.getElementById('timer-display');
         if (display) display.textContent = `(${turnTimeLeft}s)`;
         
-        turnTimerInterval = setInterval(() => {
-          turnTimeLeft--;
-          const display = document.getElementById('timer-display');
-          if (display) display.textContent = `(${turnTimeLeft}s)`;
+        if (turnTimeLeft <= 0) {
+          clearInterval(turnTimerInterval);
+          turnTimerInterval = null;
           
-          if (turnTimeLeft <= 0) {
-            clearInterval(turnTimerInterval);
-            turnTimerInterval = null;
-            
+          // Apenas o jogador do turno executa a ação de timeout
+          if (isPlayer) {
             const isItemRound = draftState.current_round === 7;
             if (room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type && !isItemRound) {
               import('../../engine/types.js').then(m => {
@@ -821,12 +843,12 @@ function processTurn() {
             } else {
               let pool = draftState.current_options || [];
               if (!pool || pool.length === 0) pool = selectOptionsFromPool(getAvailablePool().map(id => pokemonData.find(x => x.id === id)).filter(p => p));
-              const p = botChoosePokemon(pool, currentPart.team || []);
+              const p = botChoosePokemon(pool, { pokemon: currentPart.team || [] });
               selectPokemon(p);
             }
           }
-        }, 1000);
-      }
+        }
+      }, 1000);
     }
   }
 
@@ -838,8 +860,19 @@ function processTurn() {
 
   // Turno do BOT (somente o host roda a IA e grava)
   if (currentPart.is_bot && isHost) {
+    const isItemRound = draftState.current_round === 7;
+    const botPhase = (!draftState.selected_type && room.mode !== DRAFT_MODES.RANDOM && !isItemRound) ? 'type' : 'pokemon';
+    if (lastProcessedBotSlot === currentSlot && lastProcessedBotRound === currentRound && lastProcessedBotPhase === botPhase) {
+      console.log('Turno do BOT já processado pelo Host:', { currentSlot, currentRound, botPhase });
+      return;
+    }
+
     if (botTurnInProgress) return;
     botTurnInProgress = true;
+
+    lastProcessedBotSlot = currentSlot;
+    lastProcessedBotRound = currentRound;
+    lastProcessedBotPhase = botPhase;
 
     pendingBotPart = currentPart;
     if (botTimerWorker) {
@@ -967,6 +1000,11 @@ function cleanup() {
     roomSubscription.unsubscribe();
     roomSubscription = null;
   }
+  lastProcessedSlot = null;
+  lastProcessedRound = null;
+  lastProcessedBotSlot = null;
+  lastProcessedBotRound = null;
+  lastProcessedBotPhase = null;
 }
 
 export function destroy() {
