@@ -3,6 +3,8 @@ import { navigate } from '../router.js';
 import { destroyEmotes } from '../components/Emotes.js';
 import { DRAFT_MODES_INFO } from '../../engine/draft.js';
 import { initGloryModal, openGloryModal } from '../components/GloryModal.js';
+import { initAlbumModal, openAlbumModal } from '../components/AlbumModal.js';
+import { initBoosterModal, openBoosterModal } from '../components/BoosterModal.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
@@ -75,6 +77,23 @@ export async function render(cont) {
       .order('created_at', { ascending: false });
       
     profile.my_hall_of_fame = myHall || [];
+
+    // Inicializa modais de colecionaveis
+    initAlbumModal(document.body, user.id, profile?.username);
+    initBoosterModal(document.body, user.id, profile?.username, (newCount) => {
+      if (profile) {
+        profile.boosters_count = newCount;
+      }
+      const badge = document.getElementById('boosters-badge-count');
+      if (badge) {
+        badge.textContent = newCount;
+        badge.style.display = newCount > 0 ? 'inline-block' : 'none';
+      }
+      const btnBooster = document.getElementById('btn-open-boosters');
+      if (btnBooster) {
+        btnBooster.style.display = newCount > 0 ? 'flex' : 'none';
+      }
+    });
 
     // Leaderboard e Hall of Fame foram migrados para o GloryModal
 
@@ -489,8 +508,17 @@ function renderScreen() {
           <h1 class="hs-logo-text">Poke<span>Champion</span></h1>
         </div>
 
-        <div style="display:flex; align-items:center; gap:1.5rem; margin-left: auto;">
-          <button id="btn-glory" style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap; margin-left: 1rem;">
+        <div style="display:flex; align-items:center; gap:1rem; margin-left: auto;">
+          <button id="btn-open-album" style="background: rgba(124, 58, 237, 0.15); border: 1px solid #7c3aed; color: #d946ef; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;">
+            <span style="font-size:1.1rem;">📚</span> Meu Álbum
+          </button>
+          
+          <button id="btn-open-boosters" style="background: rgba(217, 70, 239, 0.15); border: 1px solid #d946ef; color: #f472b6; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: ${profile?.boosters_count > 0 ? 'flex' : 'none'}; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap; position: relative;">
+            <span style="font-size:1.1rem;">📦</span> Abrir Boosters 
+            <span id="boosters-badge-count" style="background: var(--danger); color: white; border-radius: 50%; font-size: 0.65rem; min-width: 16px; height: 16px; display: inline-block; text-align: center; line-height: 16px; font-weight: 900; margin-left: 4px;">${profile?.boosters_count || 0}</span>
+          </button>
+
+          <button id="btn-glory" style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;">
             <span style="font-size:1.1rem;">🏆</span> Ranking e Glória
           </button>
           
@@ -780,6 +808,12 @@ function attachEvents() {
       renderScreen();
     });
   }
+
+  const btnAlbum = container.querySelector('#btn-open-album');
+  if (btnAlbum) btnAlbum.addEventListener('click', openAlbumModal);
+
+  const btnOpenBoosters = container.querySelector('#btn-open-boosters');
+  if (btnOpenBoosters) btnOpenBoosters.addEventListener('click', openBoosterModal);
 
   const btnGlory = container.querySelector('#btn-glory');
   if (btnGlory) btnGlory.addEventListener('click', openGloryModal);

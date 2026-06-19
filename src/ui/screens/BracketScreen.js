@@ -309,6 +309,11 @@ function renderChampionBanner(isPlayer) {
           </span>
           <span>${isPlayer ? 'Você' : (champ?.name || '')}</span>
         </div>
+        ${isPlayer ? `
+          <div style="margin-top: 1rem; color: var(--gold); font-weight: 900; font-size: 1.1rem; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); display: flex; align-items: center; justify-content: center; gap: 6px; animation: pulse 1.5s infinite;">
+            <span>📦</span> VOCÊ GANHOU 1 BOOSTER PACK!
+          </div>
+        ` : ''}
         ${sprite ? `<img class="champion-sprite" src="${sprite}" alt="campeão">` : ''}
         
         ${finalMatch?.mvp ? `
@@ -573,10 +578,13 @@ async function advanceRoundAndSave(roundName) {
               team_json: winnerMatch.pokemon // Guarda só IDs ou o objeto todo? O DB espera JSONB, vamos guardar o objeto inteiro para preservar estado (como nickname se tivesse)
             });
 
-            // Incrementa wins do vencedor (rpc call if we had one, but we can do a simple read/write for MVP since it's only host doing it)
-            const { data: prof } = await supabase.from('profiles').select('wins').eq('id', winnerMatch.user_id).single();
+            // Incrementa wins e boosters_count do vencedor
+            const { data: prof } = await supabase.from('profiles').select('wins, boosters_count').eq('id', winnerMatch.user_id).single();
             if (prof) {
-              await supabase.from('profiles').update({ wins: (prof.wins || 0) + 1 }).eq('id', winnerMatch.user_id);
+              await supabase.from('profiles').update({ 
+                wins: (prof.wins || 0) + 1,
+                boosters_count: (prof.boosters_count || 0) + 1
+              }).eq('id', winnerMatch.user_id);
             }
           }
 
