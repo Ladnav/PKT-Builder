@@ -31,7 +31,7 @@ function renderScreen() {
 
             <div class="form-group">
               <label for="password">Senha</label>
-              <input type="password" id="password" placeholder="Mínimo 6 caracteres (ex: 123456)" required minlength="6" autocomplete="current-password" />
+              <input type="password" id="password" placeholder="Sua senha (ex: 123)" required minlength="3" autocomplete="current-password" />
             </div>
 
             ${errorMessage ? `<div class="auth-error">⚠️ ${errorMessage}</div>` : ''}
@@ -98,18 +98,20 @@ function attachEvents() {
       errorMessage = '';
       renderScreen();
 
-      const username = container.querySelector('#username').value.trim();
+            const username = container.querySelector('#username').value.trim();
       const password = container.querySelector('#password').value;
       
       // Gera o e-mail fantasma correspondente
       const dummyEmail = `${cleanUsernameForEmail(username)}@pkt.com`;
+      // Gera uma senha complexa interna para satisfazer a política do Supabase (Letra Maiúscula, Minúscula, Número, Símbolo)
+      const securePassword = `${password}Pkt@123`;
 
       try {
         if (isSignUp) {
           // Cadastro
           const { data, error } = await supabase.auth.signUp({
             email: dummyEmail,
-            password,
+            password: securePassword,
             options: {
               data: {
                 full_name: username
@@ -122,7 +124,7 @@ function attachEvents() {
           // Como usamos e-mail fictício, fazemos login automático após cadastro
           const { error: loginErr } = await supabase.auth.signInWithPassword({
             email: dummyEmail,
-            password
+            password: securePassword
           });
           
           if (loginErr) throw loginErr;
@@ -130,7 +132,7 @@ function attachEvents() {
           // Login
           const { error } = await supabase.auth.signInWithPassword({
             email: dummyEmail,
-            password
+            password: securePassword
           });
           if (error) throw error;
         }
