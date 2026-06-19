@@ -13,10 +13,21 @@ export const ROUNDS_NAMES = {
 // Cria o bracket inicial com 8 times
 // times: array de { slot, name, isPlayer, pokemon }
 export function createBracket(teams) {
-  // Embaralha preservando o jogador na posição 0
-  const player = teams.find(t => t.isPlayer);
+  // Pega todos os jogadores humanos (pode haver mais de 1)
+  const players = teams.filter(t => t.isPlayer);
   const bots = teams.filter(t => !t.isPlayer).sort(() => Math.random() - 0.5);
-  const shuffled = [player, ...bots];
+  const shuffled = [...players, ...bots];
+
+  // Garante que a array tenha 8 times (caso alguém saia na hora do draft)
+  while (shuffled.length < 8) {
+    shuffled.push({
+      id: 'dummy-' + Math.random(),
+      slot: 99,
+      name: 'Treinador Desistente',
+      isPlayer: false,
+      pokemon: [] // Time vazio perde automaticamente
+    });
+  }
 
   return {
     teams: shuffled,
