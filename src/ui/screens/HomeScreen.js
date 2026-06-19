@@ -618,7 +618,7 @@ function renderScreen() {
               <div class="setting-toggle-row">
                 <div class="setting-toggle-info">
                   <span class="setting-toggle-title">✨ Permitir Shinies</span>
-                  <span class="setting-toggle-desc">Pokémon raros com +15% de status (2% de chance).</span>
+                  <span class="setting-toggle-desc">Pokémon raros com +15% de status (0,5% de chance).</span>
                 </div>
                 <label class="toggle-switch">
                   <input type="checkbox" id="settings-shinies" checked>

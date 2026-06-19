@@ -114,7 +114,7 @@ export function selectOptionsFromPool(available) {
 
   // Aplica chance de Shiny (2% de chance, +15% status)
   return selected.map(p => {
-    if (Math.random() > 0.02) return p;
+    if (Math.random() > 0.005) return p;
 
     const clone = JSON.parse(JSON.stringify(p));
     clone.isShiny = true;
