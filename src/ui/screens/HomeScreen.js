@@ -2,6 +2,7 @@
 import { navigate } from '../router.js';
 import { destroyEmotes } from '../components/Emotes.js';
 import { DRAFT_MODES_INFO } from '../../engine/draft.js';
+import { initGloryModal, openGloryModal } from '../components/GloryModal.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 let selectedMode = 'type';
 let activeView = 'home'; // 'home' | 'profile'
@@ -34,14 +35,25 @@ export async function render(cont) {
     if (profErr) throw profErr;
     profile = prof;
 
-    // Busca leaderboard
-    const { data: lead, error: leadErr } = await supabase
-      .from('leaderboard')
+    // Busca Shinies relacionais
+    const { data: myShinies } = await supabase
+      .from('user_shinies')
       .select('*')
-      .limit(10);
+      .eq('user_id', user.id)
+      .order('caught_at', { ascending: false });
+    
+    profile.my_shinies = myShinies || [];
 
-    if (leadErr) throw leadErr;
-    leaderboard = lead || [];
+    // Busca Hall da Fama pessoal
+    const { data: myHall } = await supabase
+      .from('hall_of_fame')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+      
+    profile.my_hall_of_fame = myHall || [];
+
+    // Leaderboard e Hall of Fame foram migrados para o GloryModal
 
   } catch (err) {
     console.error('Erro ao carregar dados do menu:', err);
@@ -524,42 +536,7 @@ function renderScreen() {
             </div>
           </section>
 
-          <section>
-            <p class="hs-section-label">&#x1F3C6; Leaderboard</p>
-            <div class="hs-lb-card">
-              <table class="hs-lb-table">
-                <thead>
-                  <tr>
-                    <th class="hs-lb-pos">Pos</th>
-                    <th>Treinador</th>
-                    <th class="tc">Campeonatos</th>
-                    <th class="tc">V/D</th>
-                    <th class="tr">Win%</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${leaderboard.length === 0 ? `
-                    <tr><td colspan="5" class="hs-lb-empty">Nenhum resultado ainda &#x2014; seja o primeiro campeao! &#x1F3C6;</td></tr>
-                  ` : leaderboard.map((row, index) => {
-                    let medal = String(index + 1);
-                    if (index === 0) medal = '&#x1F947;';
-                    else if (index === 1) medal = '&#x1F948;';
-                    else if (index === 2) medal = '&#x1F949;';
-                    const isSelf = row.id === profile?.id;
-                    return `
-                      <tr class="${isSelf ? 'self-row' : ''}">
-                        <td class="hs-lb-pos">${medal}</td>
-                        <td class="hs-lb-name">${row.username}${isSelf ? ' <span style="font-size:0.65rem;color:rgba(167,139,250,0.7);font-weight:400;">(voce)</span>' : ''}</td>
-                        <td class="hs-lb-champ">${row.championships}</td>
-                        <td class="hs-lb-vd">${row.wins}/${row.losses}</td>
-                        <td class="hs-lb-wr">${row.win_rate}%</td>
-                      </tr>
-                    `;
-                  }).join('')}
-                </tbody>
-              </table>
-            </div>
-          </section>
+
         ` : `
           <!-- PROFILE VIEW -->
           <div class="hs-hero">
@@ -568,38 +545,46 @@ function renderScreen() {
           </div>
 
           <section>
-            <p class="hs-section-label">&#x2728; Coleção de Shinies (${profile?.shinies?.length || 0})</p>
-            <div class="hs-lb-card" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1.5rem;">
-              ${(!profile?.shinies || profile.shinies.length === 0) ? `
+            <p class="hs-section-label">&#x2728; Minha Coleção de Shinies (${profile?.my_shinies?.length || 0})</p>
+            <div class="hs-lb-card" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1.5rem; justify-content: center;">
+              ${(!profile?.my_shinies || profile.my_shinies.length === 0) ? `
                 <p style="color: var(--text-3); font-style: italic;">Você ainda não capturou nenhum Shiny. Eles têm 2% de chance de aparecer no draft!</p>
-              ` : profile.shinies.map(s => `
-                <div class="pokemon-mini-card shiny" style="--card-color: #fbbf24;" title="${s.displayName}">
-                  <img src="${s.sprite}" alt="${s.displayName}">
-                  <span class="mini-name" style="color: #fbbf24;">${s.displayName}</span>
+              ` : profile.my_shinies.map(s => `
+                <div class="pokemon-mini-card shiny" style="--card-color: #fbbf24; cursor: help;" data-tooltip-info='${JSON.stringify(s.pokemon_data).replace(/'/g, "&apos;")}'>
+                  <img src="${s.pokemon_data.sprite}" alt="${s.pokemon_data.displayName}">
+                  <span class="mini-name" style="color: #fbbf24;">${s.pokemon_data.displayName}</span>
                 </div>
               `).join('')}
             </div>
           </section>
 
           <section>
-            <p class="hs-section-label">&#x1F3C6; Hall da Fama (${profile?.hall_of_fame?.length || 0})</p>
+            <p class="hs-section-label">&#x1F3C6; Meus Títulos (${profile?.my_hall_of_fame?.length || 0})</p>
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-              ${(!profile?.hall_of_fame || profile.hall_of_fame.length === 0) ? `
-                <div class="hs-lb-card" style="padding: 1.5rem;"><p style="color: var(--text-3); font-style: italic;">Vença seu primeiro torneio para registrar seu time no Hall da Fama!</p></div>
-              ` : profile.hall_of_fame.map(hof => `
+              ${(!profile?.my_hall_of_fame || profile.my_hall_of_fame.length === 0) ? `
+                <div class="hs-lb-card" style="padding: 1.5rem;"><p style="color: var(--text-3); font-style: italic;">Vença seu primeiro torneio para registrar seu time aqui!</p></div>
+              ` : profile.my_hall_of_fame.map(hof => `
                 <div class="hs-lb-card" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                   <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-                    <span style="font-weight: bold; color: var(--gold);">🏆 Campeão</span>
-                    <span style="font-size: 0.8rem; color: var(--text-3);">${new Date(hof.date).toLocaleDateString()}</span>
+                    <span style="font-weight: bold; color: var(--gold);">🏆 ${hof.room_name}</span>
+                    <span style="font-size: 0.8rem; color: var(--text-3);">${new Date(hof.created_at).toLocaleDateString()}</span>
                   </div>
-                  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                    ${hof.team.map(p => `
-                      <div class="pokemon-mini-card ${p.id === hof.mvp?.id ? 'mvp-glow' : ''}" style="--card-color: ${p.isShiny ? '#fbbf24' : 'var(--accent)'}; border-color: ${p.id === hof.mvp?.id ? 'var(--gold)' : 'transparent'}">
+                  <div style="display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    ${hof.team_json.map(p => {
+                      if (!p.stats) {
+                        return `
+                          <div style="text-align: center; width: 50px;">
+                            <div style="font-size: 2rem;">${p.icon}</div>
+                            <div style="font-size: 0.6rem; color: var(--text-2); margin-top: 0.3rem;">${p.displayName}</div>
+                          </div>
+                        `;
+                      }
+                      return `
+                      <div class="pokemon-mini-card" style="--card-color: ${p.isShiny ? '#fbbf24' : 'var(--accent)'};" data-tooltip-info='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
                         <img src="${p.sprite}" alt="${p.displayName}">
                         <span class="mini-name">${p.displayName}</span>
-                        ${p.id === hof.mvp?.id ? '<span style="position:absolute; top:-10px; right:-5px; font-size:1.2rem;">🌟</span>' : ''}
                       </div>
-                    `).join('')}
+                    `}).join('')}
                   </div>
                 </div>
               `).join('')}

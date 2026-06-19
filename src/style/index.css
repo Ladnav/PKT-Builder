@@ -2139,3 +2139,29 @@ input:checked + .toggle-slider:before {
 .eff-super { color: var(--gold); font-weight: bold; }
 .eff-not-very { color: var(--text-3); }
 .eff-immune { color: var(--danger); text-decoration: line-through; }
+
+
+/* ===================================================
+   TOOLTIP SYSTEM
+   =================================================== */
+.global-tooltip {
+  position: fixed;
+  background: rgba(15, 15, 20, 0.95);
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--text-1);
+  width: 250px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+  z-index: 10000;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+  backdrop-filter: blur(5px);
+}
+
+.global-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+}

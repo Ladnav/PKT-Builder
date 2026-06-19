@@ -40,7 +40,7 @@ export function PokemonCard(pokemon, options = {}) {
   ` : '';
 
   return `
-    <div class="${cls}" data-id="${pokemon.id}" style="--card-color: ${gradColor}">
+    <div class="${cls}" data-id="${pokemon.id}" style="--card-color: ${gradColor}" data-tooltip-info='${JSON.stringify(pokemon).replace(/'/g, "&apos;")}'>
       <div class="card-glow"></div>
       <div class="card-header">
         <span class="card-number">#${String(pokemon.id).padStart(3,'0')}</span>
@@ -66,7 +66,7 @@ export function PokemonMiniCard(pokemon, options = {}) {
   const gradColor = TYPE_COLORS[pokemon.types[0]] || '#6c63ff';
 
   return `
-    <div class="pokemon-mini-card ${fainted ? 'fainted' : ''}" style="--card-color: ${gradColor}" title="${pokemon.displayName}">
+    <div class="pokemon-mini-card ${fainted ? 'fainted' : ''}" style="--card-color: ${gradColor}" data-tooltip-info='${JSON.stringify(pokemon).replace(/'/g, "&apos;")}'>
       <img src="${pokemon.sprite}" alt="${pokemon.displayName}" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png'">
       <span class="mini-name">${pokemon.displayName}</span>
     </div>

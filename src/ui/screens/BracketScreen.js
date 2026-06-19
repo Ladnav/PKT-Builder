@@ -608,12 +608,57 @@ async function advanceRoundAndSave(roundName) {
 
     if (error) throw error;
 
-    // Se o campeonato acabou, muda status da sala
+    // Se o campeonato acabou, muda status da sala e processa Hall of Fame / Shinies
     if (nextRound === 'done') {
       await supabase
         .from('rooms')
         .update({ status: 'finished', finished_at: new Date().toISOString() })
         .eq('id', roomId);
+
+      // Só o Host processa as recompensas para não duplicar inserts
+      if (isHost) {
+        try {
+          const winnerMatch = bracket.matches.final[0].winner;
+          
+          // 1. Hall of Fame e Estatísticas do Vencedor
+          if (winnerMatch && winnerMatch.user_id) {
+            // Insere no Hall da Fama
+            await supabase.from('hall_of_fame').insert({
+              user_id: winnerMatch.user_id,
+              room_name: room?.code || 'Torneio',
+              team_json: winnerMatch.pokemon.map(p => p.id) // Guarda só IDs ou o objeto todo? O DB espera JSONB, vamos guardar o objeto inteiro para preservar estado (como nickname se tivesse)
+            });
+
+            // Incrementa wins do vencedor (rpc call if we had one, but we can do a simple read/write for MVP since it's only host doing it)
+            const { data: prof } = await supabase.from('profiles').select('wins').eq('id', winnerMatch.user_id).single();
+            if (prof) {
+              await supabase.from('profiles').update({ wins: (prof.wins || 0) + 1 }).eq('id', winnerMatch.user_id);
+            }
+          }
+
+          // 2. Incrementar tournaments_played para todos os jogadores reais e checar Shinies
+          for (const p of participants) {
+            if (p.user_id && !p.is_bot) {
+              const { data: prof } = await supabase.from('profiles').select('tournaments_played').eq('id', p.user_id).single();
+              if (prof) {
+                await supabase.from('profiles').update({ tournaments_played: (prof.tournaments_played || 0) + 1 }).eq('id', p.user_id);
+              }
+
+              // Checa shinies no time do jogador
+              const shinies = p.team.filter(poke => poke.isShiny && poke.stats); // Garante que é pokemon e é shiny
+              for (const shiny of shinies) {
+                await supabase.from('user_shinies').insert({
+                  user_id: p.user_id,
+                  pokemon_id: shiny.id,
+                  pokemon_data: shiny
+                });
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao salvar recompensas do fim do torneio:", err);
+        }
+      }
     }
 
   } catch (err) {
