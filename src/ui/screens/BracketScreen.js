@@ -96,7 +96,7 @@ function setupSubscription() {
       table: 'brackets',
       filter: `room_id=eq.${roomId}`
     }, (payload) => {
-      bracket = payload.new;
+      bracket = { ...bracket, ...payload.new };
       updateUI();
       if (isHost) runSimulations();
     })

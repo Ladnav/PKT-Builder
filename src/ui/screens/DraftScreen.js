@@ -130,7 +130,8 @@ function setupSubscriptions() {
       table: 'draft_state',
       filter: `room_id=eq.${roomId}`
     }, async (payload) => {
-      draftState = payload.new;
+      // Mescla com o estado atual para evitar perda de colunas grandes (TOAST) omitidas pelo WAL
+      draftState = { ...draftState, ...payload.new };
       await fetchParticipants(); // Pega times atualizados
       updateUI();
       processTurn();
