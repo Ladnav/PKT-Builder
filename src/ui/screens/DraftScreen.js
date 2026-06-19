@@ -755,6 +755,50 @@ function processTurn() {
 
   const isPlayer = currentPart.user_id === currentUserId;
 
+  if (!isPlayer) {
+    if (turnTimerInterval) {
+      clearInterval(turnTimerInterval);
+      turnTimerInterval = null;
+    }
+  } else {
+    if (turnTimerInterval) clearInterval(turnTimerInterval);
+    
+    const timerSetting = room?.settings?.turnTimer ?? 45;
+    if (timerSetting > 0) {
+      turnTimeLeft = timerSetting;
+      
+      const display = document.getElementById('timer-display');
+      if (display) display.textContent = `(${turnTimeLeft}s)`;
+      
+      turnTimerInterval = setInterval(() => {
+        turnTimeLeft--;
+        const display = document.getElementById('timer-display');
+        if (display) display.textContent = `(${turnTimeLeft}s)`;
+        
+        if (turnTimeLeft <= 0) {
+          clearInterval(turnTimerInterval);
+          turnTimerInterval = null;
+          
+          const isItemRound = draftState.current_round === 7;
+          if (room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type && !isItemRound) {
+            import('../../engine/types.js').then(m => {
+              const t = m.ALL_TYPES[Math.floor(Math.random() * m.ALL_TYPES.length)];
+              selectType(t);
+            });
+          } else if (isItemRound) {
+            const it = botChooseItem();
+            selectPokemon(it);
+          } else {
+            let pool = draftState.current_options || [];
+            if (!pool || pool.length === 0) pool = selectOptionsFromPool(getAvailablePool().map(id => pokemonData.find(x => x.id === id)).filter(p => p));
+            const p = botChoosePokemon(pool, currentPart.team || []);
+            selectPokemon(p);
+          }
+        }
+      }, 1000);
+    }
+  }
+
   // Se for o modo Random e opções estiverem vazias, o HOST é responsável por gerar
   if (room.mode === DRAFT_MODES.RANDOM && (!draftState.current_options || draftState.current_options.length === 0) && isHost) {
     generateRandomOptionsAndSave();
