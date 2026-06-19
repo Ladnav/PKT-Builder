@@ -96,20 +96,55 @@ export function advanceDraft(state) {
   return state;
 }
 
+function selectOptionsFromPool(available) {
+  // Aplica penalidade para lendários (BST >= 570 tem apenas 15% de chance de aparecer)
+  let filtered = available.filter(p => {
+    const bst = Object.values(p.stats).reduce((sum, val) => sum + val, 0);
+    if (bst >= 570) return Math.random() < 0.15;
+    return true;
+  });
+
+  // Fallback caso falte opções (ex: tipo dragão)
+  if (filtered.length < OPTIONS_COUNT) {
+    filtered = available;
+  }
+
+  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, OPTIONS_COUNT);
+
+  // Aplica chance de Shiny (2% de chance, +15% status)
+  return selected.map(p => {
+    if (Math.random() > 0.02) return p;
+
+    const clone = JSON.parse(JSON.stringify(p));
+    clone.isShiny = true;
+    clone.displayName = `✨ ${clone.displayName}`;
+    
+    for (const stat in clone.stats) {
+      clone.stats[stat] = Math.round(clone.stats[stat] * 1.15);
+    }
+
+    // Ajusta sprites para shiny (PokeAPI)
+    if (clone.sprite) clone.sprite = clone.sprite.replace('/official-artwork/', '/official-artwork/shiny/');
+    if (clone.spriteAnimated) clone.spriteAnimated = clone.spriteAnimated.replace('/animated/', '/animated/shiny/');
+    if (clone.spriteBack) clone.spriteBack = clone.spriteBack.replace('/back/', '/back/shiny/');
+
+    return clone;
+  });
+}
+
 // Gera opções para o tipo escolhido (Modo 1 e 3)
 export function generateTypeOptions(state, type) {
   const available = state.pool.filter(
     p => p.types.includes(type) && !state.usedIds.has(p.id)
   );
-  const shuffled = [...available].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, OPTIONS_COUNT);
+  return selectOptionsFromPool(available);
 }
 
 // Gera opções aleatórias (Modo 2)
 export function generateRandomOptions(state) {
   const available = state.pool.filter(p => !state.usedIds.has(p.id));
-  const shuffled = [...available].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, OPTIONS_COUNT);
+  return selectOptionsFromPool(available);
 }
 
 // Executa um pick

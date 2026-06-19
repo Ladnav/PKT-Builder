@@ -12,6 +12,7 @@ export function PokemonCard(pokemon, options = {}) {
     selectable ? 'selectable' : '',
     selected ? 'selected' : '',
     small ? 'pokemon-card-sm' : '',
+    pokemon.isShiny ? 'shiny' : ''
   ].filter(Boolean).join(' ');
 
   const statsHtml = showStats ? `
