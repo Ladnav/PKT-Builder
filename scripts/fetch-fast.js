@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const LIMIT = 151; // Gen 1 apenas para ser mais rapido
+const LIMIT = 493; // Gen 1 a Gen 4
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
 

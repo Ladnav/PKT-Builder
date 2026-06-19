@@ -25,7 +25,8 @@ let roomSubscription = null;
 let loading = false;
 let errorMsg = '';
 let botTurnInProgress = false;
-let botTimer = null;
+let pendingBotPart = null;
+let botTimerWorker = null;
 
 export async function render(cont, params) {
   container = cont;
@@ -34,6 +35,17 @@ export async function render(cont, params) {
   isHost = params.isHost;
   loading = true;
   errorMsg = '';
+  
+  if (!botTimerWorker) {
+    botTimerWorker = new Worker(new URL('../../lib/timerWorker.js', import.meta.url));
+    botTimerWorker.onmessage = () => {
+      if (pendingBotPart) {
+        executeBotTurn(pendingBotPart);
+        pendingBotPart = null;
+      }
+    };
+  }
+
   botTurnInProgress = false;
 
   renderLayout();
@@ -328,8 +340,8 @@ function renderDraftMain(isPlayer) {
 
     if (draftState.current_options && draftState.current_options.length > 0) {
       optionsInfo = `
-        <div class="options-grid" style="margin-top: 1rem; opacity: 0.7; pointer-events: none; transform: scale(0.95); transform-origin: top;">
-          ${draftState.current_options.map(p => PokemonCard(p, { selectable: false })).join('')}
+        <div style="margin-top: 1rem; opacity: 0.8; pointer-events: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+          ${draftState.current_options.map(p => PokemonMiniCard(p)).join('')}
         </div>
       `;
     }
@@ -607,8 +619,10 @@ function processTurn() {
     if (botTurnInProgress) return;
     botTurnInProgress = true;
 
-    clearTimeout(botTimer);
-    botTimer = setTimeout(() => executeBotTurn(currentPart), 300 + Math.random() * 500);
+    pendingBotPart = currentPart;
+    if (botTimerWorker) {
+      botTimerWorker.postMessage({ command: 'start', delay: 300 + Math.random() * 500 });
+    }
   }
 }
 
@@ -694,7 +708,9 @@ function getModeLabel(mode) {
 }
 
 function cleanup() {
-  clearTimeout(botTimer);
+  if (botTimerWorker) {
+    botTimerWorker.postMessage({ command: 'stop' });
+  }
   if (draftStateSubscription) {
     draftStateSubscription.unsubscribe();
     draftStateSubscription = null;
