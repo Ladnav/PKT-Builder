@@ -308,9 +308,19 @@ function attachEvents() {
   });
 }
 
-function handleGoHome() {
-  cleanup();
-  navigate('home');
+async function handleGoHome() {
+  if (confirm('Deseja sair da sala e voltar ao menu principal?')) {
+    try {
+      const myPart = participants.find(p => p.user_id === currentUserId);
+      if (myPart) {
+        await supabase.from('room_participants').delete().eq('id', myPart.id);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    cleanup();
+    navigate('home');
+  }
 }
 
 async function loadAndShowBattleLog(matchId) {

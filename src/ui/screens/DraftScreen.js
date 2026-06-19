@@ -181,6 +181,7 @@ function renderLayout() {
         <div class="draft-turn-info" id="turn-info">
           Buscando turno...
         </div>
+        <button id="btn-leave-draft" style="margin-left: auto; background: #e74c3c; border: none; color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; font-family: inherit; transition: opacity 0.2s;">🚪 Sair</button>
       </header>
 
       <!-- BODY -->
@@ -292,6 +293,13 @@ function updateUI() {
   const myTeamStats = container.querySelector('#my-team-stats span');
   if (myTeamStats) {
     myTeamStats.textContent = `${playerPart.team?.length || 0}/6 Pokémons`;
+  }
+
+  // Eventos do cabeçalho
+  const btnLeave = container.querySelector('#btn-leave-draft');
+  if (btnLeave && !btnLeave.hasAttribute('data-attached')) {
+    btnLeave.setAttribute('data-attached', 'true');
+    btnLeave.addEventListener('click', handleLeaveRoom);
   }
 
   // 6. Painel central
@@ -641,6 +649,22 @@ async function generateRandomOptionsAndSave() {
     if (error) throw error;
   } catch (err) {
     console.error('Erro ao gerar opções aleatórias:', err);
+  }
+}
+
+async function handleLeaveRoom() {
+  if (!confirm('Tem certeza que deseja sair desta sala? Seu time e posição serão removidos.')) return;
+  
+  try {
+    const myPart = participants.find(p => p.user_id === currentUserId);
+    if (myPart) {
+      await supabase.from('room_participants').delete().eq('id', myPart.id);
+    }
+  } catch (e) {
+    console.error('Erro ao sair:', e);
+  } finally {
+    cleanup();
+    import('../router.js').then(m => m.navigate('home'));
   }
 }
 
