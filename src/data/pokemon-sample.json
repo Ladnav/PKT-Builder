@@ -19519,35 +19519,35 @@
     },
     "moves": [
       {
-        "name": "knock-off",
-        "displayName": "Knock Off",
-        "type": "dark",
-        "power": 65,
-        "accuracy": 100,
-        "damage_class": "physical"
-      },
-      {
-        "name": "feint",
-        "displayName": "Feint",
-        "type": "normal",
-        "power": 30,
-        "accuracy": 100,
-        "damage_class": "physical"
-      },
-      {
-        "name": "sucker-punch",
-        "displayName": "Sucker Punch",
-        "type": "dark",
-        "power": 70,
-        "accuracy": 100,
-        "damage_class": "physical"
-      },
-      {
         "name": "night-slash",
         "displayName": "Night Slash",
         "type": "dark",
         "power": 70,
         "accuracy": 100,
+        "damage_class": "physical"
+      },
+      {
+        "name": "stone-edge",
+        "displayName": "Stone Edge",
+        "type": "rock",
+        "power": 100,
+        "accuracy": 80,
+        "damage_class": "physical"
+      },
+      {
+        "name": "psycho-cut",
+        "displayName": "Psycho Cut",
+        "type": "psychic",
+        "power": 70,
+        "accuracy": 100,
+        "damage_class": "physical"
+      },
+      {
+        "name": "megahorn",
+        "displayName": "Megahorn",
+        "type": "bug",
+        "power": 120,
+        "accuracy": 85,
         "damage_class": "physical"
       }
     ],
