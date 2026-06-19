@@ -4,6 +4,8 @@ import pokemonData from '../../data/pokemon-sample.json';
 import { TypeBadge } from './TypeBadge.js';
 import { TYPE_COLORS, TYPE_ICONS } from '../../engine/types.js';
 
+const LEGENDARY_IDS = [150, 384, 483, 487, 491]; // Mewtwo, Rayquaza, Dialga, Giratina, Darkrai
+
 let modalContainer = null;
 let currentUserId = null;
 let currentUsername = 'Treinador';
@@ -332,12 +334,14 @@ function updateFilteredCards(collectedMap, search, typeFilter, onlyCollected) {
     const hasShiny = col && col.shiny > 0;
     const hasNormal = col && col.normal > 0;
     const totalQty = col ? (col.normal + col.shiny) : 0;
-    const color = isCollected ? (TYPE_COLORS[p.types[0]] || '#6c63ff') : '#444';
+    const isLegendary = LEGENDARY_IDS.includes(p.id);
+    const color = isCollected ? (isLegendary ? '#ff3e3e' : (TYPE_COLORS[p.types[0]] || '#6c63ff')) : '#444';
     
     const cardCls = [
       'album-card-slot',
       isCollected ? 'collected' : 'locked',
-      hasShiny ? 'shiny-holo' : ''
+      hasShiny ? 'shiny-holo' : '',
+      (isCollected && isLegendary) ? 'legendary-holo' : ''
     ].filter(Boolean).join(' ');
 
     return `
@@ -347,7 +351,7 @@ function updateFilteredCards(collectedMap, search, typeFilter, onlyCollected) {
         <!-- CARD HEADER -->
         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.6rem; color: var(--text-3); z-index: 2;">
           <span>#${String(p.id).padStart(3, '0')}</span>
-          ${hasShiny ? '<span style="color: var(--gold); font-weight: bold;" title="Colecionado Versão Shiny! ✨">FOIL ✨</span>' : ''}
+          ${hasShiny ? '<span style="color: var(--gold); font-weight: bold;" title="Colecionado Versao Shiny! ✨">FOIL ✨</span>' : isLegendary && isCollected ? '<span style="color: #ff3e3e; font-weight: 900;" title="Pokemon Lendario/Mitico! 👑">LENDÁRIO 👑</span>' : ''}
         </div>
 
         <!-- SPRITE -->

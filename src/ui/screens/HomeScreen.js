@@ -305,9 +305,13 @@ function renderScreen() {
         grid-template-columns: repeat(3, 1fr);
         gap: 0.85rem;
       }
+      @media (max-width: 768px) {
+        .hs-btn-text { display: none; }
+        .hs-header button { padding: 0.5rem 0.65rem !important; }
+      }
       @media (max-width: 600px) {
         .hs-modes-row { grid-template-columns: 1fr; }
-        .hs-header { padding: 0.6rem 1rem; }
+        .hs-header { padding: 0.6rem 1rem; gap: 0.5rem; }
         .hs-profile-stats { display: none; }
       }
       .mode-card {
@@ -508,18 +512,18 @@ function renderScreen() {
           <h1 class="hs-logo-text">Poke<span>Champion</span></h1>
         </div>
 
-        <div style="display:flex; align-items:center; gap:1rem; margin-left: auto;">
-          <button id="btn-open-album" style="background: rgba(124, 58, 237, 0.15); border: 1px solid #7c3aed; color: #d946ef; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;">
-            <span style="font-size:1.1rem;">📚</span> Meu Álbum
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-left: auto; padding-left: 1rem;">
+          <button id="btn-open-album" style="background: rgba(124, 58, 237, 0.15); border: 1px solid #7c3aed; color: #d946ef; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;" title="Ver Meu Álbum">
+            <span style="font-size:1.1rem;">📚</span> <span class="hs-btn-text">Meu Álbum</span>
           </button>
           
-          <button id="btn-open-boosters" style="background: rgba(217, 70, 239, 0.15); border: 1px solid #d946ef; color: #f472b6; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: ${profile?.boosters_count > 0 ? 'flex' : 'none'}; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap; position: relative;">
-            <span style="font-size:1.1rem;">📦</span> Abrir Boosters 
+          <button id="btn-open-boosters" style="background: rgba(217, 70, 239, 0.15); border: 1px solid #d946ef; color: #f472b6; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: ${profile?.boosters_count > 0 ? 'flex' : 'none'}; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap; position: relative;" title="Abrir Pacotes de Booster">
+            <span style="font-size:1.1rem;">📦</span> <span class="hs-btn-text">Abrir Boosters</span>
             <span id="boosters-badge-count" style="background: var(--danger); color: white; border-radius: 50%; font-size: 0.65rem; min-width: 16px; height: 16px; display: inline-block; text-align: center; line-height: 16px; font-weight: 900; margin-left: 4px;">${profile?.boosters_count || 0}</span>
           </button>
 
-          <button id="btn-glory" style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;">
-            <span style="font-size:1.1rem;">🏆</span> Ranking e Glória
+          <button id="btn-glory" style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;" title="Ver Ranking e Hall da Fama">
+            <span style="font-size:1.1rem;">🏆</span> <span class="hs-btn-text">Ranking e Glória</span>
           </button>
           
           <div class="hs-profile-card">
