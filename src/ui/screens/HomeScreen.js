@@ -1,5 +1,6 @@
 // src/ui/screens/HomeScreen.js
 import { navigate } from '../router.js';
+import { destroyEmotes } from '../components/Emotes.js';
 import { DRAFT_MODES_INFO } from '../../engine/draft.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 let selectedMode = 'type';

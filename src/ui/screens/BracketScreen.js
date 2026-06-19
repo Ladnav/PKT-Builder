@@ -1,5 +1,6 @@
 // src/ui/screens/BracketScreen.js
 import { navigate } from '../router.js';
+import { initEmotes, destroyEmotes } from '../components/Emotes.js';
 import { createBattleState, simulateBattle } from '../../engine/battle.js';
 import { TYPE_COLORS } from '../../engine/types.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
@@ -45,6 +46,7 @@ export async function render(cont, params) {
       return;
     }
     currentUserId = user.id;
+    initEmotes(document.body, roomId, currentUserId);
 
     // Busca room para settings
     const { data: rData, error: rErr } = await supabase

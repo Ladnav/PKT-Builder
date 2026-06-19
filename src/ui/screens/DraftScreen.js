@@ -1,5 +1,6 @@
 // src/ui/screens/DraftScreen.js
 import { navigate } from '../router.js';
+import { initEmotes, destroyEmotes } from '../components/Emotes.js';
 import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
 import { TYPE_NAMES_PT, TYPE_ICONS, TYPE_COLORS, ALL_TYPES, getTotalEffectiveness } from '../../engine/types.js';
@@ -62,6 +63,7 @@ export async function render(cont, params) {
       return;
     }
     currentUserId = user.id;
+    initEmotes(document.body, roomId, currentUserId);
 
     // Busca dados da sala
     const { data: rData, error: rErr } = await supabase
@@ -719,6 +721,7 @@ async function generateRandomOptionsAndSave() {
 }
 
 async function handleLeaveRoom() {
+  destroyEmotes();
   if (!confirm('Tem certeza que deseja sair desta sala? Seu time e posição serão removidos.')) return;
   
   try {

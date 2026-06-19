@@ -1,5 +1,6 @@
 // src/ui/screens/LobbyScreen.js
 import { navigate } from '../router.js';
+import { initEmotes, destroyEmotes } from '../components/Emotes.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 
@@ -32,6 +33,7 @@ export async function render(cont, params) {
       return;
     }
     currentUserId = user.id;
+    initEmotes(document.body, roomId, currentUserId);
 
     // Busca dados da sala
     const { data: rData, error: rErr } = await supabase
@@ -349,6 +351,7 @@ async function handleKickParticipant(pId) {
 }
 
 async function handleLeaveRoom() {
+  destroyEmotes();
   errorMsg = '';
   cleanup();
 
