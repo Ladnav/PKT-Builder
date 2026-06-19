@@ -39,11 +39,11 @@ html { font-size: 16px; scroll-behavior: smooth; }
 body {
   font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   background-color: var(--bg-1);
-  background-image: url('/bg-pattern.png');
-  background-size: 300px;
-  background-repeat: repeat;
+  background-image: url('/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   background-attachment: fixed;
-  background-blend-mode: overlay;
   color: var(--text-1);
   min-height: 100vh;
   overflow-x: hidden;
@@ -53,8 +53,7 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--bg-0);
-  opacity: 0.6; /* Dim the pattern slightly */
+  background: radial-gradient(circle at center, rgba(6, 6, 15, 0.4) 0%, rgba(6, 6, 15, 0.8) 100%), rgba(6, 6, 15, 0.55);
   z-index: -1;
   pointer-events: none;
 }
