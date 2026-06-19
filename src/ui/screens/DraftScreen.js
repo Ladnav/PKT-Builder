@@ -830,9 +830,17 @@ function processTurn() {
     
     const timerSetting = room?.settings?.turnTimer ?? 45;
     if (timerSetting > 0) {
-      const startMs = draftState.updated_at ? Date.parse(draftState.updated_at) : Date.now();
-      const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
-      turnTimeLeft = Math.min(timerSetting, Math.max(0, timerSetting - elapsedSeconds));
+      const isFirstLoad = lastActiveSlot === null;
+      if (isFirstLoad) {
+        const startMs = draftState.updated_at ? Date.parse(draftState.updated_at) : Date.now();
+        const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startMs) / 1000));
+        const calculatedLeft = timerSetting - elapsedSeconds;
+        // Garante pelo menos 5 segundos no carregamento inicial para tolerar desvios de relógio
+        turnTimeLeft = Math.max(5, Math.min(timerSetting, calculatedLeft));
+      } else {
+        // Turnos em tempo real iniciam com o tempo cheio
+        turnTimeLeft = timerSetting;
+      }
       
       const display = document.getElementById('timer-display');
       if (display) display.textContent = `(${turnTimeLeft}s)`;

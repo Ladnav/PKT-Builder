@@ -42,10 +42,10 @@ export async function openAlbumModal() {
   }
   
   modal.innerHTML = `
-    <div class="battle-modal-card album-modal-card" style="max-width: 1000px; width: 95%;">
-      <div class="battle-modal-header">
+    <div class="battle-modal-inner album-modal-card" style="max-width: 950px; width: 95%; height: 85vh; position: relative;">
+      <button class="modal-close" id="btn-close-album">✕</button>
+      <div class="battle-modal-header" style="padding-right: 3.5rem;">
         <h3 class="battle-modal-title">📚 Coleção e Álbum de Cartas</h3>
-        <button class="battle-modal-close" id="btn-close-album">✕</button>
       </div>
       <div class="album-loading-state" style="text-align: center; padding: 3rem;">
         <span class="loading-spinner">⌛</span> Carregando sua coleção de cartas...
@@ -163,9 +163,9 @@ function renderAlbumContent() {
   const progressPercent = ((uniqueCount / pokemonData.length) * 100).toFixed(0);
 
   card.innerHTML = `
-    <div class="battle-modal-header">
+    <button class="modal-close" id="btn-close-album">✕</button>
+    <div class="battle-modal-header" style="padding-right: 3.5rem;">
       <h3 class="battle-modal-title">📚 Coleção e Álbum de Cartas</h3>
-      <button class="battle-modal-close" id="btn-close-album">✕</button>
     </div>
     
     <div class="album-layout" style="display: flex; flex-direction: column; gap: 1rem; padding: 1rem; max-height: 80vh; overflow-y: auto;">
@@ -234,14 +234,14 @@ function renderAlbumContent() {
 
       <!-- CARDS CONTENT CONTAINER -->
       <div id="album-tab-content-cards" class="album-content-view">
-        <div class="album-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; padding-top: 0.5rem;">
+        <div class="album-cards-grid">
           <!-- CARDS RENDERED DYNAMICALLY -->
         </div>
       </div>
 
       <!-- BADGES CONTENT CONTAINER -->
       <div id="album-tab-content-badges" class="album-content-view" style="display: none;">
-        <div class="album-badges-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+        <div class="album-badges-list">
           <!-- BADGES RENDERED DYNAMICALLY -->
         </div>
       </div>

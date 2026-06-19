@@ -37,10 +37,10 @@ export async function openBoosterModal() {
   }
 
   modal.innerHTML = `
-    <div class="battle-modal-card booster-modal-card" style="max-width: 600px; width: 95%;">
-      <div class="battle-modal-header">
+    <div class="battle-modal-inner booster-modal-card" style="max-width: 600px; width: 95%; height: 75vh; position: relative;">
+      <button class="modal-close" id="btn-close-booster">✕</button>
+      <div class="battle-modal-header" style="padding-right: 3.5rem;">
         <h3 class="battle-modal-title">📦 Abertura de Booster Packs</h3>
-        <button class="battle-modal-close" id="btn-close-booster">✕</button>
       </div>
       <div class="booster-loading-state" style="text-align: center; padding: 3rem;">
         <span class="loading-spinner">⌛</span> Verificando seus pacotes de booster...
@@ -84,9 +84,9 @@ function renderBoosterScreen(count) {
 
   if (count <= 0) {
     card.innerHTML = `
-      <div class="battle-modal-header">
+      <button class="modal-close" id="btn-close-booster">✕</button>
+      <div class="battle-modal-header" style="padding-right: 3.5rem;">
         <h3 class="battle-modal-title">📦 Abertura de Booster Packs</h3>
-        <button class="battle-modal-close" id="btn-close-booster">✕</button>
       </div>
       <div style="text-align: center; padding: 3rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
         <div style="font-size: 3.5rem;">📦🚫</div>
@@ -103,9 +103,9 @@ function renderBoosterScreen(count) {
   }
 
   card.innerHTML = `
-    <div class="battle-modal-header">
+    <button class="modal-close" id="btn-close-booster">✕</button>
+    <div class="battle-modal-header" style="padding-right: 3.5rem;">
       <h3 class="battle-modal-title">📦 Abertura de Booster Packs</h3>
-      <button class="battle-modal-close" id="btn-close-booster">✕</button>
     </div>
     
     <div class="booster-content" style="display: flex; flex-direction: column; align-items: center; gap: 2rem; padding: 2rem 1rem; text-align: center;">

@@ -2771,4 +2771,34 @@ input:checked + .toggle-slider:before {
   to { transform: scale(1); opacity: 1; }
 }
 
+/* Responsive grids for album and badges */
+.album-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 1.25rem;
+  padding: 0.5rem 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .album-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+}
+
+.album-badges-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .album-badges-list {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+
 
