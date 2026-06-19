@@ -432,6 +432,9 @@ function renderTypeSelect() {
 function renderPokemonOptions() {
   const options = draftState.current_options || [];
   const isItemRound = draftState.current_round === 7;
+  const currentSlot = draftState.current_slot;
+  const currentPart = participants.find(p => p.slot === currentSlot);
+  const isPlayer = currentPart && currentPart.user_id === currentUserId;
 
   if (isItemRound) {
     return `
@@ -470,11 +473,69 @@ function renderPokemonOptions() {
           </div>
         ` : options.map(p => PokemonCard(p, { selectable: true })).join('')}
       </div>
+      ${isPlayer && !hasRerolled() ? `
+        <div style="text-align: center; margin-top: 2rem;">
+          <button id="btn-reroll" style="padding: 0.8rem 1.5rem; background: var(--bg-3); border: 1px solid var(--gold); color: var(--gold); border-radius: var(--radius-md); cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;">
+            🎲 Reroll Aleatório (1x)
+          </button>
+        </div>
+      ` : ''}
     </div>
   `;
 }
 
+function hasRerolled() {
+  if (!draftState || !draftState.picks_history) return false;
+  return draftState.picks_history.some(h => h.type === 'reroll' && h.user_id === currentUserId);
+}
+
+async function handleReroll() {
+  if (loading || hasRerolled()) return;
+  loading = true;
+  
+  // Show spinner immediately to give feedback
+  container.querySelector('#options-grid').innerHTML = '<div class="bot-thinking" style="grid-column: 1/-1"><p>Rodando roleta...</p></div>';
+  
+  try {
+    let available_pool = draftState.available_pool || pokemonData.map(p => p.id);
+    
+    if (room.mode === 'type') {
+      const chosenTypeObj = draftState.picks_history.find(h => h.round === 0 && h.user_id === currentUserId);
+      if (chosenTypeObj) {
+        available_pool = available_pool.filter(id => {
+          const p = pokemonData.find(x => x.id === id);
+          return p && p.types.includes(chosenTypeObj.pokemon_id);
+        });
+      }
+    }
+    
+    const available_pokemons = available_pool.map(id => pokemonData.find(p => p.id === id)).filter(p => p);
+    const newOptions = selectOptionsFromPool(available_pokemons);
+    
+    const newHistory = [...(draftState.picks_history || []), { type: 'reroll', user_id: currentUserId, round: draftState.current_round }];
+    
+    const { error } = await supabase
+      .from('draft_state')
+      .update({
+        current_options: newOptions,
+        picks_history: newHistory
+      })
+      .eq('room_id', roomId);
+      
+    if (error) throw error;
+  } catch (err) {
+    console.error('Erro no Reroll:', err);
+  } finally {
+    loading = false;
+  }
+}
+
 function attachDraftEvents() {
+  const btnReroll = container.querySelector('#btn-reroll');
+  if (btnReroll) {
+    btnReroll.addEventListener('click', handleReroll);
+  }
+
   // Seleção de tipo
   container.querySelectorAll('.type-btn:not(.disabled)').forEach(btn => {
     btn.addEventListener('click', () => {
