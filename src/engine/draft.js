@@ -96,7 +96,7 @@ export function advanceDraft(state) {
   return state;
 }
 
-function selectOptionsFromPool(available) {
+export function selectOptionsFromPool(available) {
   // Aplica penalidade para lendários (BST >= 570 tem apenas 15% de chance de aparecer)
   let filtered = available.filter(p => {
     const bst = Object.values(p.stats).reduce((sum, val) => sum + val, 0);

@@ -3,7 +3,7 @@ import { navigate } from '../router.js';
 import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
 import { TYPE_NAMES_PT, TYPE_ICONS, ALL_TYPES } from '../../engine/types.js';
-import { DRAFT_MODES, ROUNDS, botChooseType, botChoosePokemon, getDraftProgress } from '../../engine/draft.js';
+import { DRAFT_MODES, ROUNDS, botChooseType, botChoosePokemon, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
 import { createBracket } from '../../tournament/bracket.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
@@ -449,7 +449,7 @@ async function selectType(type) {
   const available = pokemonData.filter(
     p => p.types.includes(type) && !getAvailablePool().includes(p.id) === false
   );
-  const currentOptions = [...available].sort(() => Math.random() - 0.5).slice(0, 8);
+  const currentOptions = selectOptionsFromPool(available);
 
   try {
     const { error } = await supabase
@@ -658,7 +658,7 @@ function processTurn() {
 
 async function generateRandomOptionsAndSave() {
   const available = pokemonData.filter(p => !getAvailablePool().includes(p.id) === false);
-  const currentOptions = [...available].sort(() => Math.random() - 0.5).slice(0, 8);
+  const currentOptions = selectOptionsFromPool(available);
 
   try {
     const { error } = await supabase
@@ -706,7 +706,8 @@ async function executeBotTurn(botParticipant) {
         
         // Salva tipo e gera opções
         const available = pokemonData.filter(p => !getAvailablePool().includes(p.id) === false);
-        const typeOptions = available.filter(p => p.types.includes(type)).sort(() => Math.random() - 0.5).slice(0, 8);
+        const typeAvailable = available.filter(p => p.types.includes(type));
+        const typeOptions = selectOptionsFromPool(typeAvailable);
 
         const { error } = await supabase
           .from('draft_state')
