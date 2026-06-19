@@ -287,7 +287,10 @@ function renderChampionBanner(isPlayer) {
             </div>
           `).join('') || ''}
         </div>
-        <button class="btn-play-again" id="btn-play-again">🔄 Voltar ao Menu</button>
+        <div class="champion-buttons" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+          <button class="btn-view-bracket" id="btn-view-bracket" style="padding: 0.8rem 1.5rem; background: var(--bg-3); border: 1px solid var(--border-bright); color: white; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; transition: all 0.2s;">👀 Ver Chaveamento</button>
+          <button class="btn-play-again" id="btn-play-again" style="padding: 0.8rem 1.5rem; background: var(--primary); border: none; color: white; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; transition: all 0.2s;">🔄 Voltar ao Menu</button>
+        </div>
       </div>
     </div>
   `;
@@ -299,6 +302,12 @@ function attachEvents() {
 
   // Play again
   container.querySelector('#btn-play-again')?.addEventListener('click', handleGoHome);
+
+  // View Bracket (hide banner)
+  container.querySelector('#btn-view-bracket')?.addEventListener('click', () => {
+    const banner = container.querySelector('.champion-banner');
+    if (banner) banner.style.display = 'none';
+  });
 
   // Close modal
   container.querySelector('#modal-close')?.addEventListener('click', () => {
