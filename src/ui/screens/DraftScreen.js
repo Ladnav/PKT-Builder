@@ -4,7 +4,7 @@ import { initEmotes, destroyEmotes } from '../components/Emotes.js';
 import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
 import { TYPE_NAMES_PT, TYPE_ICONS, TYPE_COLORS, ALL_TYPES, getTotalEffectiveness } from '../../engine/types.js';
-import { DRAFT_MODES, botChooseType, botChoosePokemon, botChooseItem, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
+import { DRAFT_MODES, botChooseType, botChoosePokemon, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
 import { createBracket } from '../../tournament/bracket.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
@@ -786,7 +786,9 @@ function processTurn() {
               selectType(t);
             });
           } else if (isItemRound) {
-            const it = botChooseItem();
+            let pool = draftState.current_options || [];
+            if (pool.length === 0) pool = itemsData;
+            const it = pool[Math.floor(Math.random() * pool.length)];
             selectPokemon(it);
           } else {
             let pool = draftState.current_options || [];
