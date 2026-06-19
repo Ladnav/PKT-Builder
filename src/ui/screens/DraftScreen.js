@@ -31,6 +31,8 @@ let pendingBotPart = null;
 let botTimerWorker = null;
 let turnTimerInterval = null;
 let turnTimeLeft = 0;
+let lastActiveSlot = null;
+let lastActiveRound = null;
 
 function getAvailablePool() {
   return draftState?.available_pool || pokemonData.map(p => p.id);
@@ -345,14 +347,20 @@ function renderDraftMain(isPlayer) {
   const isBlindMode = room.mode === DRAFT_MODES.BLIND;
   let lastPickInfo = '';
   if (!isBlindMode && draftState.picks_history && draftState.picks_history.length > 0) {
-    const lastPick = draftState.picks_history[draftState.picks_history.length - 1];
-    lastPickInfo = `
-      <div style="background: var(--surface-hover); padding: 0.5rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; border: 1px solid var(--border-bright); animation: fade-up 0.3s ease;">
-        <span style="font-size: 0.9rem; color: var(--text-2);">Último pick:</span>
-        <img src="${lastPick.pokemon.sprite}" style="width: 40px; height: 40px; object-fit: contain;">
-        <span><b>${lastPick.teamName}</b> escolheu <b>${lastPick.pokemon.displayName}</b></span>
-      </div>
-    `;
+    const pickHistoryOnly = draftState.picks_history.filter(h => h.pokemon);
+    if (pickHistoryOnly.length > 0) {
+      const lastPick = pickHistoryOnly[pickHistoryOnly.length - 1];
+      const spriteHtml = lastPick.pokemon.sprite 
+        ? `<img src="${lastPick.pokemon.sprite}" style="width: 40px; height: 40px; object-fit: contain;">`
+        : `<span style="font-size: 1.5rem;">${lastPick.pokemon.icon || '🎒'}</span>`;
+      lastPickInfo = `
+        <div style="background: var(--surface-hover); padding: 0.5rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; border: 1px solid var(--border-bright); animation: fade-up 0.3s ease;">
+          <span style="font-size: 0.9rem; color: var(--text-2);">Último pick:</span>
+          ${spriteHtml}
+          <span><b>${lastPick.teamName}</b> escolheu <b>${lastPick.pokemon.displayName}</b></span>
+        </div>
+      `;
+    }
   }
 
   const totalRounds = room?.settings?.items ? 7 : 6;
@@ -468,11 +476,19 @@ function renderPokemonOptions() {
 
   return `
     <div class="pokemon-options-wrap">
-      <div class="options-header">
+      <div class="options-header" style="position: relative;">
         <h2 class="pick-title">
           ${draftState.selected_type ? `${TYPE_ICONS[draftState.selected_type]} Pokémons do tipo ${TYPE_NAMES_PT[draftState.selected_type]}` : '🎲 Pokémons Aleatórios'}
         </h2>
         <p class="pick-sub">Escolha 1 Pokémon para o seu time (Slot ${(participants.find(p => p.user_id === currentUserId)?.team?.length || 0) + 1}/6)</p>
+        
+        ${isPlayer && !hasRerolled() ? `
+          <div style="margin-top: 0.8rem; display: flex; justify-content: center;">
+            <button id="btn-reroll" style="padding: 0.6rem 1.2rem; background: rgba(251, 191, 36, 0.1); border: 1px solid var(--gold); color: var(--gold); border-radius: var(--radius-md); cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 0.9rem;">
+              🎲 Reroll Aleatório (1x)
+            </button>
+          </div>
+        ` : ''}
       </div>
       <div class="options-grid" id="options-grid">
         ${options.length === 0 ? `
@@ -481,13 +497,6 @@ function renderPokemonOptions() {
           </div>
         ` : options.map(p => PokemonCard(p, { selectable: true })).join('')}
       </div>
-      ${isPlayer && !hasRerolled() ? `
-        <div style="text-align: center; margin-top: 2rem;">
-          <button id="btn-reroll" style="padding: 0.8rem 1.5rem; background: var(--bg-3); border: 1px solid var(--gold); color: var(--gold); border-radius: var(--radius-md); cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;">
-            🎲 Reroll Aleatório (1x)
-          </button>
-        </div>
-      ` : ''}
     </div>
   `;
 }
@@ -502,19 +511,21 @@ async function handleReroll() {
   loading = true;
   
   // Show spinner immediately to give feedback
-  container.querySelector('#options-grid').innerHTML = '<div class="bot-thinking" style="grid-column: 1/-1"><p>Rodando roleta...</p></div>';
+  const grid = container.querySelector('#options-grid');
+  if (grid) {
+    grid.innerHTML = '<div class="bot-thinking" style="grid-column: 1/-1"><p>Rodando roleta...</p></div>';
+  }
   
   try {
     let available_pool = draftState.available_pool || pokemonData.map(p => p.id);
     
-    if (room.mode === 'type') {
-      const chosenTypeObj = draftState.picks_history.find(h => h.round === 0 && h.user_id === currentUserId);
-      if (chosenTypeObj) {
-        available_pool = available_pool.filter(id => {
-          const p = pokemonData.find(x => x.id === id);
-          return p && p.types.includes(chosenTypeObj.pokemon_id);
-        });
-      }
+    // Mantém o filtro de tipo se estiver no modo correspondente e houver tipo selecionado
+    if (room.mode === 'type' && draftState.selected_type) {
+      const selType = draftState.selected_type;
+      available_pool = available_pool.filter(id => {
+        const p = pokemonData.find(x => x.id === id);
+        return p && p.types.includes(selType);
+      });
     }
     
     const available_pokemons = available_pool.map(id => pokemonData.find(p => p.id === id)).filter(p => p);
@@ -533,6 +544,8 @@ async function handleReroll() {
     if (error) throw error;
   } catch (err) {
     console.error('Erro no Reroll:', err);
+    loading = false;
+    updateUI(); // Redesenha para sumir com o spinner e reativar o botão se der erro
   } finally {
     loading = false;
   }
@@ -742,6 +755,11 @@ function processTurn() {
   if (!draftState || draftState.current_round > totalRounds) return;
 
   const currentSlot = draftState.current_slot;
+  const currentRound = draftState.current_round;
+
+  const isNewTurn = lastActiveSlot !== currentSlot || lastActiveRound !== currentRound;
+  lastActiveSlot = currentSlot;
+  lastActiveRound = currentRound;
   let currentPart = participants.find(p => p.slot === currentSlot);
   
   if (!currentPart) {
@@ -769,43 +787,46 @@ function processTurn() {
       turnTimerInterval = null;
     }
   } else {
-    if (turnTimerInterval) clearInterval(turnTimerInterval);
-    
-    const timerSetting = room?.settings?.turnTimer ?? 45;
-    if (timerSetting > 0) {
-      turnTimeLeft = timerSetting;
+    // Inicia ou reseta o timer apenas se for um turno novo ou o timer não estiver rodando
+    if (isNewTurn || !turnTimerInterval) {
+      if (turnTimerInterval) clearInterval(turnTimerInterval);
       
-      const display = document.getElementById('timer-display');
-      if (display) display.textContent = `(${turnTimeLeft}s)`;
-      
-      turnTimerInterval = setInterval(() => {
-        turnTimeLeft--;
+      const timerSetting = room?.settings?.turnTimer ?? 45;
+      if (timerSetting > 0) {
+        turnTimeLeft = timerSetting;
+        
         const display = document.getElementById('timer-display');
         if (display) display.textContent = `(${turnTimeLeft}s)`;
         
-        if (turnTimeLeft <= 0) {
-          clearInterval(turnTimerInterval);
-          turnTimerInterval = null;
+        turnTimerInterval = setInterval(() => {
+          turnTimeLeft--;
+          const display = document.getElementById('timer-display');
+          if (display) display.textContent = `(${turnTimeLeft}s)`;
           
-          const isItemRound = draftState.current_round === 7;
-          if (room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type && !isItemRound) {
-            import('../../engine/types.js').then(m => {
-              const t = m.ALL_TYPES[Math.floor(Math.random() * m.ALL_TYPES.length)];
-              selectType(t);
-            });
-          } else if (isItemRound) {
-            let pool = draftState.current_options || [];
-            if (pool.length === 0) pool = itemsData;
-            const it = pool[Math.floor(Math.random() * pool.length)];
-            selectPokemon(it);
-          } else {
-            let pool = draftState.current_options || [];
-            if (!pool || pool.length === 0) pool = selectOptionsFromPool(getAvailablePool().map(id => pokemonData.find(x => x.id === id)).filter(p => p));
-            const p = botChoosePokemon(pool, currentPart.team || []);
-            selectPokemon(p);
+          if (turnTimeLeft <= 0) {
+            clearInterval(turnTimerInterval);
+            turnTimerInterval = null;
+            
+            const isItemRound = draftState.current_round === 7;
+            if (room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type && !isItemRound) {
+              import('../../engine/types.js').then(m => {
+                const t = m.ALL_TYPES[Math.floor(Math.random() * m.ALL_TYPES.length)];
+                selectType(t);
+              });
+            } else if (isItemRound) {
+              let pool = draftState.current_options || [];
+              if (pool.length === 0) pool = itemsData;
+              const it = pool[Math.floor(Math.random() * pool.length)];
+              selectPokemon(it);
+            } else {
+              let pool = draftState.current_options || [];
+              if (!pool || pool.length === 0) pool = selectOptionsFromPool(getAvailablePool().map(id => pokemonData.find(x => x.id === id)).filter(p => p));
+              const p = botChoosePokemon(pool, currentPart.team || []);
+              selectPokemon(p);
+            }
           }
-        }
-      }, 1000);
+        }, 1000);
+      }
     }
   }
 
@@ -929,6 +950,10 @@ function getModeLabel(mode) {
 function cleanup() {
   if (botTimerWorker) {
     botTimerWorker.postMessage({ command: 'stop' });
+  }
+  if (turnTimerInterval) {
+    clearInterval(turnTimerInterval);
+    turnTimerInterval = null;
   }
   if (draftStateSubscription) {
     draftStateSubscription.unsubscribe();
