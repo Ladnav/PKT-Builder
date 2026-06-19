@@ -28,6 +28,10 @@ let botTurnInProgress = false;
 let pendingBotPart = null;
 let botTimerWorker = null;
 
+function getAvailablePool() {
+  return draftState?.available_pool || pokemonData.map(p => p.id);
+}
+
 export async function render(cont, params) {
   container = cont;
   roomCode = params.code;
@@ -382,7 +386,7 @@ function renderTypeSelect() {
       <div class="type-grid" id="type-grid">
         ${ALL_TYPES.map(type => {
           const available = pokemonData.filter(
-            p => p.types.includes(type) && !draftState.available_pool.includes(p.id) === false
+            p => p.types.includes(type) && !getAvailablePool().includes(p.id) === false
           ).length;
           return `
             <button class="type-btn ${available === 0 ? 'disabled' : ''}" data-type="${type}" ${available === 0 ? 'disabled' : ''}>
@@ -442,7 +446,7 @@ async function selectType(type) {
   
   // Filtra disponíveis
   const available = pokemonData.filter(
-    p => p.types.includes(type) && !draftState.available_pool.includes(p.id) === false
+    p => p.types.includes(type) && !getAvailablePool().includes(p.id) === false
   );
   const currentOptions = [...available].sort(() => Math.random() - 0.5).slice(0, 8);
 
@@ -513,7 +517,7 @@ async function selectPokemon(pokemon) {
       }
     ];
 
-    const nextAvailablePool = draftState.available_pool.filter(id => id !== pokemon.id);
+    const nextAvailablePool = getAvailablePool().filter(id => id !== pokemon.id);
 
     // 3. Atualiza estado global do draft
     const { error: draftErr } = await supabase
@@ -635,7 +639,7 @@ function processTurn() {
 }
 
 async function generateRandomOptionsAndSave() {
-  const available = pokemonData.filter(p => !draftState.available_pool.includes(p.id) === false);
+  const available = pokemonData.filter(p => !getAvailablePool().includes(p.id) === false);
   const currentOptions = [...available].sort(() => Math.random() - 0.5).slice(0, 8);
 
   try {
@@ -683,7 +687,7 @@ async function executeBotTurn(botParticipant) {
         const type = botChooseType({ pokemon: botParticipant.team || [] }, pokemonData, usedIdsSet);
         
         // Salva tipo e gera opções
-        const available = pokemonData.filter(p => !draftState.available_pool.includes(p.id) === false);
+        const available = pokemonData.filter(p => !getAvailablePool().includes(p.id) === false);
         const typeOptions = available.filter(p => p.types.includes(type)).sort(() => Math.random() - 0.5).slice(0, 8);
 
         const { error } = await supabase
@@ -710,7 +714,7 @@ async function executeBotTurn(botParticipant) {
     const picked = botChoosePokemon(options, { pokemon: botParticipant.team || [] });
     if (!picked) {
       // Fallback se nada estiver disponível
-      const any = pokemonData.find(p => draftState.available_pool.includes(p.id));
+      const any = pokemonData.find(p => getAvailablePool().includes(p.id));
       if (any) await selectPokemon(any);
     } else {
       await selectPokemon(picked);
