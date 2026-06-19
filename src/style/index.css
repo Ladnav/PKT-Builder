@@ -2113,7 +2113,26 @@ input:checked + .toggle-slider:before {
   filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
 }
 
+
 .floating-emote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.floating-emote-name {
+  font-size: 0.6rem;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-main);
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.floating-emote-old {
   position: fixed;
   font-size: 3rem;
   pointer-events: none;

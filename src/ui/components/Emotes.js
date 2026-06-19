@@ -4,7 +4,7 @@ let currentChannel = null;
 
 const EMOTES_LIST = ['👍', '🔥', '😂', '🤯', '😡', '😱'];
 
-export function initEmotes(container, roomId, currentUserId) {
+export function initEmotes(container, roomId, currentUserId, currentUsername = 'Treinador') {
   // Cleanup se já existir
   destroyEmotes();
 
@@ -17,7 +17,7 @@ export function initEmotes(container, roomId, currentUserId) {
     const btn = document.createElement('button');
     btn.className = 'emote-btn';
     btn.textContent = emoji;
-    btn.onclick = () => sendEmote(emoji, roomId, currentUserId);
+    btn.onclick = () => sendEmote(emoji, roomId, currentUserId, currentUsername);
     emoteBar.appendChild(btn);
   });
 
@@ -28,7 +28,7 @@ export function initEmotes(container, roomId, currentUserId) {
   
   currentChannel
     .on('broadcast', { event: 'emote' }, (payload) => {
-      showFloatingEmote(payload.payload.emoji, payload.payload.userId);
+      showFloatingEmote(payload.payload.emoji, payload.payload.userId, payload.payload.username);
     })
     .subscribe();
 }
@@ -43,24 +43,33 @@ export function destroyEmotes() {
   }
 }
 
-async function sendEmote(emoji, roomId, userId) {
+async function sendEmote(emoji, roomId, userId, username) {
   if (!currentChannel) return;
 
   // Envia via realtime broadcast
   await currentChannel.send({
     type: 'broadcast',
     event: 'emote',
-    payload: { emoji, userId }
+    payload: { emoji, userId, username }
   });
 
   // Mostra pra si mesmo instantaneamente
-  showFloatingEmote(emoji, userId);
+  showFloatingEmote(emoji, userId, username);
 }
 
-function showFloatingEmote(emoji, userId) {
+function showFloatingEmote(emoji, userId, username = 'Treinador') {
   const floating = document.createElement('div');
   floating.className = 'floating-emote';
-  floating.textContent = emoji;
+  
+  const iconSpan = document.createElement('span');
+  iconSpan.textContent = emoji;
+  
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'floating-emote-name';
+  nameSpan.textContent = username;
+  
+  floating.appendChild(iconSpan);
+  floating.appendChild(nameSpan);
 
   // Lógica para posicionar: se encontrarmos o avatar do usuário, sai dele. Senão, sai aleatoriamente na tela.
   const userAvatar = document.querySelector(`[data-user-id="${userId}"]`);

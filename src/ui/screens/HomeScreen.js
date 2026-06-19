@@ -497,18 +497,7 @@ function renderScreen() {
             <p class="hs-hero-sub">Escolha seu modo, monte sua sala e lute pelo titulo de campeao.</p>
           </div>
 
-          <section>
-            <p class="hs-section-label">Modo de Draft</p>
-            <div class="hs-modes-row">
-              ${Object.entries(DRAFT_MODES_INFO).map(([key, info]) => `
-                <div class="mode-card ${key === selectedMode ? 'active' : ''}" data-mode="${key}">
-                  <div class="hs-mode-icon">${info.icon}</div>
-                  <h3 class="hs-mode-name">${info.name}</h3>
-                  <p class="hs-mode-desc">${info.description}</p>
-                </div>
-              `).join('')}
-            </div>
-          </section>
+
 
           <section>
             <p class="hs-section-label">Entrar na Batalha</p>
@@ -607,6 +596,25 @@ function renderScreen() {
             </div>
             <div class="battle-modal-content" style="display: flex; flex-direction: column; gap: 1rem; max-height: 75vh; overflow-y: auto; padding-bottom: 1.5rem;">
               
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Modo de Jogo</label>
+                <select id="settings-mode" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
+                  <option value="type">Draft Clássico (Aberto)</option>
+                  <option value="blind">Draft Cego (Times Ocultos)</option>
+                  <option value="random">Draft Aleatório (Sorteio)</option>
+                </select>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tempo por Turno</label>
+                <select id="settings-timer" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
+                  <option value="45">45 Segundos (Padrão)</option>
+                  <option value="30">30 Segundos (Rápido)</option>
+                  <option value="60">60 Segundos (Longo)</option>
+                  <option value="0">Sem Limite de Tempo</option>
+                </select>
+              </div>
+
               <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tamanho da Sala</label>
                 <select id="settings-size" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
@@ -748,6 +756,9 @@ function attachEvents() {
     });
   }
 
+  const btnGlory = container.querySelector('#btn-glory');
+  if (btnGlory) btnGlory.addEventListener('click', renderGloryModal);
+
   const btnLogout = container.querySelector('#btn-logout');
   if (btnLogout) {
     btnLogout.addEventListener('click', async () => {
@@ -772,12 +783,19 @@ async function handleCreateRoom() {
   
   const sizeSelect = container.querySelector('#settings-size');
   const maxPlayers = sizeSelect ? parseInt(sizeSelect.value, 10) : 8;
+  
+  const modeSelect = container.querySelector('#settings-mode');
+  const selectedMode = modeSelect ? modeSelect.value : 'type';
+
+  const timerSelect = container.querySelector('#settings-timer');
+  const turnTimer = timerSelect ? parseInt(timerSelect.value, 10) : 45;
+
   const shinies = container.querySelector('#settings-shinies')?.checked ?? true;
   const weather = container.querySelector('#settings-weather')?.checked ?? false;
   const synergy = container.querySelector('#settings-synergy')?.checked ?? false;
   const items = container.querySelector('#settings-items')?.checked ?? false;
 
-  const roomSettings = { size: maxPlayers, shinies, weather, synergy, items };
+  const roomSettings = { size: maxPlayers, turnTimer, shinies, weather, synergy, items };
 
   const settingsModal = container.querySelector('#settings-modal');
   if (settingsModal) settingsModal.style.display = 'none';

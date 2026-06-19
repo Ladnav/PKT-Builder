@@ -46,7 +46,8 @@ export async function render(cont, params) {
       return;
     }
     currentUserId = user.id;
-    initEmotes(document.body, roomId, currentUserId);
+    const myUsername = user?.user_metadata?.username || user?.email?.split('@')[0] || 'Treinador';
+    initEmotes(document.body, roomId, currentUserId, myUsername);
 
     // Busca room para settings
     const { data: rData, error: rErr } = await supabase

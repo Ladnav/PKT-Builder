@@ -29,6 +29,8 @@ let errorMsg = '';
 let botTurnInProgress = false;
 let pendingBotPart = null;
 let botTimerWorker = null;
+let turnTimerInterval = null;
+let turnTimeLeft = 0;
 
 function getAvailablePool() {
   return draftState?.available_pool || pokemonData.map(p => p.id);
@@ -63,7 +65,8 @@ export async function render(cont, params) {
       return;
     }
     currentUserId = user.id;
-    initEmotes(document.body, roomId, currentUserId);
+    const myUsername = user?.user_metadata?.username || user?.email?.split('@')[0] || 'Treinador';
+    initEmotes(document.body, roomId, currentUserId, myUsername);
 
     // Busca dados da sala
     const { data: rData, error: rErr } = await supabase
@@ -264,7 +267,12 @@ function updateUI() {
   if (turnInfo) {
     turnInfo.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
     const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
-    turnInfo.textContent = isPlayer ? '🎯 SUA VEZ!' : `⌛ Vez do ${name}`;
+        if (isPlayer) {
+      turnInfo.textContent = '🎯 SUA VEZ!';
+      turnInfo.innerHTML = `🎯 SUA VEZ! <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>`;
+    } else {
+      turnInfo.textContent = `⌛ Vez do ${name}`;
+    }
   }
 
   // 4. Sidebar esquerda: todos os times
