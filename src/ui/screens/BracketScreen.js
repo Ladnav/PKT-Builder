@@ -109,8 +109,11 @@ function renderLayout() {
       <header class="bracket-header">
         <button class="btn-back" id="btn-back">← Menu</button>
         <h1 class="bracket-title">🏆 Campeonato PokéChampion</h1>
-        <div class="bracket-status" id="bracket-status">
-          Carregando chaveamento...
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <div class="bracket-status" id="bracket-status">
+            Carregando chaveamento...
+          </div>
+          <button id="btn-show-champion" style="display: none; padding: 0.4rem 1rem; background: rgba(108, 99, 255, 0.1); border: 1px solid var(--primary); color: white; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; transition: all 0.2s;">👑 Ver Campeão</button>
         </div>
       </header>
 
@@ -158,12 +161,15 @@ function updateUI() {
 
   // Status
   const statusEl = container.querySelector('#bracket-status');
+  const btnShowChamp = container.querySelector('#btn-show-champion');
   if (statusEl) {
     if (bracket.round === 'done') {
       const winnerName = bracket.matches.final[0]?.winner?.name || 'Vencedor';
       statusEl.textContent = playerAlive ? '🥇 Você é o Grande Campeão! 🎉' : `🏆 Campeão: ${winnerName}`;
+      if (btnShowChamp) btnShowChamp.style.display = 'block';
     } else {
       statusEl.textContent = `Rodada: ${ROUNDS_NAMES[bracket.round]}`;
+      if (btnShowChamp) btnShowChamp.style.display = 'none';
     }
   }
 
@@ -307,6 +313,12 @@ function attachEvents() {
   container.querySelector('#btn-view-bracket')?.addEventListener('click', () => {
     const banner = container.querySelector('.champion-banner');
     if (banner) banner.style.display = 'none';
+  });
+
+  // Show Champion (show banner)
+  container.querySelector('#btn-show-champion')?.addEventListener('click', () => {
+    const banner = container.querySelector('.champion-banner');
+    if (banner) banner.style.display = 'flex';
   });
 
   // Close modal
