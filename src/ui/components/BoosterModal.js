@@ -37,12 +37,12 @@ export async function openBoosterModal() {
   }
 
   modal.innerHTML = `
-    <div class="battle-modal-inner booster-modal-card" style="max-width: 600px; width: 95%; height: 75vh; position: relative;">
+    <div class="battle-modal-inner booster-modal-card" style="max-width: 600px; width: 95%; max-height: 85vh; height: auto; position: relative; display: flex; flex-direction: column;">
       <button class="modal-close" id="btn-close-booster">✕</button>
-      <div class="battle-modal-header" style="padding-right: 3.5rem;">
+      <div class="battle-modal-header" style="padding-right: 3.5rem; flex-shrink: 0;">
         <h3 class="battle-modal-title">📦 Abertura de Booster Packs</h3>
       </div>
-      <div class="booster-loading-state" style="text-align: center; padding: 3rem;">
+      <div class="booster-loading-state" style="text-align: center; padding: 3rem; flex: 1; overflow-y: auto;">
         <span class="loading-spinner">⌛</span> Verificando seus pacotes de booster...
       </div>
     </div>
@@ -85,16 +85,16 @@ function renderBoosterScreen(count) {
   if (count <= 0) {
     card.innerHTML = `
       <button class="modal-close" id="btn-close-booster">✕</button>
-      <div class="battle-modal-header" style="padding-right: 3.5rem;">
+      <div class="battle-modal-header" style="padding-right: 3.5rem; flex-shrink: 0;">
         <h3 class="battle-modal-title">📦 Abertura de Booster Packs</h3>
       </div>
-      <div style="text-align: center; padding: 3rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <div style="text-align: center; padding: 3rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; flex: 1; overflow-y: auto;">
         <div style="font-size: 3.5rem;">📦🚫</div>
         <h4 style="font-weight: bold; font-size: 1.1rem; color: var(--text-2);">Nenhum Booster Disponível</h4>
         <p style="font-size: 0.85rem; color: var(--text-3); max-width: 320px;">
           Você não tem pacotes de booster acumulados. Ganhe a Grande Final de torneios para receber pacotes!
         </p>
-        <button class="btn-primary" id="btn-ok-no-booster" style="margin-top: 1rem; padding: 0.6rem 2rem;">Confirmar</button>
+        <button class="btn-primary" id="btn-ok-no-booster" style="margin-top: 1rem; padding: 0.6rem 2rem; flex-shrink: 0;">Confirmar</button>
       </div>
     `;
     document.getElementById('btn-close-booster').addEventListener('click', closeBoosterModal);
@@ -104,15 +104,15 @@ function renderBoosterScreen(count) {
 
   card.innerHTML = `
     <button class="modal-close" id="btn-close-booster">✕</button>
-    <div class="battle-modal-header" style="padding-right: 3.5rem;">
+    <div class="battle-modal-header" style="padding-right: 3.5rem; flex-shrink: 0;">
       <h3 class="battle-modal-title">📦 Abertura de Booster Packs</h3>
     </div>
     
-    <div class="booster-content" style="display: flex; flex-direction: column; align-items: center; gap: 2rem; padding: 2rem 1rem; text-align: center;">
-      <div style="font-weight: bold; color: var(--gold);">Pacotes Disponíveis: ${count}</div>
+    <div class="booster-content" style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem; padding: 1.5rem 1rem; text-align: center; overflow-y: auto; flex: 1; width: 100%; box-sizing: border-box;">
+      <div style="font-weight: bold; color: var(--gold); flex-shrink: 0;">Pacotes Disponíveis: ${count}</div>
 
       <!-- BOOSTER ENVELOPE CONTAINER -->
-      <div class="booster-pack-container" id="booster-pack-graphic">
+      <div class="booster-pack-container" id="booster-pack-graphic" style="flex-shrink: 0;">
         <div class="booster-pack">
           <div class="booster-pack-design">
             <div class="booster-pack-header">POKÉCHAMPION</div>
@@ -124,7 +124,7 @@ function renderBoosterScreen(count) {
         </div>
       </div>
 
-      <button class="btn-primary" id="btn-open-pack" style="padding: 0.8rem 2.5rem; font-size: 1rem; font-weight: bold; background: linear-gradient(135deg, #d946ef 0%, #7c3aed 100%); border: none;">
+      <button class="btn-primary" id="btn-open-pack" style="padding: 0.8rem 2.5rem; font-size: 1rem; font-weight: bold; background: linear-gradient(135deg, #d946ef 0%, #7c3aed 100%); border: none; flex-shrink: 0; margin-bottom: 0.5rem;">
         🔓 ABRIR PACOTE
       </button>
     </div>
@@ -247,12 +247,12 @@ function renderRevealedCards(cardsList, nextCount) {
   const card = modal.querySelector('.booster-modal-card');
 
   card.innerHTML = `
-    <div class="battle-modal-header">
+    <div class="battle-modal-header" style="flex-shrink: 0;">
       <h3 class="battle-modal-title">🃏 Cartas Reveladas!</h3>
     </div>
     
-    <div class="booster-reveal-view" style="display: flex; flex-direction: column; align-items: center; gap: 2rem; padding: 1.5rem 0.5rem; text-align: center;">
-      <div style="font-size: 0.85rem; color: var(--text-2);">Clique nas cartas para revelá-las!</div>
+    <div class="booster-reveal-view" style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem; padding: 1rem 0.5rem; text-align: center; overflow-y: auto; flex: 1; width: 100%; box-sizing: border-box;">
+      <div style="font-size: 0.85rem; color: var(--text-2); flex-shrink: 0;">Clique nas cartas para revelá-las!</div>
 
       <!-- CARDS LIST -->
       <div class="booster-cards-reveal-grid" style="display: flex; gap: 1.5rem; justify-content: center; width: 100%; flex-wrap: wrap;">
@@ -290,11 +290,12 @@ function renderRevealedCards(cardsList, nextCount) {
         }).join('')}
       </div>
 
-      <div class="booster-reveal-actions" style="display: flex; gap: 1rem; width: 100%; justify-content: center; margin-top: 1rem;">
+      <div class="booster-reveal-actions" style="display: flex; gap: 1rem; width: 100%; justify-content: center; margin-top: 0.5rem; flex-shrink: 0; padding-bottom: 0.5rem;">
         <button class="btn-primary" id="btn-next-action" style="padding: 0.6rem 2rem; display: none;"></button>
       </div>
     </div>
   `;
+
 
   const containers = card.querySelectorAll('.booster-card-flip-container');
   let flippedCount = 0;

@@ -410,7 +410,8 @@ function renderMatch(match, isFinal = false) {
 function renderChampionBanner(isPlayer) {
   const finalMatch = bracket.matches.final[0];
   const champ = finalMatch?.winner;
-  const sprite = finalMatch?.mvp?.sprite || champ?.pokemon[0]?.sprite || '';
+  const mvp = finalMatch?.mvp;
+  const avatarUrl = getTrainerAvatar(champ);
 
   return `
     <div class="champion-banner ${isPlayer ? 'player-wins' : ''}">
@@ -419,7 +420,7 @@ function renderChampionBanner(isPlayer) {
         <h2 class="champion-title">${isPlayer ? '🎉 VOCÊ É O CAMPEÃO!' : '🏆 CAMPEÃO!'}</h2>
         <div class="champion-name" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
           <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
-            <img src="${getTrainerAvatar(champ)}" alt="${champ?.name || ''}" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="${avatarUrl}" alt="${champ?.name || ''}" style="width: 100%; height: 100%; object-fit: cover;">
           </span>
           <span>${isPlayer ? 'Você' : (champ?.name || '')}</span>
         </div>
@@ -433,16 +434,28 @@ function renderChampionBanner(isPlayer) {
             </button>
           </div>
         ` : ''}
-        ${sprite ? `<img class="champion-sprite" src="${sprite}" alt="campeão">` : ''}
         
-        ${finalMatch?.mvp ? `
+        ${mvp?.sprite ? `
+          <div class="champion-sprite-wrap">
+            <img class="champion-sprite" src="${mvp.sprite}" alt="MVP" style="width: 180px; height: 180px; object-fit: contain; filter: drop-shadow(0 12px 30px rgba(255, 215, 0, 0.6));">
+            <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #f59e0b, #d97706); color: black; border: 1.5px solid gold; padding: 3px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.5); white-space: nowrap;">
+              ⭐ MVP ⭐
+            </div>
+          </div>
+        ` : `
+          <div class="champion-avatar-large-wrap">
+            <img src="${avatarUrl}" alt="${champ?.name || ''}" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+        `}
+        
+        ${mvp ? `
           <div class="champion-mvp" style="margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 215, 0, 0.1); border-radius: var(--radius-md); border: 1px solid gold; display: flex; flex-direction: column; align-items: center;">
             <h4 style="color: gold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">⭐ MVP da Final ⭐</h4>
             <div style="display: flex; align-items: center; gap: 0.8rem;">
-              <img src="${finalMatch.mvp.sprite}" style="width: 50px; height: 50px; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));">
+              <img src="${mvp.sprite}" style="width: 50px; height: 50px; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));">
               <div style="text-align: left;">
-                <div style="font-weight: bold; font-size: 1.1rem;">${finalMatch.mvp.displayName}</div>
-                <div style="font-size: 0.8rem; opacity: 0.8;">KOs: ${finalMatch.mvp.kos || 0} | Dano: ${finalMatch.mvp.damageDealt || 0}</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">${mvp.displayName}</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;">KOs: ${mvp.kos || 0} | Dano: ${mvp.damageDealt || 0}</div>
               </div>
             </div>
           </div>
@@ -640,7 +653,7 @@ function runSimulations() {
   // aguarda ela terminar antes de simular a próxima ou avançar o round.
   if (Object.keys(activeAnimations).length > 0) {
     clearTimeout(simulationTimer);
-    simulationTimer = setTimeout(runSimulations, 1000);
+    simulationTimer = setTimeout(runSimulations, 300);
     return;
   }
 
@@ -653,14 +666,14 @@ function runSimulations() {
   if (pendingMatch) {
     simulationInProgress = true;
     clearTimeout(simulationTimer);
-    simulationTimer = setTimeout(() => simulateMatchAndSave(pendingMatch, roundName), 4000);
+    simulationTimer = setTimeout(() => simulateMatchAndSave(pendingMatch, roundName), 1200);
   } else {
     // Todas as partidas do round atual foram simuladas. Avança o round!
     const roundComplete = matches.every(m => m.simulated || (!m.team1 || !m.team2));
     if (roundComplete) {
       simulationInProgress = true;
       clearTimeout(simulationTimer);
-      simulationTimer = setTimeout(() => advanceRoundAndSave(roundName), 4000);
+      simulationTimer = setTimeout(() => advanceRoundAndSave(roundName), 1200);
     }
   }
 }
@@ -935,10 +948,10 @@ async function startMatchAnimation(match) {
     // Atualiza a interface daquela partida específica
     updateMatchCardDOM(match.id);
     
-    // Configura o intervalo para avançar a animação
+    // Configura o intervalo para avançar a animação (acelerada 3x)
     activeAnimations[match.id].interval = setInterval(() => {
       advanceMatchAnimation(match.id);
-    }, 450);
+    }, 50);
     
   } catch (err) {
     console.error('Erro ao buscar logs para animação no bracket:', err);

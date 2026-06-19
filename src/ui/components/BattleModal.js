@@ -274,7 +274,7 @@ function startSimulation(logs, t1, t2) {
     }
     
     logIndex++;
-  }, 400); 
+  }, 45); 
 }
 
 function skipSimulation(logs, t1, t2) {

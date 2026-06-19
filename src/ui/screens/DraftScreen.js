@@ -752,20 +752,24 @@ async function createBracketAndTransitionRoom() {
       item: p.team.find(x => !x.stats) || null // Item doesn't have stats
     }));
 
-    // Busca usernames dos perfis para preencher o name
+    // Busca usernames e avatar_urls dos perfis para preencher o name e o avatar_url
     const { data: profs } = await supabase
       .from('profiles')
-      .select('id, username')
+      .select('id, username, avatar_url')
       .in('id', parts.map(p => p.user_id).filter(Boolean));
 
     const profMap = {};
-    profs?.forEach(p => { profMap[p.id] = p.username; });
+    profs?.forEach(p => { 
+      profMap[p.id] = { username: p.username, avatar_url: p.avatar_url }; 
+    });
 
     mappedTeams.forEach(t => {
       if (!t.isPlayer) return;
       const userPart = parts.find(p => p.slot === t.slot);
       if (userPart?.user_id) {
-        t.name = profMap[userPart.user_id] || 'Treinador';
+        const prof = profMap[userPart.user_id];
+        t.name = prof?.username || 'Treinador';
+        t.avatar_url = prof?.avatar_url || null;
       }
     });
 

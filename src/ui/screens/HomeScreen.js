@@ -207,6 +207,13 @@ function renderScreen() {
         font-size: 1.1rem;
         flex-shrink: 0;
         box-shadow: 0 0 0 2px rgba(167,139,250,0.35);
+        overflow: hidden;
+      }
+      .hs-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        image-rendering: pixelated;
       }
       .hs-profile-info {
         display: flex;
@@ -527,18 +534,24 @@ function renderScreen() {
           </button>
           
           <div class="hs-profile-card">
-            <div class="hs-avatar">&#128100;</div>
-            <div class="hs-profile-info" style="cursor:pointer;" id="btn-open-profile" title="Ver Perfil Completo">
-              <span class="hs-profile-name">${profile?.username || 'Treinador'}</span>
-              <span class="hs-profile-stats">
-                <span class="hs-champ">&#127942; ${profile?.championships || 0}</span>
-                <span class="hs-stat-sep">&#183;</span>
-                <span class="hs-wins">${profile?.wins || 0}V</span>
-                <span class="hs-stat-sep">/</span>
-                <span class="hs-losses">${profile?.losses || 0}D</span>
-                <span class="hs-stat-sep">&#183;</span>
-                <span class="hs-wr">${winRate}%</span>
-              </span>
+            <div id="btn-open-profile" style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer;" title="Editar Perfil / Escolher Avatar">
+              <div class="hs-avatar" style="overflow: hidden; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #7c3aed, #2563eb);">
+                ${profile?.avatar_url ? `<img src="${profile.avatar_url}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" />` : '&#128100;'}
+              </div>
+              <div class="hs-profile-info">
+                <span class="hs-profile-name" style="display: flex; align-items: center; gap: 0.25rem;">
+                  ${profile?.username || 'Treinador'} ✏️
+                </span>
+                <span class="hs-profile-stats">
+                  <span class="hs-champ">&#127942; ${profile?.championships || 0}</span>
+                  <span class="hs-stat-sep">&#183;</span>
+                  <span class="hs-wins">${profile?.wins || 0}V</span>
+                  <span class="hs-stat-sep">/</span>
+                  <span class="hs-losses">${profile?.losses || 0}D</span>
+                  <span class="hs-stat-sep">&#183;</span>
+                  <span class="hs-wr">${winRate}%</span>
+                </span>
+              </div>
             </div>
             <button class="hs-btn-logout" id="btn-logout" title="Sair da conta">&#x1F6AA;</button>
           </div>
@@ -550,6 +563,28 @@ function renderScreen() {
           <div class="hs-hero">
             <h2 class="hs-hero-tagline">Construa seu time.<br>Domine o torneio.</h2>
             <p class="hs-hero-sub">Escolha seu modo, monte sua sala e lute pelo titulo de campeao.</p>
+          </div>
+
+          <!-- Card de Boas-Vindas & Atalho para Perfil/Avatar -->
+          <div class="hs-welcome-card" style="display: flex; align-items: center; justify-content: space-between; background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.2); padding: 1rem 1.25rem; border-radius: 16px; margin-bottom: 1.75rem; gap: 1rem; backdrop-filter: blur(10px); box-shadow: inset 0 0 12px rgba(167,139,250,0.05); text-align: left;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #2563eb); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--gold); box-shadow: 0 0 12px rgba(251, 191, 36, 0.3); flex-shrink: 0;">
+                ${profile?.avatar_url ? `<img src="${profile.avatar_url}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" />` : '<span style="font-size: 1.5rem;">👤</span>'}
+              </div>
+              <div style="text-align: left;">
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: bold; color: white; display: flex; align-items: center; gap: 0.35rem;">
+                  Treinador: ${profile?.username || 'Treinador'}
+                </h3>
+                <p style="margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--text-3); display: flex; align-items: center; gap: 0.5rem;">
+                  <span>🏆 ${profile?.championships || 0} Campeonatos</span>
+                  <span>•</span>
+                  <span>⚔️ ${profile?.wins || 0}V / ${profile?.losses || 0}D</span>
+                </p>
+              </div>
+            </div>
+            <button id="btn-edit-profile-hero" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem; background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(167, 139, 250, 0.05)); border: 1px solid rgba(167, 139, 250, 0.4); color: #c4b5fd; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: bold; display: flex; align-items: center; gap: 0.35rem;" title="Escolher Avatar e Editar Nome">
+              <span>👤</span> Escolher Avatar
+            </button>
           </div>
 
 
@@ -593,6 +628,55 @@ function renderScreen() {
             <button class="btn-play-again" id="btn-back-home" style="margin-bottom: 1rem; background: var(--bg-3); border: 1px solid var(--border-bright); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer;">&#x2190; Voltar ao Menu</button>
             <h2 class="hs-hero-tagline">Seu Perfil de Treinador</h2>
           </div>
+
+          <section>
+            <p class="hs-section-label">👤 Configurar Treinador</p>
+            <div class="hs-lb-card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+              
+              <!-- Nome do Treinador -->
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold; text-align: left;">Nome do Treinador</label>
+                <input type="text" id="profile-username-input" value="${profile?.username || ''}" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; box-sizing: border-box;" placeholder="Digite seu nome de treinador..." />
+              </div>
+
+              <!-- Escolha de Avatar -->
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold; text-align: left;">Escolha seu Avatar</label>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; background: var(--bg-3); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
+                  ${[
+                    { name: 'Red', url: 'https://play.pokemonshowdown.com/sprites/trainers/red.png' },
+                    { name: 'Blue', url: 'https://play.pokemonshowdown.com/sprites/trainers/blue.png' },
+                    { name: 'Ash', url: 'https://play.pokemonshowdown.com/sprites/trainers/ash.png' },
+                    { name: 'Gary', url: 'https://play.pokemonshowdown.com/sprites/trainers/blue-gen7.png' },
+                    { name: 'Cynthia', url: 'https://play.pokemonshowdown.com/sprites/trainers/cynthia.png' },
+                    { name: 'Lance', url: 'https://play.pokemonshowdown.com/sprites/trainers/lance.png' },
+                    { name: 'Misty', url: 'https://play.pokemonshowdown.com/sprites/trainers/misty.png' },
+                    { name: 'Brock', url: 'https://play.pokemonshowdown.com/sprites/trainers/brock.png' },
+                    { name: 'Steven', url: 'https://play.pokemonshowdown.com/sprites/trainers/steven.png' },
+                    { name: 'Leon', url: 'https://play.pokemonshowdown.com/sprites/trainers/leon.png' },
+                    { name: 'N', url: 'https://play.pokemonshowdown.com/sprites/trainers/n.png' },
+                    { name: 'Cyrus', url: 'https://play.pokemonshowdown.com/sprites/trainers/cyrus.png' },
+                    { name: 'Giovanni', url: 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png' }
+                  ].map(item => {
+                    const isSelected = profile?.avatar_url === item.url;
+                    return `
+                      <div class="profile-avatar-option ${isSelected ? 'selected' : ''}" data-url="${item.url}" style="cursor: pointer; width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: var(--bg-1); border: 2px solid ${isSelected ? 'var(--gold)' : 'transparent'}; box-shadow: ${isSelected ? '0 0 10px rgba(251, 191, 36, 0.4)' : 'none'}; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="${item.name}">
+                        <img src="${item.url}" style="width: 100%; height: 100%; object-fit: cover;" />
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <!-- Salvar Botão -->
+              <div style="display: flex; justify-content: flex-end; width: 100%;">
+                <button id="btn-save-profile" class="btn-primary" style="padding: 0.6rem 2rem; font-weight: bold; background: linear-gradient(135deg, var(--gold), #f59e0b); border: none; color: black; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); text-transform: uppercase;">
+                  Salvar Alterações
+                </button>
+              </div>
+
+            </div>
+          </section>
 
           <section>
             <p class="hs-section-label">&#x2728; Minha Coleção de Shinies (${profile?.my_shinies?.length || 0})</p>
@@ -805,11 +889,77 @@ function attachEvents() {
     });
   }
 
+  const btnEditProfileHero = container.querySelector('#btn-edit-profile-hero');
+  if (btnEditProfileHero) {
+    btnEditProfileHero.addEventListener('click', () => {
+      activeView = 'profile';
+      renderScreen();
+    });
+  }
+
   const btnBackHome = container.querySelector('#btn-back-home');
   if (btnBackHome) {
     btnBackHome.addEventListener('click', () => {
       activeView = 'home';
       renderScreen();
+    });
+  }
+
+  // Seleção de Avatar
+  container.querySelectorAll('.profile-avatar-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      container.querySelectorAll('.profile-avatar-option').forEach(o => {
+        o.classList.remove('selected');
+        o.style.borderColor = 'transparent';
+        o.style.boxShadow = 'none';
+      });
+      opt.classList.add('selected');
+      opt.style.borderColor = 'var(--gold)';
+      opt.style.boxShadow = '0 0 10px rgba(251, 191, 36, 0.4)';
+    });
+  });
+
+  // Salvar Alterações de Perfil
+  const btnSaveProfile = container.querySelector('#btn-save-profile');
+  if (btnSaveProfile) {
+    btnSaveProfile.addEventListener('click', async () => {
+      const inputUsername = container.querySelector('#profile-username-input');
+      const newUsername = inputUsername ? inputUsername.value.trim() : '';
+      const selectedOpt = container.querySelector('.profile-avatar-option.selected');
+      const selectedAvatarUrl = selectedOpt ? selectedOpt.dataset.url : null;
+
+      if (!newUsername) {
+        alert('O nome do treinador não pode estar vazio.');
+        return;
+      }
+
+      btnSaveProfile.disabled = true;
+      btnSaveProfile.textContent = 'SALVANDO...';
+
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            username: newUsername,
+            avatar_url: selectedAvatarUrl
+          })
+          .eq('id', profile.id);
+
+        if (error) throw error;
+
+        // Atualiza os dados locais do perfil
+        profile.username = newUsername;
+        profile.avatar_url = selectedAvatarUrl;
+
+        alert('Perfil atualizado com sucesso! 🎉');
+        renderScreen(); // Re-renderiza para atualizar o cabeçalho e estatísticas
+      } catch (err) {
+        console.error('Erro ao atualizar perfil:', err);
+        alert('Erro ao atualizar perfil: ' + (err.message || err));
+      } finally {
+        btnSaveProfile.disabled = false;
+        btnSaveProfile.textContent = 'SALVAR ALTERAÇÕES';
+      }
     });
   }
 
