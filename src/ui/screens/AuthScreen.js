@@ -179,16 +179,19 @@ function attachEvents() {
         let msg = getErrorMessage(err);
 
         // Traduções de erros comuns
-        if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+        if (isSignUp && (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials'))) {
+          // Acontece quando o usuário já existe: signUp "silencia" o erro, mas o login automático falha
+          msg = 'Este treinador já está cadastrado com outra senha. Clique em "Entrar" e use a senha original.';
+        } else if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
           msg = 'Usuário ou senha incorretos.';
         } else if (msg.includes('User already registered') || msg.includes('already registered')) {
-          msg = 'Este treinador já está cadastrado. Escolha outro nome.';
+          msg = 'Este treinador já está cadastrado. Escolha outro nome ou faça login.';
         } else if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
           msg = 'Acesso bloqueado. Desative a opção "Confirm email" no painel do Supabase → Authentication → Email.';
         } else if (msg.includes('invalid format') || msg.includes('Unable to validate')) {
           msg = 'Nome de usuário inválido. Use apenas letras e números sem espaços.';
         } else if (err.status === 500 || msg.includes('500')) {
-          msg = 'O projeto do Supabase pode estar pausado. Acesse supabase.com e reative o projeto.';
+          msg = 'Erro no servidor. Verifique se o projeto do Supabase está ativo.';
         }
 
         errorMessage = msg;

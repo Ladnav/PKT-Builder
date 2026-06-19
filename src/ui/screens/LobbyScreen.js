@@ -318,7 +318,8 @@ async function handleAddBot() {
       })
       .select();
 
-    console.log('🤖 Resultado:', { data, error });
+    console.log('🤖 Resultado data:', JSON.stringify(data));
+    console.log('🤖 Resultado error:', JSON.stringify(error));
     if (error) throw error;
 
   } catch (err) {
