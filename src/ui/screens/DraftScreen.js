@@ -2,11 +2,12 @@
 import { navigate } from '../router.js';
 import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
-import { TYPE_NAMES_PT, TYPE_ICONS, ALL_TYPES } from '../../engine/types.js';
-import { DRAFT_MODES, ROUNDS, botChooseType, botChoosePokemon, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
+import { TYPE_NAMES_PT, TYPE_ICONS, TYPE_COLORS, ALL_TYPES, getTotalEffectiveness } from '../../engine/types.js';
+import { DRAFT_MODES, botChooseType, botChoosePokemon, botChooseItem, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
 import { createBracket } from '../../tournament/bracket.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
+import itemsData from '../../data/items-sample.json';
 
 let roomId = null;
 let roomCode = null;
@@ -243,9 +244,18 @@ function updateUI() {
 
   // 2. Atualiza progresso
   const bar = container.querySelector('#progress-bar');
-  if (bar) bar.style.width = `${progress}%`;
   const txt = container.querySelector('#progress-text');
-  if (txt) txt.textContent = `Rodada ${Math.min(draftState.current_round, ROUNDS)}/${ROUNDS} • ${progress}%`;
+  const totalRounds = room?.settings?.items ? 7 : 6;
+  const progress = Math.min(100, Math.floor(((draftState.current_round - 1) * 8 + draftState.current_slot) / (totalRounds * 8) * 100));
+  
+  if (bar) bar.style.width = `${progress}%`;
+  if (txt) {
+    if (draftState.current_round === 7) {
+      txt.textContent = `Rodada Extra de Itens (7/7) • ${progress}%`;
+    } else {
+      txt.textContent = `Rodada ${Math.min(draftState.current_round, totalRounds)}/${totalRounds} • ${progress}%`;
+    }
+  }
 
   // 3. Info de turno
   const turnInfo = container.querySelector('#turn-info');
@@ -273,9 +283,12 @@ function updateUI() {
           </div>
           ${showTeams || isMe ? `
             <div class="team-pokemon-row">
-              ${teamList.map(poke => `
-                <img class="team-mini-sprite" src="${poke.sprite}" alt="${poke.displayName}" title="${poke.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${poke.id}.png'">
-              `).join('')}
+              ${teamList.map(poke => {
+                const weakAgainst = ALL_TYPES.filter(t => getTotalEffectiveness(t, poke.types) >= 2)
+                  .map(t => TYPE_NAMES_PT[t]).join(', ');
+                const titleText = weakAgainst ? `${poke.displayName}\nFraco contra: ${weakAgainst}` : poke.displayName;
+                return `<img class="team-mini-sprite" src="${poke.sprite}" alt="${poke.displayName}" title="${titleText}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${poke.id}.png'">`;
+              }).join('')}
               ${Array(6 - teamList.length).fill('<div class="team-mini-empty"></div>').join('')}
             </div>
           ` : `<div class="team-hidden">🫣 Times ocultos</div>`}
@@ -331,7 +344,8 @@ function renderDraftMain(isPlayer) {
     `;
   }
 
-  if (draftState.current_round > ROUNDS) {
+  const totalRounds = room?.settings?.items ? 7 : 6;
+  if (draftState.current_round > totalRounds) {
     return `
       <div class="draft-done-msg">
         <div class="done-icon">✅</div>
@@ -373,9 +387,10 @@ function renderDraftMain(isPlayer) {
   }
 
   // É a vez do jogador
+  const isItemRound = draftState.current_round === 7;
   return `
     ${lastPickInfo}
-    ${(room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type) ? renderTypeSelect() : renderPokemonOptions()}
+    ${(!isItemRound && room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type) ? renderTypeSelect() : renderPokemonOptions()}
   `;
 }
 
@@ -390,10 +405,10 @@ function renderTypeSelect() {
             p => p.types.includes(type) && !getAvailablePool().includes(p.id) === false
           ).length;
           return `
-            <button class="type-btn ${available === 0 ? 'disabled' : ''}" data-type="${type}" ${available === 0 ? 'disabled' : ''}>
+            <button class="type-btn ${available === 0 ? 'disabled' : ''}" data-type="${type}" ${available === 0 ? 'disabled' : ''} style="border-color: ${TYPE_COLORS[type]}; color: ${TYPE_COLORS[type]};">
               <span class="type-btn-icon">${TYPE_ICONS[type]}</span>
               <span class="type-btn-name">${TYPE_NAMES_PT[type]}</span>
-              <span class="type-btn-count">${available} disp.</span>
+              <span class="type-btn-count" style="color: var(--text-2);">${available} disp.</span>
             </button>
           `;
         }).join('')}
@@ -404,6 +419,30 @@ function renderTypeSelect() {
 
 function renderPokemonOptions() {
   const options = draftState.current_options || [];
+  const isItemRound = draftState.current_round === 7;
+
+  if (isItemRound) {
+    return `
+      <div class="pokemon-options-wrap">
+        <div class="options-header">
+          <h2 class="pick-title">🎒 Escolha um Item Global para o Time</h2>
+          <p class="pick-sub">Este item será equipado na sua equipe durante as batalhas.</p>
+        </div>
+        <div class="options-grid" id="options-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+          ${options.length === 0 ? `
+            <div class="bot-thinking" style="grid-column: 1/-1"><p>Gerando itens...</p></div>
+          ` : options.map(item => `
+            <div class="pokemon-card selectable" data-id="${item.id}" style="text-align: center; padding: 1.5rem; cursor: pointer; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-3); transition: all 0.2s;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">${item.icon}</div>
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">${item.displayName}</h3>
+              <p style="font-size: 0.8rem; color: var(--text-2); line-height: 1.4;">${item.description}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   return `
     <div class="pokemon-options-wrap">
       <div class="options-header">
@@ -432,12 +471,13 @@ function attachDraftEvents() {
     });
   });
 
-  // Seleção de Pokémon
+  // Seleção de Pokémon / Item
   container.querySelectorAll('.pokemon-card.selectable').forEach(card => {
     card.addEventListener('click', () => {
-      const id = parseInt(card.dataset.id);
-      const pokemon = draftState.current_options.find(p => p.id === id);
-      if (pokemon) selectPokemon(pokemon);
+      const rawId = card.dataset.id;
+      const id = isNaN(parseInt(rawId)) ? rawId : parseInt(rawId); // items use string id
+      const option = draftState.current_options.find(p => p.id === id);
+      if (option) selectPokemon(option); // We reuse selectPokemon for items
     });
   });
 }
@@ -506,7 +546,8 @@ async function selectPokemon(pokemon) {
       }
     }
 
-    const isDone = nextRound > ROUNDS;
+    const totalRounds = room?.settings?.items ? 7 : 6;
+    const isDone = nextRound > totalRounds;
 
     const nextHistory = [
       ...(draftState.picks_history || []),
@@ -567,7 +608,8 @@ async function createBracketAndTransitionRoom() {
       name: p.is_bot ? p.bot_name : (p.bot_name || 'Treinador'), // fallback
       isPlayer: p.user_id !== null,
       user_id: p.user_id,
-      pokemon: p.team
+      pokemon: p.team.filter(x => x.stats), // Pokémon have stats
+      item: p.team.find(x => !x.stats) || null // Item doesn't have stats
     }));
 
     // Busca usernames dos perfis para preencher o name
@@ -614,7 +656,9 @@ async function createBracketAndTransitionRoom() {
 }
 
 function processTurn() {
-  if (!draftState || draftState.current_round > ROUNDS) return;
+  if (!room || !participants.length) return;
+  const totalRounds = room?.settings?.items ? 7 : 6;
+  if (!draftState || draftState.current_round > totalRounds) return;
 
   const currentSlot = draftState.current_slot;
   let currentPart = participants.find(p => p.slot === currentSlot);

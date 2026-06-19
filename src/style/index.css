@@ -37,11 +37,11 @@
 html { font-size: 16px; scroll-behavior: smooth; }
 
 body {
-  font-family: 'Outfit', system-ui, sans-serif;
-  background-color: var(--bg-0);
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-1);
   background-image: url('/bg-pattern.png');
+  background-size: 300px;
   background-repeat: repeat;
-  background-size: 400px;
   background-attachment: fixed;
   background-blend-mode: overlay;
   color: var(--text-1);
@@ -1859,8 +1859,192 @@ a { color: var(--accent-2); }
   display: flex;
   flex-direction: column;
   align-items: center;
+/* MVP Glow */
+.pokemon-mini-card {
+  position: relative;
+}
+.pokemon-mini-card.mvp-glow {
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   BATTLE LOG & MATCHUP MODAL UI
+   ========================================================================== */
+
+/* Cores de Log de Batalha */
+.log-line.super-effective, .log-line.super-effective-4x {
+  color: #fbbf24; /* Dourado */
+  font-weight: 800;
+  text-shadow: 0 0 5px rgba(251, 191, 36, 0.3);
+}
+
+.log-line.not-effective, .log-line.immune {
+  color: #94a3b8; /* Cinza claro */
+  font-style: italic;
+}
+
+/* Modal de Batalha */
+.battle-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
   justify-content: center;
-  gap: 1.5rem;
+  align-items: center;
+  z-index: 1000;
+  animation: fade-in 0.2s ease;
+}
+
+.battle-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.battle-modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-2);
+}
+
+.battle-modal-title { font-size: 1.2rem; font-weight: 800; }
+
+.btn-close-modal {
+  background: none; border: none;
+  color: var(--text-2); font-size: 1.5rem;
+  cursor: pointer; transition: color 0.2s;
+}
+.btn-close-modal:hover { color: var(--text-1); }
+
+.battle-modal-tabs {
+  display: flex;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+}
+
+.battle-tab {
+  flex: 1; padding: 0.8rem;
+  background: none; border: none;
+  color: var(--text-2); font-weight: 700;
+  cursor: pointer; transition: 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.battle-tab.active {
+  color: var(--text-1);
+  border-bottom-color: var(--gold);
+  background: rgba(255,255,255,0.02);
+}
+
+.battle-modal-content {
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Resumo 1v1 */
+.matchup-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.matchup-row {
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  padding: 0.5rem; background: var(--bg-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.matchup-side { display: flex; align-items: center; gap: 0.5rem; flex: 1; }
+.matchup-side.left { justify-content: flex-end; }
+.matchup-side.right { justify-content: flex-start; }
+
+.matchup-sprite { width: 48px; height: 48px; object-fit: contain; }
+.matchup-name { font-size: 0.85rem; font-weight: 700; }
+
+.matchup-vs {
+  font-size: 0.75rem; font-weight: 800; color: var(--text-3);
+  background: var(--surface); padding: 0.2rem 0.5rem; border-radius: 100px;
+}
+
+.matchup-side.winner .matchup-sprite { filter: drop-shadow(0 0 5px var(--gold)); }
+.matchup-side.winner .matchup-name { color: var(--gold); }
+.matchup-side.loser .matchup-sprite { filter: grayscale(1) opacity(0.5); }
+.matchup-side.loser .matchup-name { color: var(--text-3); text-decoration: line-through; }
+
+/* Settings Modal Toggles */
+.setting-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: var(--bg-3);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.setting-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  padding-right: 1rem;
+}
+.setting-toggle-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-1);
+}
+.setting-toggle-desc {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--bg-1);
+  border: 2px solid var(--border);
+  transition: .3s;
+  border-radius: 34px;
+}
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--text-3);
+  transition: .3s;
+  border-radius: 50%;
+}
+input:checked + .toggle-slider {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+input:checked + .toggle-slider:before {
+  transform: translateX(22px);
+  background-color: white;
 }
 
 .thinking-spinner {

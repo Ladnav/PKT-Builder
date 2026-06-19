@@ -2,8 +2,8 @@
 import { navigate } from '../router.js';
 import { DRAFT_MODES_INFO } from '../../engine/draft.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
-
 let selectedMode = 'type';
+let activeView = 'home'; // 'home' | 'profile'
 let container = null;
 let profile = null;
 let leaderboard = [];
@@ -455,7 +455,7 @@ function renderScreen() {
 
         <div class="hs-profile-card">
           <div class="hs-avatar">&#128100;</div>
-          <div class="hs-profile-info">
+          <div class="hs-profile-info" style="cursor:pointer;" id="btn-open-profile" title="Ver Perfil Completo">
             <span class="hs-profile-name">${profile?.username || 'Treinador'}</span>
             <span class="hs-profile-stats">
               <span class="hs-champ">&#127942; ${profile?.championships || 0}</span>
@@ -472,97 +472,208 @@ function renderScreen() {
       </header>
 
       <main class="hs-main">
+        ${activeView === 'home' ? `
+          <div class="hs-hero">
+            <h2 class="hs-hero-tagline">Construa seu time.<br>Domine o torneio.</h2>
+            <p class="hs-hero-sub">Escolha seu modo, monte sua sala e lute pelo titulo de campeao.</p>
+          </div>
 
-        <div class="hs-hero">
-          <h2 class="hs-hero-tagline">Construa seu time.<br>Domine o torneio.</h2>
-          <p class="hs-hero-sub">Escolha seu modo, monte sua sala e lute pelo titulo de campeao.</p>
-        </div>
+          <section>
+            <p class="hs-section-label">Modo de Draft</p>
+            <div class="hs-modes-row">
+              ${Object.entries(DRAFT_MODES_INFO).map(([key, info]) => `
+                <div class="mode-card ${key === selectedMode ? 'active' : ''}" data-mode="${key}">
+                  <div class="hs-mode-icon">${info.icon}</div>
+                  <h3 class="hs-mode-name">${info.name}</h3>
+                  <p class="hs-mode-desc">${info.description}</p>
+                </div>
+              `).join('')}
+            </div>
+          </section>
 
-        <section>
-          <p class="hs-section-label">Modo de Draft</p>
-          <div class="hs-modes-row">
-            ${Object.entries(DRAFT_MODES_INFO).map(([key, info]) => `
-              <div class="mode-card ${key === selectedMode ? 'active' : ''}" data-mode="${key}">
-                <div class="hs-mode-icon">${info.icon}</div>
-                <h3 class="hs-mode-name">${info.name}</h3>
-                <p class="hs-mode-desc">${info.description}</p>
+          <section>
+            <p class="hs-section-label">Entrar na Batalha</p>
+
+            ${errorMsg ? `
+              <div class="hs-error">
+                <span>&#x26A0;&#xFE0F;</span>
+                <span>${errorMsg}</span>
               </div>
-            `).join('')}
-          </div>
-        </section>
+            ` : ''}
 
-        <section>
-          <p class="hs-section-label">Entrar na Batalha</p>
+            <div class="hs-battle-row">
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                <button class="hs-btn-create" id="btn-open-settings" style="width: 100%; height: 100%; min-height: 50px;">
+                  <span class="hs-btn-create-icon">&#x2699;&#xFE0F;</span>
+                  Configurar e Criar Sala
+                </button>
+              </div>
 
-          ${errorMsg ? `
-            <div class="hs-error">
-              <span>&#x26A0;&#xFE0F;</span>
-              <span>${errorMsg}</span>
+              <div class="hs-join-box">
+                <input
+                  type="text"
+                  id="room-code-input"
+                  placeholder="CODIGO DA SALA"
+                  maxlength="6"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <button class="hs-btn-join" id="btn-join-room">Entrar &#x2192;</button>
+              </div>
             </div>
-          ` : ''}
+          </section>
 
-          <div class="hs-battle-row">
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
-              <select id="room-size-select" style="width: 100%; padding: 0.85rem 1.2rem; border-radius: 12px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; font-weight: 600; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; transition: background 0.2s;">
-                <option value="8" style="background: #1e1b4b; color: white;">8 Jogadores (Tamanho Padrao)</option>
-                <option value="4" style="background: #1e1b4b; color: white;">4 Jogadores (Mais Rapido)</option>
-              </select>
-              <button class="hs-btn-create" id="btn-create-room">
-                <span class="hs-btn-create-icon">&#x2795;</span>
-                Criar Sala Online
+          <section>
+            <p class="hs-section-label">&#x1F3C6; Leaderboard</p>
+            <div class="hs-lb-card">
+              <table class="hs-lb-table">
+                <thead>
+                  <tr>
+                    <th class="hs-lb-pos">Pos</th>
+                    <th>Treinador</th>
+                    <th class="tc">Campeonatos</th>
+                    <th class="tc">V/D</th>
+                    <th class="tr">Win%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${leaderboard.length === 0 ? `
+                    <tr><td colspan="5" class="hs-lb-empty">Nenhum resultado ainda &#x2014; seja o primeiro campeao! &#x1F3C6;</td></tr>
+                  ` : leaderboard.map((row, index) => {
+                    let medal = String(index + 1);
+                    if (index === 0) medal = '&#x1F947;';
+                    else if (index === 1) medal = '&#x1F948;';
+                    else if (index === 2) medal = '&#x1F949;';
+                    const isSelf = row.id === profile?.id;
+                    return `
+                      <tr class="${isSelf ? 'self-row' : ''}">
+                        <td class="hs-lb-pos">${medal}</td>
+                        <td class="hs-lb-name">${row.username}${isSelf ? ' <span style="font-size:0.65rem;color:rgba(167,139,250,0.7);font-weight:400;">(voce)</span>' : ''}</td>
+                        <td class="hs-lb-champ">${row.championships}</td>
+                        <td class="hs-lb-vd">${row.wins}/${row.losses}</td>
+                        <td class="hs-lb-wr">${row.win_rate}%</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ` : `
+          <!-- PROFILE VIEW -->
+          <div class="hs-hero">
+            <button class="btn-play-again" id="btn-back-home" style="margin-bottom: 1rem; background: var(--bg-3); border: 1px solid var(--border-bright); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer;">&#x2190; Voltar ao Menu</button>
+            <h2 class="hs-hero-tagline">Seu Perfil de Treinador</h2>
+          </div>
+
+          <section>
+            <p class="hs-section-label">&#x2728; Coleção de Shinies (${profile?.shinies?.length || 0})</p>
+            <div class="hs-lb-card" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1.5rem;">
+              ${(!profile?.shinies || profile.shinies.length === 0) ? `
+                <p style="color: var(--text-3); font-style: italic;">Você ainda não capturou nenhum Shiny. Eles têm 2% de chance de aparecer no draft!</p>
+              ` : profile.shinies.map(s => `
+                <div class="pokemon-mini-card shiny" style="--card-color: #fbbf24;" title="${s.displayName}">
+                  <img src="${s.sprite}" alt="${s.displayName}">
+                  <span class="mini-name" style="color: #fbbf24;">${s.displayName}</span>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+
+          <section>
+            <p class="hs-section-label">&#x1F3C6; Hall da Fama (${profile?.hall_of_fame?.length || 0})</p>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              ${(!profile?.hall_of_fame || profile.hall_of_fame.length === 0) ? `
+                <div class="hs-lb-card" style="padding: 1.5rem;"><p style="color: var(--text-3); font-style: italic;">Vença seu primeiro torneio para registrar seu time no Hall da Fama!</p></div>
+              ` : profile.hall_of_fame.map(hof => `
+                <div class="hs-lb-card" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                    <span style="font-weight: bold; color: var(--gold);">🏆 Campeão</span>
+                    <span style="font-size: 0.8rem; color: var(--text-3);">${new Date(hof.date).toLocaleDateString()}</span>
+                  </div>
+                  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    ${hof.team.map(p => `
+                      <div class="pokemon-mini-card ${p.id === hof.mvp?.id ? 'mvp-glow' : ''}" style="--card-color: ${p.isShiny ? '#fbbf24' : 'var(--accent)'}; border-color: ${p.id === hof.mvp?.id ? 'var(--gold)' : 'transparent'}">
+                        <img src="${p.sprite}" alt="${p.displayName}">
+                        <span class="mini-name">${p.displayName}</span>
+                        ${p.id === hof.mvp?.id ? '<span style="position:absolute; top:-10px; right:-5px; font-size:1.2rem;">🌟</span>' : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        `}
+        
+        <!-- SETTINGS MODAL -->
+        <div id="settings-modal" class="battle-modal-overlay" style="display: none;">
+          <div class="battle-modal" style="max-width: 400px;">
+            <div class="battle-modal-header">
+              <div class="battle-modal-title">⚙️ Regras da Sala</div>
+              <button class="btn-close-modal" id="btn-close-settings">×</button>
+            </div>
+            <div class="battle-modal-content" style="display: flex; flex-direction: column; gap: 1rem;">
+              
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tamanho da Sala</label>
+                <select id="settings-size" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
+                  <option value="8">8 Jogadores (Clássico)</option>
+                  <option value="4">4 Jogadores (Rápido)</option>
+                </select>
+              </div>
+
+              <div class="setting-toggle-row">
+                <div class="setting-toggle-info">
+                  <span class="setting-toggle-title">✨ Permitir Shinies</span>
+                  <span class="setting-toggle-desc">Pokémon raros com +15% de status (2% de chance).</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settings-shinies" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="setting-toggle-row">
+                <div class="setting-toggle-info">
+                  <span class="setting-toggle-title">🌦️ Clima Dinâmico</span>
+                  <span class="setting-toggle-desc">Sorteia um clima global (Chuva, Sol, Neve) que afeta os danos.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settings-weather">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="setting-toggle-row">
+                <div class="setting-toggle-info">
+                  <span class="setting-toggle-title">🔗 Sinergia de Time</span>
+                  <span class="setting-toggle-desc">Draftar 3+ Pokémon do mesmo tipo dá +10% de stats para eles.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settings-synergy">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="setting-toggle-row">
+                <div class="setting-toggle-info">
+                  <span class="setting-toggle-title">🎒 Itens Equipáveis</span>
+                  <span class="setting-toggle-desc">Ativa uma rodada extra (Rodada 7) para pickar 1 Item Global para o time.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settings-items">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <button class="hs-btn-create" id="btn-confirm-create" style="margin-top: 1rem; padding: 1rem; font-size: 1.1rem;">
+                Criar Sala
               </button>
-            </div>
 
-            <div class="hs-join-box">
-              <input
-                type="text"
-                id="room-code-input"
-                placeholder="CODIGO DA SALA"
-                maxlength="6"
-                autocomplete="off"
-                spellcheck="false"
-              />
-              <button class="hs-btn-join" id="btn-join-room">Entrar &#x2192;</button>
             </div>
           </div>
-        </section>
-
-        <section>
-          <p class="hs-section-label">&#x1F3C6; Leaderboard</p>
-          <div class="hs-lb-card">
-            <table class="hs-lb-table">
-              <thead>
-                <tr>
-                  <th class="hs-lb-pos">Pos</th>
-                  <th>Treinador</th>
-                  <th class="tc">Campeonatos</th>
-                  <th class="tc">V/D</th>
-                  <th class="tr">Win%</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${leaderboard.length === 0 ? `
-                  <tr><td colspan="5" class="hs-lb-empty">Nenhum resultado ainda &#x2014; seja o primeiro campeao! &#x1F3C6;</td></tr>
-                ` : leaderboard.map((row, index) => {
-                  let medal = String(index + 1);
-                  if (index === 0) medal = '&#x1F947;';
-                  else if (index === 1) medal = '&#x1F948;';
-                  else if (index === 2) medal = '&#x1F949;';
-                  const isSelf = row.id === profile?.id;
-                  return `
-                    <tr class="${isSelf ? 'self-row' : ''}">
-                      <td class="hs-lb-pos">${medal}</td>
-                      <td class="hs-lb-name">${row.username}${isSelf ? ' <span style="font-size:0.65rem;color:rgba(167,139,250,0.7);font-weight:400;">(voce)</span>' : ''}</td>
-                      <td class="hs-lb-champ">${row.championships}</td>
-                      <td class="hs-lb-vd">${row.wins}/${row.losses}</td>
-                      <td class="hs-lb-wr">${row.win_rate}%</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        </div>
 
       </main>
     </div>
@@ -601,9 +712,23 @@ function attachEvents() {
     });
   });
 
-  const btnCreate = container.querySelector('#btn-create-room');
-  if (btnCreate) {
-    btnCreate.addEventListener('click', handleCreateRoom);
+  const btnOpenSettings = container.querySelector('#btn-open-settings');
+  const btnCloseSettings = container.querySelector('#btn-close-settings');
+  const settingsModal = container.querySelector('#settings-modal');
+  const btnConfirmCreate = container.querySelector('#btn-confirm-create');
+
+  if (btnOpenSettings) {
+    btnOpenSettings.addEventListener('click', () => {
+      if (settingsModal) settingsModal.style.display = 'flex';
+    });
+  }
+  if (btnCloseSettings) {
+    btnCloseSettings.addEventListener('click', () => {
+      if (settingsModal) settingsModal.style.display = 'none';
+    });
+  }
+  if (btnConfirmCreate) {
+    btnConfirmCreate.addEventListener('click', handleCreateRoom);
   }
 
   const btnJoin = container.querySelector('#btn-join-room');
@@ -612,6 +737,22 @@ function attachEvents() {
     btnJoin.addEventListener('click', () => handleJoinRoom(inputCode.value));
     inputCode.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') handleJoinRoom(inputCode.value);
+    });
+  }
+
+  const btnOpenProfile = container.querySelector('#btn-open-profile');
+  if (btnOpenProfile) {
+    btnOpenProfile.addEventListener('click', () => {
+      activeView = 'profile';
+      renderScreen();
+    });
+  }
+
+  const btnBackHome = container.querySelector('#btn-back-home');
+  if (btnBackHome) {
+    btnBackHome.addEventListener('click', () => {
+      activeView = 'home';
+      renderScreen();
     });
   }
 
@@ -637,9 +778,17 @@ async function handleCreateRoom() {
   loading = true;
   errorMsg = '';
   
-  // Captura o tamanho da sala antes de re-renderizar (o re-render faria perder o state do DOM)
-  const sizeSelect = container.querySelector('#room-size-select');
+  const sizeSelect = container.querySelector('#settings-size');
   const maxPlayers = sizeSelect ? parseInt(sizeSelect.value, 10) : 8;
+  const shinies = container.querySelector('#settings-shinies')?.checked ?? true;
+  const weather = container.querySelector('#settings-weather')?.checked ?? false;
+  const synergy = container.querySelector('#settings-synergy')?.checked ?? false;
+  const items = container.querySelector('#settings-items')?.checked ?? false;
+
+  const roomSettings = { size: maxPlayers, shinies, weather, synergy, items };
+
+  const settingsModal = container.querySelector('#settings-modal');
+  if (settingsModal) settingsModal.style.display = 'none';
 
   renderScreen();
 
@@ -656,7 +805,8 @@ async function handleCreateRoom() {
         host_id: user.id,
         mode: selectedMode,
         status: 'waiting',
-        max_players: maxPlayers
+        max_players: maxPlayers,
+        settings: roomSettings
       })
       .select()
       .single();

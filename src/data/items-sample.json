@@ -1,0 +1,58 @@
+[
+  {
+    "id": "item-1",
+    "name": "leftovers",
+    "displayName": "Leftovers",
+    "description": "Restaura 6% do HP máximo no final de cada turno.",
+    "icon": "🍎"
+  },
+  {
+    "id": "item-2",
+    "name": "choice-band",
+    "displayName": "Choice Band",
+    "description": "Aumenta o Dano Físico em 30%, mas não permite usar ataques Especiais.",
+    "icon": "🎽"
+  },
+  {
+    "id": "item-3",
+    "name": "choice-specs",
+    "displayName": "Choice Specs",
+    "description": "Aumenta o Dano Especial em 30%, mas não permite usar ataques Físicos.",
+    "icon": "🕶️"
+  },
+  {
+    "id": "item-4",
+    "name": "focus-sash",
+    "displayName": "Focus Sash",
+    "description": "Se o Pokémon estiver com HP cheio, sobrevive a um golpe letal com 1 HP.",
+    "icon": "🧣"
+  },
+  {
+    "id": "item-5",
+    "name": "life-orb",
+    "displayName": "Life Orb",
+    "description": "Aumenta todo o Dano em 20%, mas perde 10% do HP a cada ataque realizado.",
+    "icon": "🔮"
+  },
+  {
+    "id": "item-6",
+    "name": "rocky-helmet",
+    "displayName": "Rocky Helmet",
+    "description": "Causa dano (1/6 HP do atacante) ao receber ataques Físicos.",
+    "icon": "🪖"
+  },
+  {
+    "id": "item-7",
+    "name": "assault-vest",
+    "displayName": "Assault Vest",
+    "description": "Aumenta a Defesa Especial em 50%.",
+    "icon": "🦺"
+  },
+  {
+    "id": "item-8",
+    "name": "expert-belt",
+    "displayName": "Expert Belt",
+    "description": "Aumenta em 20% o dano de ataques que são Super Efetivos.",
+    "icon": "🥋"
+  }
+]

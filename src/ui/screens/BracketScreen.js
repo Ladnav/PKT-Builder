@@ -1,6 +1,6 @@
 // src/ui/screens/BracketScreen.js
 import { navigate } from '../router.js';
-import { simulateBattle } from '../../engine/battle.js';
+import { createBattleState, simulateBattle } from '../../engine/battle.js';
 import { TYPE_COLORS } from '../../engine/types.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 
@@ -19,6 +19,7 @@ let container = null;
 
 let bracket = null;
 let participants = [];
+let room = null;
 
 let bracketSubscription = null;
 let simulationInProgress = false;
@@ -44,6 +45,15 @@ export async function render(cont, params) {
       return;
     }
     currentUserId = user.id;
+
+    // Busca room para settings
+    const { data: rData, error: rErr } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('id', roomId)
+      .single();
+    if (rErr) throw rErr;
+    room = rData;
 
     // Busca participantes
     const { data: parts, error: partErr } = await supabase
@@ -380,20 +390,28 @@ async function loadAndShowBattleLog(matchId) {
   if (!modal || !content) return;
 
   content.innerHTML = `
-    <div class="log-header">
-      <h3>⚔️ Batalha: ${match.team1.name} vs ${match.team2.name}</h3>
-      <p>Buscando histórico de turnos no servidor...</p>
+    <div class="battle-modal-header">
+      <div class="battle-modal-title">⚔️ ${match.team1.name} vs ${match.team2.name}</div>
+      <button class="btn-close-modal" id="modal-close-inner">×</button>
     </div>
-    <div class="battle-log-scroll" style="display:flex; justify-content:center; align-items:center; padding: 3rem">
+    <div class="battle-modal-tabs">
+      <button class="battle-tab active" id="tab-matchups">Resumo 1v1</button>
+      <button class="battle-tab" id="tab-log">Log Completo</button>
+    </div>
+    <div class="battle-modal-content" style="display:flex; justify-content:center; align-items:center; min-height: 200px;">
       <div class="thinking-spinner"></div>
     </div>
   `;
   modal.style.display = 'flex';
 
+  document.getElementById('modal-close-inner').addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
   try {
     const { data, error } = await supabase
       .from('battle_logs')
-      .select('log, total_turns')
+      .select('log, matchups, total_turns')
       .eq('bracket_id', bracket.id)
       .eq('participant1_id', match.team1.id)
       .eq('participant2_id', match.team2.id)
@@ -401,25 +419,61 @@ async function loadAndShowBattleLog(matchId) {
 
     if (error) throw error;
 
-    content.innerHTML = `
-      <div class="log-header">
-        <h3>⚔️ ${match.team1.name} vs ${match.team2.name}</h3>
-        <p>Vencedor: <b>${match.winner.name}</b> • ${data.total_turns} turnos</p>
-      </div>
-      <div class="battle-log-scroll">
-        ${data.log.map(entry => `
-          <div class="log-entry log-${entry.type}">
-            ${entry.message}
+    const modalContent = document.querySelector('.battle-modal-content');
+    const tabMatchups = document.getElementById('tab-matchups');
+    const tabLog = document.getElementById('tab-log');
+
+    const renderMatchups = () => {
+      const list = data.matchups?.map(m => `
+        <div class="matchup-row">
+          <div class="matchup-side ${m.winner.team === 1 ? 'winner left' : 'loser left'}">
+            <span class="matchup-name">${m.winner.team === 1 ? m.winner.name : m.loser.name}</span>
+            <img class="matchup-sprite" src="${m.winner.team === 1 ? m.winner.sprite : m.loser.sprite}">
           </div>
-        `).join('')}
-      </div>
-    `;
+          <span class="matchup-vs">VS</span>
+          <div class="matchup-side ${m.winner.team === 2 ? 'winner right' : 'loser right'}">
+            <img class="matchup-sprite" src="${m.winner.team === 2 ? m.winner.sprite : m.loser.sprite}">
+            <span class="matchup-name">${m.winner.team === 2 ? m.winner.name : m.loser.name}</span>
+          </div>
+        </div>
+      `).join('') || '<p>Resumo indisponível.</p>';
+      
+      modalContent.innerHTML = `
+        <div style="margin-bottom: 1rem; text-align: center; color: var(--text-2); font-size: 0.9rem;">
+          Vencedor: <b>${match.winner.name}</b> em ${data.total_turns} turnos
+        </div>
+        <div class="matchup-list">${list}</div>
+      `;
+    };
+
+    const renderLog = () => {
+      modalContent.innerHTML = `
+        <div class="battle-log-scroll">
+          ${data.log.map(entry => `
+            <div class="log-entry log-${entry.type}">
+              ${entry.message}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    };
+
+    tabMatchups.addEventListener('click', () => {
+      tabMatchups.classList.add('active'); tabLog.classList.remove('active');
+      renderMatchups();
+    });
+    tabLog.addEventListener('click', () => {
+      tabLog.classList.add('active'); tabMatchups.classList.remove('active');
+      renderLog();
+    });
+
+    // Default
+    renderMatchups();
 
   } catch (err) {
     console.error('Erro ao buscar log:', err);
-    content.innerHTML = `
-      <div class="log-header">
-        <h3>⚔️ Erro</h3>
+    document.querySelector('.battle-modal-content').innerHTML = `
+      <div style="text-align: center; color: var(--text-2);">
         <p>Não foi possível carregar os detalhes desta batalha.</p>
       </div>
     `;
@@ -440,14 +494,14 @@ function runSimulations() {
   if (pendingMatch) {
     simulationInProgress = true;
     clearTimeout(simulationTimer);
-    simulationTimer = setTimeout(() => simulateMatchAndSave(pendingMatch, roundName), 2000);
+    simulationTimer = setTimeout(() => simulateMatchAndSave(pendingMatch, roundName), 4000);
   } else {
     // Todas as partidas do round atual foram simuladas. Avança o round!
     const roundComplete = matches.every(m => m.simulated || (!m.team1 || !m.team2));
     if (roundComplete) {
       simulationInProgress = true;
       clearTimeout(simulationTimer);
-      simulationTimer = setTimeout(() => advanceRoundAndSave(roundName), 2000);
+      simulationTimer = setTimeout(() => advanceRoundAndSave(roundName), 4000);
     }
   }
 }
@@ -456,7 +510,10 @@ async function simulateMatchAndSave(match, roundName) {
   try {
     const seed = Date.now() + Math.floor(Math.random() * 10000);
     // Simula a batalha com o motor
-    const result = simulateBattle(match.team1.pokemon, match.team2.pokemon, seed);
+    const t1 = match.team1.pokemon.map(p => ({ ...p, item: match.team1.item }));
+    const t2 = match.team2.pokemon.map(p => ({ ...p, item: match.team2.item }));
+    const state = createBattleState(t1, t2, seed, room?.settings || {});
+    const result = simulateBattle(state);
 
     const winner = result.winner === 1 ? match.team1 : match.team2;
     const loser = result.winner === 1 ? match.team2 : match.team1;
@@ -488,6 +545,7 @@ async function simulateMatchAndSave(match, roundName) {
         participant2_id: match.team2.id,
         winner_id: winner.id,
         log: result.log,
+        matchups: result.matchups,
         total_turns: result.totalTurns,
         battle_seed: seed
       });
@@ -496,7 +554,7 @@ async function simulateMatchAndSave(match, roundName) {
 
     // 2. Atualiza estatísticas persistentes
     const isChampionship = roundName === 'final';
-    await updateUserStats(winner.user_id, loser.user_id, isChampionship);
+    await updateUserStats(winner, loser, isChampionship, mvp);
 
     // 3. Atualiza o bracket no banco
     const { error: brkErr } = await supabase
@@ -563,15 +621,39 @@ async function advanceRoundAndSave(roundName) {
   }
 }
 
-async function updateUserStats(winnerUserId, loserUserId, isChampionship = false) {
+async function updateUserStats(winner, loser, isChampionship = false, mvp = null) {
   try {
+    const winnerUserId = winner?.user_id;
+    const loserUserId = loser?.user_id;
+
     if (winnerUserId) {
-      const { data: p } = await supabase.from('profiles').select('wins, championships').eq('id', winnerUserId).single();
+      const { data: p } = await supabase.from('profiles').select('wins, championships, shinies, hall_of_fame').eq('id', winnerUserId).single();
       if (p) {
+        let newShinies = p.shinies || [];
+        if (winner.pokemon) {
+          const teamShinies = winner.pokemon.filter(poke => poke.isShiny);
+          teamShinies.forEach(ts => {
+            if (!newShinies.find(s => s.id === ts.id)) {
+              newShinies.push(ts);
+            }
+          });
+        }
+
+        let newHoF = p.hall_of_fame || [];
+        if (isChampionship && winner.pokemon) {
+          newHoF.push({
+            date: new Date().toISOString(),
+            team: winner.pokemon,
+            mvp: mvp
+          });
+        }
+
         await supabase.from('profiles')
           .update({
             wins: p.wins + 1,
-            championships: isChampionship ? p.championships + 1 : p.championships
+            championships: isChampionship ? p.championships + 1 : p.championships,
+            shinies: newShinies,
+            hall_of_fame: newHoF
           })
           .eq('id', winnerUserId);
       }

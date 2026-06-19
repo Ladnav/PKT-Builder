@@ -6,13 +6,37 @@ import { getTotalEffectiveness, getEffectivenessText } from './types.js';
 const LEVEL = 50; // Nível padrão de todos os Pokémons
 
 // Calcula o dano de um ataque
-function calcDamage(attacker, defender, move) {
+function calcDamage(attacker, defender, move, weather) {
   const isSpecial = move.damage_class === 'special';
-  const atk = isSpecial ? attacker.stats.spAtk : attacker.stats.attack;
-  const def = isSpecial ? defender.stats.spDef : defender.stats.defense;
+  let atk = isSpecial ? attacker.stats.spAtk : attacker.stats.attack;
+  let def = isSpecial ? defender.stats.spDef : defender.stats.defense;
+
+  // Modificadores de Item Atacante
+  const atkItem = attacker.item?.name;
+  if (atkItem === 'choice-band' && !isSpecial) atk *= 1.3;
+  if (atkItem === 'choice-specs' && isSpecial) atk *= 1.3;
+
+  // Modificadores de Item Defensor
+  const defItem = defender.item?.name;
+  if (defItem === 'assault-vest' && isSpecial) def *= 1.5;
 
   // Fórmula oficial Gen 4: floor(floor(floor(2*Lv/5+2)*Power*A/D)/50+2) * mods
   let base = Math.floor(Math.floor(Math.floor(2 * LEVEL / 5 + 2) * move.power * atk / def) / 50 + 2);
+
+  // Weather Base Power Modifiers
+  let weatherMod = 1;
+  if (weather === 'chuva') {
+    if (move.type === 'water') weatherMod = 1.5;
+    if (move.type === 'fire') weatherMod = 0.5;
+  } else if (weather === 'sol') {
+    if (move.type === 'fire') weatherMod = 1.5;
+    if (move.type === 'water') weatherMod = 0.5;
+  } else if (weather === 'neve' && move.type === 'ice') {
+    weatherMod = 1.5;
+  } else if (weather === 'areia' && ['rock', 'ground', 'steel'].includes(move.type)) {
+    weatherMod = 1.2;
+  }
+  base = Math.floor(base * weatherMod);
 
   // STAB
   const stab = attacker.types.includes(move.type) ? 1.5 : 1;
@@ -23,20 +47,52 @@ function calcDamage(attacker, defender, move) {
   // Fator aleatório (0.85 a 1.00)
   const random = (85 + Math.floor(Math.random() * 16)) / 100;
 
-  const total = Math.floor(base * stab * effectiveness * random);
+  let total = Math.floor(base * stab * effectiveness * random);
+
+  // Modificadores finais de item
+  if (atkItem === 'life-orb') total = Math.floor(total * 1.2);
+  if (atkItem === 'expert-belt' && effectiveness > 1) total = Math.floor(total * 1.2);
+
   return { damage: Math.max(1, total), effectiveness, stab };
 }
 
 // Cria estado de batalha a partir de dois times
-export function createBattleState(team1, team2, seed = Date.now()) {
+export function createBattleState(team1, team2, seed = Date.now(), settings = {}) {
+  const weathers = ['none', 'chuva', 'sol', 'neve', 'areia'];
+  const weather = settings.weather ? weathers[Math.floor(Math.random() * (weathers.length - 1)) + 1] : 'none';
+
+  const applySynergy = (team) => {
+    if (!settings.synergy) return team.map(p => ({ ...p }));
+    const typeCounts = {};
+    team.forEach(p => p.types.forEach(t => typeCounts[t] = (typeCounts[t] || 0) + 1));
+    const boostedTypes = Object.keys(typeCounts).filter(t => typeCounts[t] >= 3);
+    
+    return team.map(p => {
+      const pCopy = { ...p };
+      if (p.types.some(t => boostedTypes.includes(t))) {
+        pCopy.stats = { ...p.stats };
+        Object.keys(pCopy.stats).forEach(k => {
+          if (k !== 'hp') pCopy.stats[k] = Math.floor(pCopy.stats[k] * 1.1);
+        });
+        pCopy.hasSynergy = true;
+      }
+      return pCopy;
+    });
+  };
+
+  const t1 = applySynergy(team1);
+  const t2 = applySynergy(team2);
+
   return {
     seed,
-    team1: team1.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
-    team2: team2.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
+    weather,
+    team1: t1.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
+    team2: t2.map(p => ({ ...p, currentHp: p.stats.hp, fainted: false, kos: 0, damageDealt: 0 })),
     active1: 0,
     active2: 0,
     turn: 0,
     log: [],
+    matchups: [],
     winner: null,
   };
 }
@@ -68,13 +124,70 @@ function log(state, message, type = 'normal') {
   state.log.push({ turn: state.turn, message, type });
 }
 
+function processAttack(state, attacker, defender, move) {
+  const result = calcDamage(attacker, defender, move, state.weather);
+  
+  // Focus Sash Logic
+  let isFatal = result.damage >= defender.currentHp;
+  if (isFatal && defender.currentHp === defender.stats.hp && defender.item?.name === 'focus-sash') {
+    result.damage = defender.currentHp - 1;
+    log(state, `  🧣 O Focus Sash salvou <b>${defender.displayName}</b>!`, 'eff-super');
+  }
+
+  const actualDmg = Math.min(defender.currentHp, result.damage);
+  defender.currentHp = Math.max(0, defender.currentHp - result.damage);
+  attacker.damageDealt += actualDmg;
+
+  const effText = getEffectivenessText(result.effectiveness);
+  const stabText = result.stab > 1 ? ' (STAB)' : '';
+
+  log(state, `⚡ <b>${attacker.displayName}</b> usa <span class="move-name">${move.displayName}</span>${stabText}!`, 'attack');
+  if (effText.text) log(state, `  ${effText.text}`, effText.class);
+  log(state, `  💥 <b>${defender.displayName}</b> perde ${result.damage} HP [${Math.max(0,defender.currentHp)}/${defender.stats.hp} HP]`, 'damage');
+
+  // Life Orb recoil
+  if (attacker.item?.name === 'life-orb') {
+    const recoil = Math.floor(attacker.stats.hp * 0.1);
+    attacker.currentHp = Math.max(0, attacker.currentHp - recoil);
+    log(state, `  🔮 <b>${attacker.displayName}</b> perde ${recoil} HP pelo Life Orb!`, 'damage');
+  }
+
+  // Rocky Helmet
+  if (defender.item?.name === 'rocky-helmet' && move.damage_class === 'physical') {
+    const recoil = Math.floor(attacker.stats.hp / 6);
+    attacker.currentHp = Math.max(0, attacker.currentHp - recoil);
+    log(state, `  🪖 <b>${attacker.displayName}</b> se machucou no Rocky Helmet (${recoil} HP)!`, 'damage');
+  }
+
+  // Process Faints
+  if (attacker.currentHp <= 0 && !attacker.fainted) {
+    attacker.fainted = true;
+    defender.kos++;
+    log(state, `  💀 <b>${attacker.displayName}</b> desmaiou!`, 'faint');
+  }
+  
+  if (defender.currentHp <= 0 && !defender.fainted) {
+    defender.fainted = true;
+    attacker.kos++;
+    log(state, `  💀 <b>${defender.displayName}</b> desmaiou!`, 'faint');
+    state.matchups.push({
+      winner: { id: attacker.id, name: attacker.displayName, sprite: attacker.sprite, team: attacker.teamIdx },
+      loser: { id: defender.id, name: defender.displayName, sprite: defender.sprite, team: defender.teamIdx },
+      turn: state.turn
+    });
+  }
+}
+
 // Executa um turno da batalha
 function executeTurn(state) {
   state.turn++;
   const p1 = state.team1[state.active1];
   const p2 = state.team2[state.active2];
 
-  // Escolhe moves aleatórios para ambos
+  p1.teamIdx = 1; p2.teamIdx = 2;
+
+  // Leftovers healing at turn start (or end, we'll do end of turn below)
+  // Mas first let's pick moves
   const move1 = chooseMoveRandom(p1);
   const move2 = chooseMoveRandom(p2);
 
@@ -82,53 +195,30 @@ function executeTurn(state) {
   let first, second, moveFirst, moveSecond;
   if (p1.stats.speed >= p2.stats.speed) {
     first = p1; second = p2; moveFirst = move1; moveSecond = move2;
-    first.teamIdx = 1; second.teamIdx = 2;
   } else {
     first = p2; second = p1; moveFirst = move2; moveSecond = move1;
-    first.teamIdx = 2; second.teamIdx = 1;
   }
 
   // Primeiro ataque
   if (!first.fainted && !second.fainted) {
-    const result1 = calcDamage(first, second, moveFirst);
-    const actualDmg = Math.min(second.currentHp, result1.damage);
-    second.currentHp = Math.max(0, second.currentHp - result1.damage);
-    first.damageDealt += actualDmg;
-
-    const effText = getEffectivenessText(result1.effectiveness);
-    const stabText = result1.stab > 1 ? ' (STAB)' : '';
-
-    log(state, `⚡ <b>${first.displayName}</b> usa <span class="move-name">${moveFirst.displayName}</span>${stabText}!`, 'attack');
-    if (effText.text) log(state, `  ${effText.text}`, effText.class);
-    log(state, `  💥 <b>${second.displayName}</b> perde ${result1.damage} HP [${Math.max(0,second.currentHp)}/${second.stats.hp} HP]`, 'damage');
-
-    if (second.currentHp <= 0) {
-      second.fainted = true;
-      first.kos++;
-      log(state, `  💀 <b>${second.displayName}</b> desmaiou!`, 'faint');
-    }
+    processAttack(state, first, second, moveFirst);
   }
 
-  // Segundo ataque (se ainda em pé)
+  // Segundo ataque
   if (!second.fainted && !first.fainted) {
-    const result2 = calcDamage(second, first, moveSecond);
-    const actualDmg = Math.min(first.currentHp, result2.damage);
-    first.currentHp = Math.max(0, first.currentHp - result2.damage);
-    second.damageDealt += actualDmg;
+    processAttack(state, second, first, moveSecond);
+  }
 
-    const effText = getEffectivenessText(result2.effectiveness);
-    const stabText = result2.stab > 1 ? ' (STAB)' : '';
-
-    log(state, `⚡ <b>${second.displayName}</b> usa <span class="move-name">${moveSecond.displayName}</span>${stabText}!`, 'attack');
-    if (effText.text) log(state, `  ${effText.text}`, effText.class);
-    log(state, `  💥 <b>${first.displayName}</b> perde ${result2.damage} HP [${Math.max(0,first.currentHp)}/${first.stats.hp} HP]`, 'damage');
-
-    if (first.currentHp <= 0) {
-      first.fainted = true;
-      second.kos++;
-      log(state, `  💀 <b>${first.displayName}</b> desmaiou!`, 'faint');
+  // End of turn effects (Leftovers)
+  const applyEndTurn = (p) => {
+    if (!p.fainted && p.currentHp < p.stats.hp && p.item?.name === 'leftovers') {
+      const heal = Math.floor(p.stats.hp * 0.06) || 1;
+      p.currentHp = Math.min(p.stats.hp, p.currentHp + heal);
+      log(state, `  🍎 <b>${p.displayName}</b> recuperou ${heal} HP com Leftovers!`, 'heal');
     }
   }
+  applyEndTurn(first);
+  applyEndTurn(second);
 
   // Avança para próximo Pokémon se desmaiou
   function advanceTeam(state, teamKey, activeKey) {
@@ -149,63 +239,35 @@ function executeTurn(state) {
     return true;
   }
 
-  const team1alive = advanceTeam(state, 'team1', 'active1');
-  const team2alive = advanceTeam(state, 'team2', 'active2');
+  const t1Alive = advanceTeam(state, 'team1', 'active1');
+  const t2Alive = advanceTeam(state, 'team2', 'active2');
 
-  if (!team1alive) state.winner = 2;
-  else if (!team2alive) state.winner = 1;
+  if (!t1Alive && !t2Alive) {
+    state.winner = 1; // Empate favorece P1
+    log(state, `🏆 <b>Empate!</b> Vitória concedida ao Time 1.`, 'win');
+  } else if (!t1Alive) {
+    state.winner = 2;
+    log(state, `🏆 <b>Time 2 venceu!</b>`, 'win');
+  } else if (!t2Alive) {
+    state.winner = 1;
+    log(state, `🏆 <b>Time 1 venceu!</b>`, 'win');
+  } else if (state.turn > 100) {
+    // Timeout
+    state.winner = 1;
+    log(state, `⏱️ <b>Tempo Esgotado!</b> Vitória concedida ao Time 1.`, 'win');
+  }
 }
 
-// Simula uma batalha completa entre dois times
-// Retorna: { winner: 1|2, log: [...], totalTurns: N }
-export function simulateBattle(team1, team2, seed) {
-  const state = createBattleState(team1, team2, seed);
-  const MAX_TURNS = 200; // Evita loop infinito
-
-  log(state, `⚔️ <b>BATALHA COMEÇOU!</b>`, 'header');
-  log(state, `🔴 Time 1: ${team1.length > 0 ? team1.map(p => p.displayName).join(', ') : '(W.O.)'}`, 'info');
-  log(state, `🔵 Time 2: ${team2.length > 0 ? team2.map(p => p.displayName).join(', ') : '(W.O.)'}`, 'info');
-  log(state, `─────────────────────────────`, 'separator');
-
-  if (team1.length === 0 && team2.length === 0) {
-    state.winner = 1;
-    log(state, `Ambos os times desistiram... Time 1 ganha por sorteio.`, 'info');
-  } else if (team1.length === 0) {
-    state.winner = 2;
-    log(state, `Time 1 não compareceu! Time 2 vence por W.O.!`, 'victory');
-  } else if (team2.length === 0) {
-    state.winner = 1;
-    log(state, `Time 2 não compareceu! Time 1 vence por W.O.!`, 'victory');
-  } else {
-    log(state, `🔴 <b>${team1[0].displayName}</b> vs 🔵 <b>${team2[0].displayName}</b>`, 'matchup');
+// Simula a batalha completa até um vencedor
+export function simulateBattle(state) {
+  if (state.weather && state.weather !== 'none') {
+    log(state, `🌤️ O clima na arena é: <b>${state.weather.toUpperCase()}</b>!`, 'switch');
   }
+  log(state, `▶️ <b>Batalha Iniciada!</b>`, 'normal');
+  log(state, `🔄 <b>${state.team1[0].displayName}</b> vs <b>${state.team2[0].displayName}</b>!`, 'switch');
 
-  let failsafe = 0;
-  while (!state.winner && failsafe < MAX_TURNS) {
+  while (!state.winner && state.turn < 150) {
     executeTurn(state);
-    failsafe++;
-
-    // Anuncia nova dupla quando muda
-    if (!state.winner) {
-      const lastLog = state.log[state.log.length - 1];
-      if (lastLog?.type === 'switch') {
-        log(state, `🔴 <b>${state.team1[state.active1].displayName}</b> vs 🔵 <b>${state.team2[state.active2].displayName}</b>`, 'matchup');
-      }
-    }
   }
-
-  if (!state.winner) state.winner = 1; // Empate → Time 1 vence (tiebreak)
-
-  log(state, `─────────────────────────────`, 'separator');
-  const winnerTeam = state.winner === 1 ? team1 : team2;
-  log(state, `🏆 <b>${winnerTeam[0].displayName} e seu time vencem!</b>`, 'victory');
-
-  return {
-    winner: state.winner,
-    log: state.log,
-    totalTurns: state.turn,
-    team1Final: state.team1,
-    team2Final: state.team2,
-    seed: state.seed,
-  };
+  return state;
 }
