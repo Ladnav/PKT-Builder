@@ -410,7 +410,7 @@ function renderMatch(match, isFinal = false) {
 function renderChampionBanner(isPlayer) {
   const finalMatch = bracket.matches.final[0];
   const champ = finalMatch?.winner;
-  const sprite = champ?.pokemon[0]?.sprite || '';
+  const sprite = finalMatch?.mvp?.sprite || champ?.pokemon[0]?.sprite || '';
 
   return `
     <div class="champion-banner ${isPlayer ? 'player-wins' : ''}">
@@ -635,6 +635,14 @@ async function handleGoHome() {
 function runSimulations() {
   if (bracket.round === 'done') return;
   if (simulationInProgress) return;
+
+  // Se houver qualquer animação de batalha rodando visualmente no cliente do host,
+  // aguarda ela terminar antes de simular a próxima ou avançar o round.
+  if (Object.keys(activeAnimations).length > 0) {
+    clearTimeout(simulationTimer);
+    simulationTimer = setTimeout(runSimulations, 1000);
+    return;
+  }
 
   const roundName = bracket.round;
   const matches = bracket.matches[roundName];
