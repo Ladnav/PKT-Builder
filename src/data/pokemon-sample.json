@@ -42,12 +42,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png",
@@ -97,12 +97,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/2.png",
@@ -523,18 +523,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "x-scissor",
+        "displayName": "X-Scissor",
+        "type": "bug",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -569,28 +569,28 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
+        "accuracy": 100,
+        "damage_class": "special"
+      },
+      {
+        "name": "x-scissor",
+        "displayName": "X-Scissor",
+        "type": "bug",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "signal-beam",
+        "displayName": "Signal Beam",
+        "type": "bug",
+        "power": 75,
         "accuracy": 100,
-        "damage_class": "physical"
-      },
-      {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/11.png",
@@ -695,12 +695,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/13.png",
@@ -734,26 +734,26 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "sludge-bomb",
+        "displayName": "Sludge Bomb",
+        "type": "poison",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "x-scissor",
+        "displayName": "X-Scissor",
+        "type": "bug",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -1566,12 +1566,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "sludge-bomb",
+        "displayName": "Sludge Bomb",
+        "type": "poison",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/29.png",
@@ -1620,12 +1620,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "sludge-bomb",
+        "displayName": "Sludge Bomb",
+        "type": "poison",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/30.png",
@@ -1729,12 +1729,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "sludge-bomb",
+        "displayName": "Sludge Bomb",
+        "type": "poison",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/32.png",
@@ -1783,12 +1783,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "sludge-bomb",
+        "displayName": "Sludge Bomb",
+        "type": "poison",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/33.png",
@@ -2321,20 +2321,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "sludge-bomb",
+        "displayName": "Sludge Bomb",
+        "type": "poison",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/43.png",
@@ -2384,12 +2384,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/44.png",
@@ -2439,12 +2439,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/45.png",
@@ -3400,27 +3400,27 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psybeam",
+        "displayName": "Psybeam",
+        "type": "psychic",
+        "power": 65,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "zen-headbutt",
+        "displayName": "Zen Headbutt",
+        "type": "psychic",
+        "power": 80,
+        "accuracy": 90,
         "damage_class": "physical"
       }
     ],
@@ -4289,12 +4289,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/79.png",
@@ -4344,12 +4344,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/80.png",
@@ -5435,12 +5435,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "thunderbolt",
+        "displayName": "Thunderbolt",
+        "type": "electric",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/100.png",
@@ -5489,12 +5489,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "thunderbolt",
+        "displayName": "Thunderbolt",
+        "type": "electric",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/101.png",
@@ -6411,12 +6411,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/118.png",
@@ -6519,12 +6519,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/120.png",
@@ -6993,26 +6993,26 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
-        "damage_class": "physical"
+        "name": "hydro-pump",
+        "displayName": "Hydro Pump",
+        "type": "water",
+        "power": 110,
+        "accuracy": 80,
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "waterfall",
+        "displayName": "Waterfall",
+        "type": "water",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -7157,24 +7157,24 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "slash",
+        "displayName": "Slash",
         "type": "normal",
-        "power": 40,
+        "power": 70,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "quick-attack",
+        "displayName": "Quick Attack",
         "type": "normal",
         "power": 40,
         "accuracy": 100,
@@ -7227,10 +7227,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -8200,20 +8200,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psybeam",
+        "displayName": "Psybeam",
+        "type": "psychic",
+        "power": 65,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png",
@@ -8254,18 +8254,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "seed-bomb",
+        "displayName": "Seed Bomb",
+        "type": "grass",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -8308,18 +8308,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "seed-bomb",
+        "displayName": "Seed Bomb",
+        "type": "grass",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -8370,12 +8370,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/154.png",
@@ -8748,10 +8748,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -8802,10 +8802,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -9242,12 +9242,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/170.png",
@@ -9289,20 +9289,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "thunderbolt",
+        "displayName": "Thunderbolt",
+        "type": "electric",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/171.png",
@@ -9452,20 +9452,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "moonblast",
+        "displayName": "Moonblast",
+        "type": "fairy",
+        "power": 95,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/174.png",
@@ -9624,12 +9624,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/177.png",
@@ -9841,12 +9841,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "thunderbolt",
+        "displayName": "Thunderbolt",
+        "type": "electric",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/181.png",
@@ -10378,20 +10378,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "giga-drain",
+        "displayName": "Giga Drain",
+        "type": "grass",
+        "power": 75,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/191.png",
@@ -10659,12 +10659,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png",
@@ -10923,20 +10923,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psybeam",
+        "displayName": "Psybeam",
+        "type": "psychic",
+        "power": 65,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/201.png",
@@ -10969,27 +10969,27 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psybeam",
+        "displayName": "Psybeam",
+        "type": "psychic",
+        "power": 65,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "zen-headbutt",
+        "displayName": "Zen Headbutt",
+        "type": "psychic",
+        "power": 80,
+        "accuracy": 90,
         "damage_class": "physical"
       }
     ],
@@ -11094,12 +11094,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/204.png",
@@ -11149,12 +11149,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/205.png",
@@ -11586,12 +11586,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/213.png",
@@ -11696,12 +11696,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "dark-pulse",
+        "displayName": "Dark Pulse",
+        "type": "dark",
+        "power": 80,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/215.png",
@@ -12233,20 +12233,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "ice-beam",
+        "displayName": "Ice Beam",
+        "type": "ice",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
-        "damage_class": "physical"
+        "name": "air-slash",
+        "displayName": "Air Slash",
+        "type": "flying",
+        "power": 75,
+        "accuracy": 95,
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/225.png",
@@ -12678,10 +12678,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -12770,24 +12770,24 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "slash",
+        "displayName": "Slash",
         "type": "normal",
-        "power": 40,
+        "power": 70,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "quick-attack",
+        "displayName": "Quick Attack",
         "type": "normal",
         "power": 40,
         "accuracy": 100,
@@ -12832,18 +12832,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "close-combat",
+        "displayName": "Close Combat",
+        "type": "fighting",
+        "power": 120,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "brick-break",
+        "displayName": "Brick Break",
+        "type": "fighting",
+        "power": 75,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -13602,12 +13602,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "flamethrower",
+        "displayName": "Flamethrower",
+        "type": "fire",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/250.png",
@@ -13657,12 +13657,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/251.png",
@@ -14301,18 +14301,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "slash",
+        "displayName": "Slash",
         "type": "normal",
-        "power": 40,
+        "power": 70,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -14355,18 +14355,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "slash",
+        "displayName": "Slash",
         "type": "normal",
-        "power": 40,
+        "power": 70,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -14417,12 +14417,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/265.png",
@@ -14463,18 +14463,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "x-scissor",
+        "displayName": "X-Scissor",
+        "type": "bug",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -14572,18 +14572,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "x-scissor",
+        "displayName": "X-Scissor",
+        "type": "bug",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -15396,20 +15396,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "bug-buzz",
+        "displayName": "Bug Buzz",
+        "type": "bug",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/283.png",
@@ -15513,12 +15513,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "energy-ball",
+        "displayName": "Energy Ball",
+        "type": "grass",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/285.png",
@@ -16220,10 +16220,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -16539,20 +16539,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "stone-edge",
+        "displayName": "Stone Edge",
+        "type": "rock",
+        "power": 100,
+        "accuracy": 80,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "flash-cannon",
+        "displayName": "Flash Cannon",
+        "type": "steel",
+        "power": 80,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/304.png",
@@ -16594,20 +16594,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "stone-edge",
+        "displayName": "Stone Edge",
+        "type": "rock",
+        "power": 100,
+        "accuracy": 80,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "flash-cannon",
+        "displayName": "Flash Cannon",
+        "type": "steel",
+        "power": 80,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/305.png",
@@ -16649,20 +16649,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "stone-edge",
+        "displayName": "Stone Edge",
+        "type": "rock",
+        "power": 100,
+        "accuracy": 80,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "flash-cannon",
+        "displayName": "Flash Cannon",
+        "type": "steel",
+        "power": 80,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/306.png",
@@ -16929,12 +16929,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "thunderbolt",
+        "displayName": "Thunderbolt",
+        "type": "electric",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/311.png",
@@ -16983,12 +16983,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "thunderbolt",
+        "displayName": "Thunderbolt",
+        "type": "electric",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/312.png",
@@ -18673,10 +18673,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "earthquake",
+        "displayName": "Earthquake",
+        "type": "ground",
+        "power": 100,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -18728,10 +18728,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "earthquake",
+        "displayName": "Earthquake",
+        "type": "ground",
+        "power": 100,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -18986,26 +18986,26 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
-        "damage_class": "physical"
+        "name": "hydro-pump",
+        "displayName": "Hydro Pump",
+        "type": "water",
+        "power": 110,
+        "accuracy": 80,
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "waterfall",
+        "displayName": "Waterfall",
+        "type": "water",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -19581,27 +19581,27 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psybeam",
+        "displayName": "Psybeam",
+        "type": "psychic",
+        "power": 65,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "zen-headbutt",
+        "displayName": "Zen Headbutt",
+        "type": "psychic",
+        "power": 80,
+        "accuracy": 90,
         "damage_class": "physical"
       }
     ],
@@ -20032,12 +20032,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/368.png",
@@ -20141,12 +20141,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/370.png",
@@ -20351,20 +20351,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "iron-head",
+        "displayName": "Iron Head",
+        "type": "steel",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/374.png",
@@ -20733,20 +20733,20 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "dragon-pulse",
+        "displayName": "Dragon Pulse",
+        "type": "dragon",
+        "power": 85,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/381.png",
@@ -20959,10 +20959,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "iron-head",
+        "displayName": "Iron Head",
+        "type": "steel",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -22320,11 +22320,11 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "stone-edge",
+        "displayName": "Stone Edge",
+        "type": "rock",
+        "power": 100,
+        "accuracy": 80,
         "damage_class": "physical"
       }
     ],
@@ -22375,11 +22375,11 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "stone-edge",
+        "displayName": "Stone Edge",
+        "type": "rock",
+        "power": 100,
+        "accuracy": 80,
         "damage_class": "physical"
       }
     ],
@@ -23300,10 +23300,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -23845,11 +23845,11 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
-        "accuracy": 100,
+        "name": "stone-edge",
+        "displayName": "Stone Edge",
+        "type": "rock",
+        "power": 100,
+        "accuracy": 80,
         "damage_class": "physical"
       }
     ],
@@ -24337,10 +24337,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "close-combat",
+        "displayName": "Close Combat",
+        "type": "fighting",
+        "power": 120,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -24384,18 +24384,18 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "close-combat",
+        "displayName": "Close Combat",
+        "type": "fighting",
+        "power": 120,
         "accuracy": 100,
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "iron-head",
+        "displayName": "Iron Head",
+        "type": "steel",
+        "power": 80,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -24828,12 +24828,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/456.png",
@@ -24882,12 +24882,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "surf",
+        "displayName": "Surf",
+        "type": "water",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/457.png",
@@ -25810,10 +25810,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
@@ -26192,12 +26192,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/481.png",
@@ -26574,12 +26574,12 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
-        "type": "normal",
-        "power": 40,
+        "name": "psychic",
+        "displayName": "Psychic",
+        "type": "psychic",
+        "power": 90,
         "accuracy": 100,
-        "damage_class": "physical"
+        "damage_class": "special"
       }
     ],
     "sprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/488.png",
@@ -26844,10 +26844,10 @@
         "damage_class": "physical"
       },
       {
-        "name": "tackle",
-        "displayName": "Tackle",
+        "name": "body-slam",
+        "displayName": "Body Slam",
         "type": "normal",
-        "power": 40,
+        "power": 85,
         "accuracy": 100,
         "damage_class": "physical"
       }
