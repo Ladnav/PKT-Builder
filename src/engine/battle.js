@@ -157,10 +157,22 @@ export function simulateBattle(team1, team2, seed) {
   const MAX_TURNS = 200; // Evita loop infinito
 
   log(state, `⚔️ <b>BATALHA COMEÇOU!</b>`, 'header');
-  log(state, `🔴 Time 1: ${team1.map(p => p.displayName).join(', ')}`, 'info');
-  log(state, `🔵 Time 2: ${team2.map(p => p.displayName).join(', ')}`, 'info');
+  log(state, `🔴 Time 1: ${team1.length > 0 ? team1.map(p => p.displayName).join(', ') : '(W.O.)'}`, 'info');
+  log(state, `🔵 Time 2: ${team2.length > 0 ? team2.map(p => p.displayName).join(', ') : '(W.O.)'}`, 'info');
   log(state, `─────────────────────────────`, 'separator');
-  log(state, `🔴 <b>${team1[0].displayName}</b> vs 🔵 <b>${team2[0].displayName}</b>`, 'matchup');
+
+  if (team1.length === 0 && team2.length === 0) {
+    state.winner = 1;
+    log(state, `Ambos os times desistiram... Time 1 ganha por sorteio.`, 'info');
+  } else if (team1.length === 0) {
+    state.winner = 2;
+    log(state, `Time 1 não compareceu! Time 2 vence por W.O.!`, 'victory');
+  } else if (team2.length === 0) {
+    state.winner = 1;
+    log(state, `Time 2 não compareceu! Time 1 vence por W.O.!`, 'victory');
+  } else {
+    log(state, `🔴 <b>${team1[0].displayName}</b> vs 🔵 <b>${team2[0].displayName}</b>`, 'matchup');
+  }
 
   while (!state.winner && state.turn < MAX_TURNS) {
     executeTurn(state);

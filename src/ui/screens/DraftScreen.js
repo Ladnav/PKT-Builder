@@ -586,7 +586,7 @@ async function createBracketAndTransitionRoom() {
       }
     });
 
-    const initialBracket = createBracket(mappedTeams);
+    const initialBracket = createBracket(mappedTeams, room.max_players || 8);
 
     // Salva o chaveamento
     const { error: brkErr } = await supabase
@@ -594,7 +594,7 @@ async function createBracketAndTransitionRoom() {
       .insert({
         room_id: roomId,
         matches: initialBracket.matches,
-        round: 'quarters'
+        round: initialBracket.round
       });
 
     if (brkErr) throw brkErr;
@@ -616,8 +616,24 @@ function processTurn() {
   if (!draftState || draftState.current_round > ROUNDS) return;
 
   const currentSlot = draftState.current_slot;
-  const currentPart = participants.find(p => p.slot === currentSlot);
-  if (!currentPart) return;
+  let currentPart = participants.find(p => p.slot === currentSlot);
+  
+  if (!currentPart) {
+    if (isHost) {
+      console.log('Jogador abandonou o slot', currentSlot, '- substituindo por Bot');
+      supabase.from('room_participants').insert({
+        room_id: roomId,
+        is_bot: true,
+        bot_name: 'Substituto ' + (currentSlot + 1),
+        slot: currentSlot,
+        team: [],
+        seed: Math.floor(Math.random() * 1000000)
+      }).then(() => {
+        // O Realtime detectará o novo participante e a tela será atualizada
+      });
+    }
+    return;
+  }
 
   const isPlayer = currentPart.user_id === currentUserId;
 

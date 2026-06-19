@@ -502,10 +502,16 @@ function renderScreen() {
           ` : ''}
 
           <div class="hs-battle-row">
-            <button class="hs-btn-create" id="btn-create-room">
-              <span class="hs-btn-create-icon">&#x2795;</span>
-              Criar Sala Online
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+              <select id="room-size-select" style="width: 100%; padding: 0.85rem 1.2rem; border-radius: 12px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; font-weight: 600; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; transition: background 0.2s;">
+                <option value="8" style="background: #1e1b4b; color: white;">8 Jogadores (Tamanho Padrao)</option>
+                <option value="4" style="background: #1e1b4b; color: white;">4 Jogadores (Mais Rapido)</option>
+              </select>
+              <button class="hs-btn-create" id="btn-create-room">
+                <span class="hs-btn-create-icon">&#x2795;</span>
+                Criar Sala Online
+              </button>
+            </div>
 
             <div class="hs-join-box">
               <input
@@ -630,6 +636,11 @@ async function handleCreateRoom() {
   if (loading) return;
   loading = true;
   errorMsg = '';
+  
+  // Captura o tamanho da sala antes de re-renderizar (o re-render faria perder o state do DOM)
+  const sizeSelect = container.querySelector('#room-size-select');
+  const maxPlayers = sizeSelect ? parseInt(sizeSelect.value, 10) : 8;
+
   renderScreen();
 
   try {
@@ -645,7 +656,7 @@ async function handleCreateRoom() {
         host_id: user.id,
         mode: selectedMode,
         status: 'waiting',
-        max_players: 8
+        max_players: maxPlayers
       })
       .select()
       .single();
@@ -724,13 +735,13 @@ async function handleJoinRoom(code) {
       throw new Error('Esta sala ja iniciou o jogo.');
     }
 
-    if (participants.length >= 8) {
+    if (participants.length >= (room.max_players || 8)) {
       throw new Error('A sala esta cheia.');
     }
 
     const takenSlots = participants.map(p => p.slot);
     let nextSlot = 0;
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < (room.max_players || 8); i++) {
       if (!takenSlots.includes(i)) {
         nextSlot = i;
         break;

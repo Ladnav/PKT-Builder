@@ -193,20 +193,26 @@ function updateUI() {
 
 function renderBracketRounds() {
   const { matches } = bracket;
+  
+  const hasQuarters = !!matches.quarters;
+
   return `
-    <div class="bracket-rounds">
-      <div class="bracket-round">
-        <h3 class="round-title">Quartas de Final</h3>
-        <div class="matches-col">
-          ${matches.quarters.map(m => renderMatch(m)).join('')}
+    <div class="bracket-rounds ${hasQuarters ? '' : 'bracket-rounds-small'}">
+      ${hasQuarters ? `
+        <div class="bracket-round">
+          <h3 class="round-title">Quartas de Final</h3>
+          <div class="matches-col">
+            ${matches.quarters.map(m => renderMatch(m)).join('')}
+          </div>
         </div>
-      </div>
-      <div class="bracket-connector-col">
-        <div class="connectors">
-          <div class="connector-v"></div>
-          <div class="connector-v"></div>
+        <div class="bracket-connector-col">
+          <div class="connectors">
+            <div class="connector-v"></div>
+            <div class="connector-v"></div>
+          </div>
         </div>
-      </div>
+      ` : ''}
+      
       <div class="bracket-round">
         <h3 class="round-title">Semifinal</h3>
         <div class="matches-col">

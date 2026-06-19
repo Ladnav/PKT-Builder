@@ -10,16 +10,16 @@ export const ROUNDS_NAMES = {
   done: 'Encerrado',
 };
 
-// Cria o bracket inicial com 8 times
+// Cria o bracket inicial
 // times: array de { slot, name, isPlayer, pokemon }
-export function createBracket(teams) {
-  // Pega todos os jogadores humanos (pode haver mais de 1)
+// maxPlayers: 4 ou 8
+export function createBracket(teams, maxPlayers = 8) {
   const players = teams.filter(t => t.isPlayer);
   const bots = teams.filter(t => !t.isPlayer).sort(() => Math.random() - 0.5);
   const shuffled = [...players, ...bots];
 
-  // Garante que a array tenha 8 times (caso alguém saia na hora do draft)
-  while (shuffled.length < 8) {
+  // Garante que a array tenha a quantidade certa de times (caso alguém saia na hora do draft)
+  while (shuffled.length < maxPlayers) {
     shuffled.push({
       id: 'dummy-' + Math.random(),
       slot: 99,
@@ -29,6 +29,25 @@ export function createBracket(teams) {
     });
   }
 
+  if (maxPlayers === 4) {
+    return {
+      teams: shuffled,
+      round: 'semis', // Pula quartas
+      matches: {
+        semis: [
+          createMatch(shuffled[0], shuffled[1], 'SF1'),
+          createMatch(shuffled[2], shuffled[3], 'SF2'),
+        ],
+        final: [
+          createMatch(null, null, 'F1'),
+        ],
+      },
+      winner: null,
+      battleLogs: {},
+    };
+  }
+
+  // Padrão 8 players
   return {
     teams: shuffled,
     round: 'quarters',

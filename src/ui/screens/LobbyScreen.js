@@ -138,15 +138,14 @@ function renderLobby() {
   }
 
   // Preenche array de slots com participantes ou vazios
-  const slots = Array(8).fill(null);
-  participants.forEach(p => {
-    slots[p.slot] = p;
+  const targetSlots = room?.max_players || 8;
+  const activeCount = participants.length;
+  const slots = Array.from({ length: targetSlots }, (_, i) => {
+    return participants.find(p => p.slot === i) || null;
   });
 
-  const activeCount = participants.length;
-
   container.innerHTML = `
-    <div class="lobby-layout">
+    <div class="lobby-bg home-bg">
       <div class="home-particles" id="lobby-particles"></div>
       
       <!-- HEADER -->
@@ -160,7 +159,7 @@ function renderLobby() {
         </div>
         
         <div class="lobby-status-pill">
-          <span>👥</span> ${activeCount}/8 Treinadores
+          <span>👥</span> ${activeCount}/${targetSlots} Treinadores
         </div>
       </header>
 
@@ -184,11 +183,11 @@ function renderLobby() {
           <!-- AÇÕES DO HOST -->
           <div class="lobby-host-actions">
             ${isHost ? `
-              <button class="btn-lobby btn-add-bot" id="btn-add-bot" ${activeCount >= 8 ? 'disabled' : ''}>
+              <button class="btn-lobby btn-add-bot" id="btn-add-bot" ${activeCount >= targetSlots ? 'disabled' : ''}>
                 🤖 Adicionar BOT
               </button>
-              <button class="btn-lobby btn-start-game" id="btn-start-game" ${activeCount === 8 ? '' : 'disabled'}>
-                ⚔️ Iniciar Draft (8/8)
+              <button class="btn-lobby btn-start-game" id="btn-start-game" ${activeCount === targetSlots ? '' : 'disabled'}>
+                ⚔️ Iniciar Draft (${activeCount}/${targetSlots})
               </button>
             ` : `
               <div class="lobby-waiting-msg">
@@ -281,7 +280,8 @@ function attachEvents() {
 }
 
 async function handleAddBot() {
-  if (!isHost || participants.length >= 8) return;
+  const targetSlots = room?.max_players || 8;
+  if (!isHost || participants.length >= targetSlots) return;
   errorMsg = '';
 
   // Desabilita o botão visualmente durante o processo
@@ -297,7 +297,7 @@ async function handleAddBot() {
     // Encontra primeiro slot livre
     const takenSlots = participants.map(p => p.slot);
     let botSlot = 0;
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < targetSlots; i++) {
       if (!takenSlots.includes(i)) {
         botSlot = i;
         break;
@@ -372,7 +372,8 @@ async function handleLeaveRoom() {
 }
 
 async function handleStartGame() {
-  if (!isHost || participants.length !== 8) return;
+  const targetSlots = room?.max_players || 8;
+  if (!isHost || participants.length !== targetSlots) return;
   errorMsg = '';
   loading = true;
   renderLobby();
