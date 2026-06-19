@@ -334,8 +334,9 @@ function renderDraftMain(isPlayer) {
   const currentSlot = draftState.current_slot;
   const currentPart = participants.find(p => p.slot === currentSlot);
 
+  const isBlindMode = room.mode === DRAFT_MODES.BLIND;
   let lastPickInfo = '';
-  if (draftState.picks_history && draftState.picks_history.length > 0) {
+  if (!isBlindMode && draftState.picks_history && draftState.picks_history.length > 0) {
     const lastPick = draftState.picks_history[draftState.picks_history.length - 1];
     lastPickInfo = `
       <div style="background: var(--surface-hover); padding: 0.5rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; border: 1px solid var(--border-bright); animation: fade-up 0.3s ease;">
@@ -363,11 +364,11 @@ function renderDraftMain(isPlayer) {
     let typeInfo = '';
     let optionsInfo = '';
 
-    if (draftState.selected_type) {
+    if (!isBlindMode && draftState.selected_type) {
       typeInfo = `<div style="margin: 1.5rem 0; font-size: 1.1rem; color: var(--text-2);">Tipo selecionado por ${name}: <span class="type-badge" style="background: var(--bg-3); padding: 0.3rem 0.8rem; border: 1px solid var(--border-bright); color: white;">${TYPE_ICONS[draftState.selected_type]} ${TYPE_NAMES_PT[draftState.selected_type]}</span></div>`;
     }
 
-    if (draftState.current_options && draftState.current_options.length > 0) {
+    if (!isBlindMode && draftState.current_options && draftState.current_options.length > 0) {
       optionsInfo = `
         <div style="margin-top: 1rem; opacity: 0.8; pointer-events: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
           ${draftState.current_options.map(p => PokemonMiniCard(p)).join('')}
@@ -381,6 +382,7 @@ function renderDraftMain(isPlayer) {
         <div class="bot-thinking" style="flex-direction: column; text-align: center; background: transparent; box-shadow: none;">
           <div class="thinking-spinner"></div>
           <p style="margin-top: 1rem; font-size: 1.2rem;"><b>${name}</b> está decidindo seu pick...</p>
+          ${isBlindMode ? `<p style="color: var(--text-3); font-size: 0.85rem; margin-top: 0.5rem;">🫣 Modo Draft Cego — escolhas ocultas até o torneio</p>` : ''}
           ${typeInfo}
           ${optionsInfo}
         </div>
