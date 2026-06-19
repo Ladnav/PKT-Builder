@@ -1,6 +1,7 @@
 // src/ui/screens/BracketScreen.js
 import { navigate } from '../router.js';
 import { initEmotes, destroyEmotes } from '../components/Emotes.js';
+import { renderBattleModal } from '../components/BattleModal.js';
 import { createBattleState, simulateBattle } from '../../engine/battle.js';
 import { TYPE_COLORS } from '../../engine/types.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
@@ -335,6 +336,24 @@ function attachEvents() {
 
   // Play again
   container.querySelector('#btn-play-again')?.addEventListener('click', handleGoHome);
+
+  // View Battle
+  container.querySelectorAll('.match-card.has-result').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', (e) => {
+      const matchId = e.currentTarget.dataset.matchid;
+      // find match in bracket
+      let foundMatch = null;
+      for (const round of ['quarters', 'semis', 'final']) {
+        if (!bracket.matches[round]) continue;
+        const m = bracket.matches[round].find(x => x.id === matchId);
+        if (m) foundMatch = m;
+      }
+      if (foundMatch) {
+        renderBattleModal(foundMatch);
+      }
+    });
+  });
 
   // View Bracket (hide banner)
   container.querySelector('#btn-view-bracket')?.addEventListener('click', () => {

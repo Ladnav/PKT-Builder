@@ -102,6 +102,16 @@ export function simulateRound(bracket, roundName, settings = {}) {
     match.log    = result.log;
     match.simulated = true;
     match.totalTurns = result.totalTurns;
+    
+    // Calcula MVP
+    const winningTeam = result.winner === 1 ? result.team1 : result.team2;
+    if (winningTeam && winningTeam.length > 0) {
+      const mvp = [...winningTeam].sort((a, b) => {
+        if (b.kos !== a.kos) return b.kos - a.kos;
+        return b.damageDealt - a.damageDealt;
+      })[0];
+      match.mvp = mvp;
+    }
 
     bracket.battleLogs[match.id] = result.log;
     results.push({ match, result });

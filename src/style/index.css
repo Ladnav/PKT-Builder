@@ -2189,3 +2189,110 @@ input:checked + .toggle-slider:before {
   opacity: 1;
   visibility: visible;
 }
+
+/* Battle Modal UI */
+.battle-modal-content {
+  max-width: 800px;
+  width: 95%;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bm-teams-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: var(--bg-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.bm-team {
+  flex: 1;
+  text-align: center;
+}
+
+.bm-team-name {
+  color: var(--text-1);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.bm-roster {
+  display: flex;
+  justify-content: center;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.bm-pokemon {
+  width: 50px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.bm-pokemon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+}
+
+.bm-pokemon.active img {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px var(--gold));
+}
+
+.bm-pokemon.fainted {
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+
+.bm-poke-name {
+  font-size: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.bm-vs {
+  font-weight: bold;
+  color: var(--gold);
+  font-size: 1.2rem;
+  padding: 0 1rem;
+}
+
+.bm-log-container {
+  flex: 1;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.bm-log-entry {
+  padding: 0.3rem;
+  border-left: 3px solid transparent;
+}
+.bm-log-entry.type-attack { color: #FFAA00; border-color: #FFAA00; }
+.bm-log-entry.type-damage { color: #FF4444; }
+.bm-log-entry.type-faint  { color: #888888; font-style: italic; }
+.bm-log-entry.type-heal   { color: #00EE00; }
+.bm-log-entry.type-switch { color: #44AAFF; font-weight: bold; }
+.bm-log-entry.type-win    { color: gold; font-weight: bold; font-size: 1.1rem; text-align: center; margin-top: 1rem; }
+.bm-log-entry.type-eff-super { color: #00FF00; }
+.bm-log-entry.type-eff-not { color: #AAAAAA; }
+
