@@ -137,6 +137,7 @@ function attachEvents() {
           if (error) throw error;
         }
       } catch (err) {
+        console.error('❌ FULL AUTH ERROR:', err);
         errorMessage = err.message || 'Erro ao processar requisição';
         // Traduz erros comuns do Supabase para ajudar o usuário
         if (errorMessage.includes('Invalid login credentials')) {
