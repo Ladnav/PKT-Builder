@@ -726,16 +726,43 @@ a { color: var(--accent-2); }
 .stat-fill.spd { background: #facc15; }
 
 /* Move pills */
-.card-moves { display: flex; flex-wrap: wrap; gap: 4px; }
+.card-moves { display: flex; flex-direction: column; gap: 4px; }
 
 .move-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+}
+
+.move-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.move-icon { font-size: 0.75rem; }
+
+.move-name {
   font-size: 0.65rem;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 100px;
-  background: var(--bg-3);
-  color: var(--text-2);
-  border: 1px solid var(--border);
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.move-power {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--gold);
+  flex-shrink: 0;
 }
 
 /* Card selecionado badge */

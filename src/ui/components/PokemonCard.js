@@ -1,6 +1,6 @@
 // src/ui/components/PokemonCard.js
 import { TypeBadge } from './TypeBadge.js';
-import { TYPE_COLORS } from '../../engine/types.js';
+import { TYPE_COLORS, TYPE_ICONS } from '../../engine/types.js';
 
 // Card completo do Pokémon para o draft
 export function PokemonCard(pokemon, options = {}) {
@@ -27,7 +27,15 @@ export function PokemonCard(pokemon, options = {}) {
 
   const movesHtml = !small ? `
     <div class="card-moves">
-      ${pokemon.moves.map(m => `<span class="move-pill" data-type="${m.type}">${m.displayName}</span>`).join('')}
+      ${pokemon.moves.map(m => `
+        <div class="move-pill" data-type="${m.type}">
+          <div class="move-info">
+            <span class="move-icon">${TYPE_ICONS[m.type] || '✨'}</span>
+            <span class="move-name">${m.displayName}</span>
+          </div>
+          <span class="move-power" title="Power / Power Base">${m.power || '-'}</span>
+        </div>
+      `).join('')}
     </div>
   ` : '';
 
