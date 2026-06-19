@@ -869,7 +869,16 @@ async function handleJoinRoom(code) {
   if (loading) return;
   loading = true;
   errorMsg = '';
-  renderScreen();
+  
+  const loaderOverlay = document.createElement('div');
+  loaderOverlay.id = 'temp-loader';
+  loaderOverlay.innerHTML = `
+    <div style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="thinking-spinner"></div>
+      <p style="margin-top: 1rem; font-weight:bold; color:var(--gold);">Entrando na Sala...</p>
+    </div>
+  `;
+  document.body.appendChild(loaderOverlay);
 
   try {
     const user = await getCurrentUser();
@@ -896,6 +905,8 @@ async function handleJoinRoom(code) {
 
     const alreadyIn = participants.find(p => p.user_id === user.id);
     if (alreadyIn) {
+      const loader = document.getElementById('temp-loader');
+      if (loader) loader.remove();
       if (room.status === 'drafting') {
         navigate('draft', { code: room.code, roomId: room.id });
       } else if (room.status === 'tournament' || room.status === 'finished') {
@@ -935,11 +946,17 @@ async function handleJoinRoom(code) {
 
     if (joinError) throw joinError;
 
+    const loader = document.getElementById('temp-loader');
+    if (loader) loader.remove();
+    
     navigate('lobby', { code: room.code, roomId: room.id });
   } catch (err) {
     console.error(err);
     errorMsg = err.message || 'Erro ao entrar na sala.';
     loading = false;
+    const loader = document.getElementById('temp-loader');
+    if (loader) loader.remove();
+    alert('Erro ao entrar na sala: ' + errorMsg);
     renderScreen();
   }
 }
