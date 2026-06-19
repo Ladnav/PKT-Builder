@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabase.js';
 
 let currentChannel = null;
 
-const EMOTES_LIST = ['👍', '🔥', '😂', '🤯', '😡', '😱'];
+const EMOTES_LIST = ['👍', '🔥', '😂', '🤯', '😡', '😱', '🎉', '🏆', '🧠', '💪', '👑', '🍀', '🤫', '💀'];
 
 export function initEmotes(container, roomId, currentUserId, currentUsername = 'Treinador') {
   // Cleanup se já existir
