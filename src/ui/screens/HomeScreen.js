@@ -466,8 +466,8 @@ function renderScreen() {
           <h1 class="hs-logo-text">Poke<span>Champion</span></h1>
         </div>
 
-        <div style="display:flex; align-items:center; gap:1rem;">
-          <button id="btn-glory" style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s;">
+        <div style="display:flex; align-items:center; gap:1.5rem; margin-left: auto;">
+          <button id="btn-glory" style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap; margin-left: 1rem;">
             <span style="font-size:1.1rem;">🏆</span> Ranking e Glória
           </button>
           
@@ -524,7 +524,7 @@ function renderScreen() {
               <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
                 <button class="hs-btn-create" id="btn-open-settings" style="width: 100%; height: 100%; min-height: 50px;">
                   <span class="hs-btn-create-icon">&#x2699;&#xFE0F;</span>
-                  Configurar e Criar Sala
+                  Criar Sala
                 </button>
               </div>
 
@@ -605,7 +605,7 @@ function renderScreen() {
               <div class="battle-modal-title">⚙️ Regras da Sala</div>
               <button class="btn-close-modal" id="btn-close-settings">×</button>
             </div>
-            <div class="battle-modal-content" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="battle-modal-content" style="display: flex; flex-direction: column; gap: 1rem; max-height: 75vh; overflow-y: auto; padding-bottom: 1.5rem;">
               
               <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tamanho da Sala</label>
