@@ -794,6 +794,7 @@ a { color: var(--accent-2); }
   flex: 1;
   padding: 2rem;
   overflow: auto;
+  display: flex;
 }
 
 /* Bracket rounds */
@@ -802,7 +803,7 @@ a { color: var(--accent-2); }
   align-items: center;
   gap: 0;
   min-width: fit-content;
-  margin: 0 auto;
+  margin: auto;
   justify-content: center;
 }
 
