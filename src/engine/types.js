@@ -22,28 +22,33 @@ export const TYPE_COLORS = {
   fairy:    '#EE99AC',
 };
 
-const iconUrl = (type) => `<img src="https://raw.githubusercontent.com/duiker101/pokemon-type-svg-icons/master/icons/${type}.svg" style="width:1.2em; height:1.2em; vertical-align:middle; display:inline-block; border-radius:50%;" alt="${type}" />`;
-
-export const TYPE_ICONS = {
-  normal:   iconUrl('normal'),
-  fire:     iconUrl('fire'),
-  water:    iconUrl('water'),
-  electric: iconUrl('electric'),
-  grass:    iconUrl('grass'),
-  ice:      iconUrl('ice'),
-  fighting: iconUrl('fighting'),
-  poison:   iconUrl('poison'),
-  ground:   iconUrl('ground'),
-  flying:   iconUrl('flying'),
-  psychic:  iconUrl('psychic'),
-  bug:      iconUrl('bug'),
-  rock:     iconUrl('rock'),
-  ghost:    iconUrl('ghost'),
-  dragon:   iconUrl('dragon'),
-  dark:     iconUrl('dark'),
-  steel:    iconUrl('steel'),
-  fairy:    iconUrl('fairy'),
+const typeEmoji = {
+  normal:   '⬡',
+  fire:     '🔥',
+  water:    '💧',
+  electric: '⚡',
+  grass:    '🌿',
+  ice:      '❄️',
+  fighting: '👊',
+  poison:   '☠️',
+  ground:   '🪨',
+  flying:   '🌬️',
+  psychic:  '🔮',
+  bug:      '🐛',
+  rock:     '🪨',
+  ghost:    '👻',
+  dragon:   '🐉',
+  dark:     '🌑',
+  steel:    '⚙️',
+  fairy:    '✨',
 };
+
+const iconUrl = (type, color) =>
+  `<span style="display:inline-flex;align-items:center;justify-content:center;width:1.15em;height:1.15em;border-radius:50%;background:${color};box-shadow:0 0 6px ${color}99;font-size:0.65em;vertical-align:middle;flex-shrink:0;"></span>`;
+
+export const TYPE_ICONS = Object.fromEntries(
+  Object.entries(TYPE_COLORS).map(([type, color]) => [type, iconUrl(type, color)])
+);
 
 export const TYPE_NAMES_PT = {
   normal:   'Normal',
