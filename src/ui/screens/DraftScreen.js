@@ -294,6 +294,18 @@ function renderDraftMain(isPlayer) {
   const currentSlot = draftState.current_slot;
   const currentPart = participants.find(p => p.slot === currentSlot);
 
+  let lastPickInfo = '';
+  if (draftState.picks_history && draftState.picks_history.length > 0) {
+    const lastPick = draftState.picks_history[draftState.picks_history.length - 1];
+    lastPickInfo = `
+      <div style="background: var(--surface-hover); padding: 0.5rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; justify-content: center; border: 1px solid var(--border-bright); animation: fade-up 0.3s ease;">
+        <span style="font-size: 0.9rem; color: var(--text-2);">Último pick:</span>
+        <img src="${lastPick.pokemon.sprite}" style="width: 40px; height: 40px; object-fit: contain;">
+        <span><b>${lastPick.teamName}</b> escolheu <b>${lastPick.pokemon.displayName}</b></span>
+      </div>
+    `;
+  }
+
   if (draftState.current_round > ROUNDS) {
     return `
       <div class="draft-done-msg">
@@ -306,22 +318,40 @@ function renderDraftMain(isPlayer) {
 
   if (!isPlayer) {
     const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
+    
+    let typeInfo = '';
+    let optionsInfo = '';
+
+    if (draftState.selected_type) {
+      typeInfo = `<div style="margin: 1.5rem 0; font-size: 1.1rem; color: var(--text-2);">Tipo selecionado por ${name}: <span class="type-badge" style="background: var(--bg-3); padding: 0.3rem 0.8rem; border: 1px solid var(--border-bright); color: white;">${TYPE_ICONS[draftState.selected_type]} ${TYPE_NAMES_PT[draftState.selected_type]}</span></div>`;
+    }
+
+    if (draftState.current_options && draftState.current_options.length > 0) {
+      optionsInfo = `
+        <div class="options-grid" style="margin-top: 1rem; opacity: 0.7; pointer-events: none; transform: scale(0.95); transform-origin: top;">
+          ${draftState.current_options.map(p => PokemonCard(p, { selectable: false })).join('')}
+        </div>
+      `;
+    }
+
     return `
-      <div class="bot-thinking">
-        <div class="thinking-spinner"></div>
-        <p>${name} está decidindo seu pick...</p>
+      <div style="width: 100%;">
+        ${lastPickInfo}
+        <div class="bot-thinking" style="flex-direction: column; text-align: center; background: transparent; box-shadow: none;">
+          <div class="thinking-spinner"></div>
+          <p style="margin-top: 1rem; font-size: 1.2rem;"><b>${name}</b> está decidindo seu pick...</p>
+          ${typeInfo}
+          ${optionsInfo}
+        </div>
       </div>
     `;
   }
 
   // É a vez do jogador
-  if (room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type) {
-    // Escolher tipo
-    return renderTypeSelect();
-  }
-
-  // Escolher pokémon
-  return renderPokemonOptions();
+  return `
+    ${lastPickInfo}
+    ${(room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type) ? renderTypeSelect() : renderPokemonOptions()}
+  `;
 }
 
 function renderTypeSelect() {
@@ -355,7 +385,7 @@ function renderPokemonOptions() {
         <h2 class="pick-title">
           ${draftState.selected_type ? `${TYPE_ICONS[draftState.selected_type]} Pokémons do tipo ${TYPE_NAMES_PT[draftState.selected_type]}` : '🎲 Pokémons Aleatórios'}
         </h2>
-        <p class="pick-sub">Escolha 1 Pokémon para o seu time (Slot ${participants.find(p => p.user_id === currentUserId)?.team?.length + 1}/6)</p>
+        <p class="pick-sub">Escolha 1 Pokémon para o seu time (Slot ${(participants.find(p => p.user_id === currentUserId)?.team?.length || 0) + 1}/6)</p>
       </div>
       <div class="options-grid" id="options-grid">
         ${options.length === 0 ? `
@@ -578,7 +608,7 @@ function processTurn() {
     botTurnInProgress = true;
 
     clearTimeout(botTimer);
-    botTimer = setTimeout(() => executeBotTurn(currentPart), 1000 + Math.random() * 800);
+    botTimer = setTimeout(() => executeBotTurn(currentPart), 300 + Math.random() * 500);
   }
 }
 
@@ -612,7 +642,7 @@ async function executeBotTurn(botParticipant) {
         participants.forEach(p => {
           p.team?.forEach(poke => usedIdsSet.add(poke.id));
         });
-                const type = botChooseType({ pokemon: botParticipant.team || [] }, pokemonData, usedIdsSet);
+        const type = botChooseType({ pokemon: botParticipant.team || [] }, pokemonData, usedIdsSet);
         
         // Salva tipo e gera opções
         const available = pokemonData.filter(p => !draftState.available_pool.includes(p.id) === false);
@@ -622,7 +652,7 @@ async function executeBotTurn(botParticipant) {
           .from('draft_state')
           .update({
             selected_type: type,
-            current_options: typeOptions,
+            current_options: typeOptions || [],
             updated_at: new Date().toISOString()
           })
           .eq('room_id', roomId);
@@ -631,11 +661,11 @@ async function executeBotTurn(botParticipant) {
         botTurnInProgress = false;
         return;
       } else {
-        options = draftState.current_options;
+        options = draftState.current_options || [];
       }
     } else {
       // Modo aleatório
-      options = draftState.current_options;
+      options = draftState.current_options || [];
     }
 
     // Escolhe Pokémon

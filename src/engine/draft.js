@@ -156,7 +156,7 @@ export function botChooseType(team, allPokemon, usedIds) {
 
 // IA do BOT: escolhe o melhor Pokémon das opções
 export function botChoosePokemon(options, team) {
-  if (options.length === 0) return null;
+  if (!options || options.length === 0) return null;
 
   // Cria score baseado em: BST total, cobertura de tipos, variedade
   const teamTypes = new Set(team.pokemon.flatMap(p => p.types));
