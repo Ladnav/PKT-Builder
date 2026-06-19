@@ -138,12 +138,31 @@ function attachEvents() {
         }
       } catch (err) {
         console.error('❌ FULL AUTH ERROR:', err);
-        errorMessage = err.message || 'Erro ao processar requisição';
+        
+        let msg = 'Erro ao processar requisição';
+        if (err) {
+          if (typeof err === 'string') {
+            msg = err;
+          } else if (err.message && err.message !== '{}') {
+            msg = err.message;
+          } else if (err.error_description) {
+            msg = err.error_description;
+          } else {
+            msg = err.msg || err.error || err.statusText || JSON.stringify(err);
+            if (msg === '{}') {
+              msg = 'Erro na resposta do servidor. Verifique as credenciais do Supabase no arquivo .env ou na Vercel.';
+            }
+          }
+        }
+        errorMessage = msg;
+        
         // Traduz erros comuns do Supabase para ajudar o usuário
         if (errorMessage.includes('Invalid login credentials')) {
           errorMessage = 'Usuário ou senha incorretos.';
         } else if (errorMessage.includes('User already registered')) {
           errorMessage = 'Este treinador já está cadastrado. Escolha outro nome.';
+        } else if (errorMessage.includes('Email not confirmed')) {
+          errorMessage = 'E-mail não confirmado. Desative a opção "Confirm email" nas configurações do seu Supabase.';
         }
       } finally {
         loading = false;
