@@ -800,7 +800,16 @@ async function handleCreateRoom() {
   const settingsModal = container.querySelector('#settings-modal');
   if (settingsModal) settingsModal.style.display = 'none';
 
-  renderScreen();
+  // Force loading spinner overlay without destroying the whole DOM if possible
+  const loaderOverlay = document.createElement('div');
+  loaderOverlay.id = 'temp-loader';
+  loaderOverlay.innerHTML = `
+    <div style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="thinking-spinner"></div>
+      <p style="margin-top: 1rem; font-weight:bold; color:var(--gold);">Criando Sala...</p>
+    </div>
+  `;
+  document.body.appendChild(loaderOverlay);
 
   try {
     const user = await getCurrentUser();
@@ -835,11 +844,17 @@ async function handleCreateRoom() {
 
     if (partError) throw partError;
 
+    const loader = document.getElementById('temp-loader');
+    if (loader) loader.remove();
+    
     navigate('lobby', { code: room.code, roomId: room.id });
   } catch (err) {
     console.error(err);
     errorMsg = err.message || 'Erro ao criar sala.';
     loading = false;
+    const loader = document.getElementById('temp-loader');
+    if (loader) loader.remove();
+    alert('Erro ao criar sala: ' + errorMsg);
     renderScreen();
   }
 }
