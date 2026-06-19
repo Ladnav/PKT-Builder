@@ -621,7 +621,7 @@ function processTurn() {
   const isPlayer = currentPart.user_id === currentUserId;
 
   // Se for o modo Random e opções estiverem vazias, o HOST é responsável por gerar
-  if (room.mode === DRAFT_MODES.RANDOM && draftState.current_options.length === 0 && isHost) {
+  if (room.mode === DRAFT_MODES.RANDOM && (!draftState.current_options || draftState.current_options.length === 0) && isHost) {
     generateRandomOptionsAndSave();
     return;
   }
