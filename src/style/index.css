@@ -1859,6 +1859,10 @@ a { color: var(--accent-2); }
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
 /* MVP Glow */
 .pokemon-mini-card {
   position: relative;

@@ -248,14 +248,14 @@ function updateUI() {
   const bar = container.querySelector('#progress-bar');
   const txt = container.querySelector('#progress-text');
   const totalRounds = room?.settings?.items ? 7 : 6;
-  const progress = Math.min(100, Math.floor(((draftState.current_round - 1) * 8 + draftState.current_slot) / (totalRounds * 8) * 100));
+  const progressPct = Math.min(100, Math.floor(((draftState.current_round - 1) * 8 + draftState.current_slot) / (totalRounds * 8) * 100));
   
-  if (bar) bar.style.width = `${progress}%`;
+  if (bar) bar.style.width = `${progressPct}%`;
   if (txt) {
     if (draftState.current_round === 7) {
-      txt.textContent = `Rodada Extra de Itens (7/7) • ${progress}%`;
+      txt.textContent = `Rodada Extra de Itens (7/7) • ${progressPct}%`;
     } else {
-      txt.textContent = `Rodada ${Math.min(draftState.current_round, totalRounds)}/${totalRounds} • ${progress}%`;
+      txt.textContent = `Rodada ${Math.min(draftState.current_round, totalRounds)}/${totalRounds} • ${progressPct}%`;
     }
   }
 
