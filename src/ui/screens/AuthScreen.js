@@ -94,12 +94,12 @@ function attachEvents() {
       e.preventDefault();
       if (loading) return;
 
+      const username = container.querySelector('#username').value.trim();
+      const password = container.querySelector('#password').value;
+
       loading = true;
       errorMessage = '';
       renderScreen();
-
-            const username = container.querySelector('#username').value.trim();
-      const password = container.querySelector('#password').value;
       
       // Gera o e-mail fantasma correspondente (usamos gmail.com pois é um domínio garantidamente válido para qualquer validador)
       const dummyEmail = `${cleanUsernameForEmail(username)}@gmail.com`;
