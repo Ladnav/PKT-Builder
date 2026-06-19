@@ -24,21 +24,14 @@ function renderScreen() {
           </div>
 
           <form class="auth-form" id="auth-form">
-            ${isSignUp ? `
-              <div class="form-group">
-                <label for="username">Treinador (Username)</label>
-                <input type="text" id="username" placeholder="Seu nome no jogo" required minlength="3" maxlength="15" autocomplete="username" />
-              </div>
-            ` : ''}
-
             <div class="form-group">
-              <label for="email">E-mail</label>
-              <input type="email" id="email" placeholder="seu@email.com" required autocomplete="email" />
+              <label for="username">Treinador (Username)</label>
+              <input type="text" id="username" placeholder="Seu nome no jogo" required minlength="3" maxlength="15" autocomplete="username" />
             </div>
 
             <div class="form-group">
               <label for="password">Senha</label>
-              <input type="password" id="password" placeholder="••••••••" required minlength="6" autocomplete="current-password" />
+              <input type="password" id="password" placeholder="Mínimo 6 caracteres (ex: 123456)" required minlength="6" autocomplete="current-password" />
             </div>
 
             ${errorMessage ? `<div class="auth-error">⚠️ ${errorMessage}</div>` : ''}
@@ -85,6 +78,15 @@ function renderParticles() {
   }
 }
 
+function cleanUsernameForEmail(username) {
+  // Remove acentos, espaços e caracteres especiais para criar um e-mail válido interno
+  return username
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
 function attachEvents() {
   const form = container.querySelector('#auth-form');
   if (form) {
@@ -96,15 +98,17 @@ function attachEvents() {
       errorMessage = '';
       renderScreen();
 
-      const email = container.querySelector('#email').value;
+      const username = container.querySelector('#username').value.trim();
       const password = container.querySelector('#password').value;
-      const username = isSignUp ? container.querySelector('#username').value : '';
+      
+      // Gera o e-mail fantasma correspondente
+      const dummyEmail = `${cleanUsernameForEmail(username)}@pkt.com`;
 
       try {
         if (isSignUp) {
           // Cadastro
           const { data, error } = await supabase.auth.signUp({
-            email,
+            email: dummyEmail,
             password,
             options: {
               data: {
@@ -115,23 +119,29 @@ function attachEvents() {
 
           if (error) throw error;
 
-          // Se a confirmação de e-mail estiver ativa no Supabase, avisa o usuário.
-          // Geralmente para projetos novos do Supabase ela está ativa por padrão.
-          // Se não estiver, o login é imediato.
-          if (data?.user && data.session === null) {
-            errorMessage = 'Conta criada! Verifique seu e-mail para confirmar o cadastro e poder fazer login.';
-            isSignUp = false; // Alterna para login para o usuário tentar logar
-          }
+          // Como usamos e-mail fictício, fazemos login automático após cadastro
+          const { error: loginErr } = await supabase.auth.signInWithPassword({
+            email: dummyEmail,
+            password
+          });
+          
+          if (loginErr) throw loginErr;
         } else {
           // Login
           const { error } = await supabase.auth.signInWithPassword({
-            email,
+            email: dummyEmail,
             password
           });
           if (error) throw error;
         }
       } catch (err) {
         errorMessage = err.message || 'Erro ao processar requisição';
+        // Traduz erros comuns do Supabase para ajudar o usuário
+        if (errorMessage.includes('Invalid login credentials')) {
+          errorMessage = 'Usuário ou senha incorretos.';
+        } else if (errorMessage.includes('User already registered')) {
+          errorMessage = 'Este treinador já está cadastrado. Escolha outro nome.';
+        }
       } finally {
         loading = false;
         renderScreen();
