@@ -167,9 +167,7 @@ function renderScreen() {
     <style>
       .hs-bg {
         min-height: 100vh;
-        background: radial-gradient(ellipse at 20% 0%, rgba(99,60,180,0.18) 0%, transparent 55%),
-                    radial-gradient(ellipse at 80% 100%, rgba(30,140,255,0.14) 0%, transparent 55%),
-                    var(--bg-1, #0d0d1a);
+        background: transparent;
         display: flex;
         flex-direction: column;
         font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -870,7 +868,6 @@ function renderScreen() {
     </div>
   `;
 
-  renderParticles();
   attachEvents();
 }
 
