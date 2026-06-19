@@ -233,7 +233,7 @@ function updateUI() {
 
   const isPlayer = currentPart.user_id === currentUserId;
   const progress = getDraftProgress({
-    numTeams: 8,
+    numTeams: room?.max_players || 8,
     history: draftState.picks_history
   });
 
@@ -489,8 +489,9 @@ async function selectPokemon(pokemon) {
     let nextRound = draftState.current_round;
     let nextDirection = draftState.snake_direction;
 
+    const maxPlayers = room?.max_players || 8;
     if (nextDirection === 1) {
-      if (nextSlot < 7) {
+      if (nextSlot < maxPlayers - 1) {
         nextSlot++;
       } else {
         nextRound++;
