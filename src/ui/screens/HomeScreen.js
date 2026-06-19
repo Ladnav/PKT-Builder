@@ -27,6 +27,31 @@ const getPokemonOrItemDetails = (p) => {
   }
   return p;
 };
+const CLASSIC_AVATARS = [
+  { name: 'Red', url: 'https://play.pokemonshowdown.com/sprites/trainers/red.png' },
+  { name: 'Blue', url: 'https://play.pokemonshowdown.com/sprites/trainers/blue.png' },
+  { name: 'Ash', url: 'https://play.pokemonshowdown.com/sprites/trainers/ash.png' },
+  { name: 'Gary', url: 'https://play.pokemonshowdown.com/sprites/trainers/blue-gen7.png' },
+  { name: 'Cynthia', url: 'https://play.pokemonshowdown.com/sprites/trainers/cynthia.png' },
+  { name: 'Lance', url: 'https://play.pokemonshowdown.com/sprites/trainers/lance.png' },
+  { name: 'Misty', url: 'https://play.pokemonshowdown.com/sprites/trainers/misty.png' },
+  { name: 'Brock', url: 'https://play.pokemonshowdown.com/sprites/trainers/brock.png' },
+  { name: 'Steven', url: 'https://play.pokemonshowdown.com/sprites/trainers/steven.png' },
+  { name: 'Leon', url: 'https://play.pokemonshowdown.com/sprites/trainers/leon.png' },
+  { name: 'N', url: 'https://play.pokemonshowdown.com/sprites/trainers/n.png' },
+  { name: 'Cyrus', url: 'https://play.pokemonshowdown.com/sprites/trainers/cyrus.png' },
+  { name: 'Giovanni', url: 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png' },
+  { name: 'Brendan', url: 'https://play.pokemonshowdown.com/sprites/trainers/brendan.png' },
+  { name: 'May', url: 'https://play.pokemonshowdown.com/sprites/trainers/may.png' },
+  { name: 'Dawn', url: 'https://play.pokemonshowdown.com/sprites/trainers/dawn.png' },
+  { name: 'Serena', url: 'https://play.pokemonshowdown.com/sprites/trainers/serena.png' },
+  { name: 'Sabrina', url: 'https://play.pokemonshowdown.com/sprites/trainers/sabrina.png' },
+  { name: 'Erika', url: 'https://play.pokemonshowdown.com/sprites/trainers/erika.png' },
+  { name: 'Morty', url: 'https://play.pokemonshowdown.com/sprites/trainers/morty.png' },
+  { name: 'Jasmine', url: 'https://play.pokemonshowdown.com/sprites/trainers/jasmine.png' },
+  { name: 'Wallace', url: 'https://play.pokemonshowdown.com/sprites/trainers/wallace.png' }
+];
+
 let selectedMode = 'type';
 let activeView = 'home'; // 'home' | 'profile'
 let container = null;
@@ -34,11 +59,27 @@ let profile = null;
 let leaderboard = [];
 let errorMsg = '';
 let loading = false;
+let randomAvatarSeeds = [];
+
+function generateRandomSeeds() {
+  if (randomAvatarSeeds.length > 0) return;
+  for (let i = 0; i < 12; i++) {
+    randomAvatarSeeds.push(Math.random().toString(36).substring(2, 9));
+  }
+}
+
+function regenerateRandomSeeds() {
+  randomAvatarSeeds = [];
+  for (let i = 0; i < 12; i++) {
+    randomAvatarSeeds.push(Math.random().toString(36).substring(2, 9));
+  }
+}
 
 export async function render(cont) {
   container = cont;
   loading = true;
   errorMsg = '';
+  generateRandomSeeds();
   renderScreen();
 
   initGloryModal(document.body);
@@ -640,28 +681,37 @@ function renderScreen() {
               </div>
 
               <!-- Escolha de Avatar -->
-              <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+              <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
                 <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold; text-align: left;">Escolha seu Avatar</label>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; background: var(--bg-3); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
-                  ${[
-                    { name: 'Red', url: 'https://play.pokemonshowdown.com/sprites/trainers/red.png' },
-                    { name: 'Blue', url: 'https://play.pokemonshowdown.com/sprites/trainers/blue.png' },
-                    { name: 'Ash', url: 'https://play.pokemonshowdown.com/sprites/trainers/ash.png' },
-                    { name: 'Gary', url: 'https://play.pokemonshowdown.com/sprites/trainers/blue-gen7.png' },
-                    { name: 'Cynthia', url: 'https://play.pokemonshowdown.com/sprites/trainers/cynthia.png' },
-                    { name: 'Lance', url: 'https://play.pokemonshowdown.com/sprites/trainers/lance.png' },
-                    { name: 'Misty', url: 'https://play.pokemonshowdown.com/sprites/trainers/misty.png' },
-                    { name: 'Brock', url: 'https://play.pokemonshowdown.com/sprites/trainers/brock.png' },
-                    { name: 'Steven', url: 'https://play.pokemonshowdown.com/sprites/trainers/steven.png' },
-                    { name: 'Leon', url: 'https://play.pokemonshowdown.com/sprites/trainers/leon.png' },
-                    { name: 'N', url: 'https://play.pokemonshowdown.com/sprites/trainers/n.png' },
-                    { name: 'Cyrus', url: 'https://play.pokemonshowdown.com/sprites/trainers/cyrus.png' },
-                    { name: 'Giovanni', url: 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png' }
-                  ].map(item => {
+                
+                <!-- Subtítulo / Seção 1 -->
+                <span style="color: var(--text-3); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; text-align: left; margin-top: 0.5rem; display: block;">🏆 Treinadores Clássicos</span>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; background: var(--bg-3); padding: 1rem; border-radius: 12px; border: 1px solid var(--border); max-height: 200px; overflow-y: auto;">
+                  ${CLASSIC_AVATARS.map(item => {
                     const isSelected = profile?.avatar_url === item.url;
                     return `
                       <div class="profile-avatar-option ${isSelected ? 'selected' : ''}" data-url="${item.url}" style="cursor: pointer; width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: var(--bg-1); border: 2px solid ${isSelected ? 'var(--gold)' : 'transparent'}; box-shadow: ${isSelected ? '0 0 10px rgba(251, 191, 36, 0.4)' : 'none'}; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="${item.name}">
-                        <img src="${item.url}" style="width: 100%; height: 100%; object-fit: cover;" />
+                        <img src="${item.url}" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" />
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Subtítulo / Seção 2 com botão de gerar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;">
+                  <span style="color: var(--text-3); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">🎨 Pixel Art Aleatórios</span>
+                  <button id="btn-regenerate-avatars" style="background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.4); color: #c4b5fd; padding: 0.3rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold; display: flex; align-items: center; gap: 4px; transition: all 0.2s;" title="Gerar novas seeds aleatórias">
+                    🔄 Gerar Novos
+                  </button>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; background: var(--bg-3); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
+                  ${randomAvatarSeeds.map((seed, idx) => {
+                    const url = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${seed}`;
+                    const isSelected = profile?.avatar_url === url;
+                    return `
+                      <div class="profile-avatar-option ${isSelected ? 'selected' : ''}" data-url="${url}" style="cursor: pointer; width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: var(--bg-1); border: 2px solid ${isSelected ? 'var(--gold)' : 'transparent'}; box-shadow: ${isSelected ? '0 0 10px rgba(251, 191, 36, 0.4)' : 'none'}; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Avatar Aleatório ${idx + 1}">
+                        <img src="${url}" style="width: 80%; height: 80%; object-fit: contain;" />
                       </div>
                     `;
                   }).join('')}
@@ -918,6 +968,15 @@ function attachEvents() {
       opt.style.boxShadow = '0 0 10px rgba(251, 191, 36, 0.4)';
     });
   });
+
+  const btnRegenerate = container.querySelector('#btn-regenerate-avatars');
+  if (btnRegenerate) {
+    btnRegenerate.addEventListener('click', (e) => {
+      e.preventDefault();
+      regenerateRandomSeeds();
+      renderScreen();
+    });
+  }
 
   // Salvar Alterações de Perfil
   const btnSaveProfile = container.querySelector('#btn-save-profile');

@@ -14,7 +14,16 @@ const BOT_AVATARS = {
   'Leon': 'https://play.pokemonshowdown.com/sprites/trainers/leon.png',
   'N': 'https://play.pokemonshowdown.com/sprites/trainers/n.png',
   'Cyrus': 'https://play.pokemonshowdown.com/sprites/trainers/cyrus.png',
-  'Giovanni': 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png'
+  'Giovanni': 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png',
+  'Brendan': 'https://play.pokemonshowdown.com/sprites/trainers/brendan.png',
+  'May': 'https://play.pokemonshowdown.com/sprites/trainers/may.png',
+  'Dawn': 'https://play.pokemonshowdown.com/sprites/trainers/dawn.png',
+  'Serena': 'https://play.pokemonshowdown.com/sprites/trainers/serena.png',
+  'Sabrina': 'https://play.pokemonshowdown.com/sprites/trainers/sabrina.png',
+  'Erika': 'https://play.pokemonshowdown.com/sprites/trainers/erika.png',
+  'Morty': 'https://play.pokemonshowdown.com/sprites/trainers/morty.png',
+  'Jasmine': 'https://play.pokemonshowdown.com/sprites/trainers/jasmine.png',
+  'Wallace': 'https://play.pokemonshowdown.com/sprites/trainers/wallace.png'
 };
 
 /**

@@ -12,10 +12,14 @@ let currentUsername = 'Treinador';
 let userCards = [];      // { pokemon_id, is_shiny, quantity }
 let userBadges = [];     // { badge_id, unlocked_at }
 
+const totalCount = pokemonData.length;
+const count10 = Math.round(totalCount * 0.1);
+const count50 = Math.round(totalCount * 0.5);
+
 const BADGES_CONFIG = {
-  'album_10': { title: '🎒 Colecionador Iniciante', desc: 'Colete 10% do Álbum (6 Pokémon)', icon: '🥉' },
-  'album_50': { title: '🏆 Colecionador Elite', desc: 'Colete 50% do Álbum (29 Pokémon)', icon: '🥈' },
-  'album_100': { title: '👑 Mestre de Kanto-Sinnoh', desc: 'Colete todos os 58 Pokémon do Álbum', icon: '🥇' },
+  'album_10': { title: '🎒 Colecionador Iniciante', desc: `Colete 10% do Álbum (${count10} Pokémon)`, icon: '🥉' },
+  'album_50': { title: '🏆 Colecionador Elite', desc: `Colete 50% do Álbum (${count50} Pokémon)`, icon: '🥈' },
+  'album_100': { title: '👑 Mestre de Kanto-Sinnoh', desc: `Colete todos os ${totalCount} Pokémon do Álbum`, icon: '🥇' },
   'type_fire': { title: '🔥 Líder de Fogo', desc: 'Colete todos os Pokémon do tipo Fogo', icon: '📛', type: 'fire' },
   'type_water': { title: '💧 Líder de Água', desc: 'Colete todos os Pokémon do tipo Água', icon: '📛', type: 'water' },
   'type_grass': { title: '🌿 Líder de Planta', desc: 'Colete todos os Pokémon do tipo Planta', icon: '📛', type: 'grass' },
@@ -109,9 +113,9 @@ async function checkAndUnlockBadges() {
   };
 
   // Verificações
-  if (uniqueCount >= 6 && !userBadges.some(b => b.badge_id === 'album_10')) newBadgesToUnlock.push('album_10');
-  if (uniqueCount >= 29 && !userBadges.some(b => b.badge_id === 'album_50')) newBadgesToUnlock.push('album_50');
-  if (uniqueCount >= 58 && !userBadges.some(b => b.badge_id === 'album_100')) newBadgesToUnlock.push('album_100');
+  if (uniqueCount >= count10 && !userBadges.some(b => b.badge_id === 'album_10')) newBadgesToUnlock.push('album_10');
+  if (uniqueCount >= count50 && !userBadges.some(b => b.badge_id === 'album_50')) newBadgesToUnlock.push('album_50');
+  if (uniqueCount >= totalCount && !userBadges.some(b => b.badge_id === 'album_100')) newBadgesToUnlock.push('album_100');
 
   if (checkTypeComplete('fire') && !userBadges.some(b => b.badge_id === 'type_fire')) newBadgesToUnlock.push('type_fire');
   if (checkTypeComplete('water') && !userBadges.some(b => b.badge_id === 'type_water')) newBadgesToUnlock.push('type_water');
