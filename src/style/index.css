@@ -766,6 +766,28 @@ a { color: var(--accent-2); }
   flex-shrink: 0;
 }
 
+.move-class {
+  font-size: 0.5rem;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.move-class.physical {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.move-class.special {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
 /* Card selecionado badge */
 .card-selected-badge {
   position: absolute;

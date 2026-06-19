@@ -34,7 +34,12 @@ export function PokemonCard(pokemon, options = {}) {
             <span class="move-icon">${TYPE_ICONS[m.type] || '✨'}</span>
             <span class="move-name">${m.displayName}</span>
           </div>
-          <span class="move-power" title="Power / Power Base">${m.power || '-'}</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="move-class ${m.damage_class}">
+              ${m.damage_class === 'physical' ? 'Fís' : 'Esp'}
+            </span>
+            <span class="move-power" title="Power / Power Base">${m.power || '-'}</span>
+          </div>
         </div>
       `).join('')}
     </div>
