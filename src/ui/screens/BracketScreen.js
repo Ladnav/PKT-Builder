@@ -1,7 +1,7 @@
 // src/ui/screens/BracketScreen.js
 import { navigate } from '../router.js';
 import { initEmotes, destroyEmotes } from '../components/Emotes.js';
-import { renderBattleModal } from '../components/BattleModal.js';
+import { renderBattleModal, renderBattleModalLoading, renderBattleModalError } from '../components/BattleModal.js';
 import { createBattleState, simulateBattle } from '../../engine/battle.js';
 import { TYPE_COLORS } from '../../engine/types.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
@@ -337,10 +337,10 @@ function attachEvents() {
   // Play again
   container.querySelector('#btn-play-again')?.addEventListener('click', handleGoHome);
 
-  // View Battle
+  // View Battle (simulação visual animada + resumos 1v1 + log completo)
   container.querySelectorAll('.match-card.has-result').forEach(el => {
     el.style.cursor = 'pointer';
-    el.addEventListener('click', (e) => {
+    el.addEventListener('click', async (e) => {
       const matchId = e.currentTarget.dataset.matchid;
       // find match in bracket
       let foundMatch = null;
@@ -350,7 +350,34 @@ function attachEvents() {
         if (m) foundMatch = m;
       }
       if (foundMatch) {
-        renderBattleModal(foundMatch);
+        // 1. Mostrar estado de carregamento
+        renderBattleModalLoading(foundMatch);
+
+        try {
+          // 2. Buscar logs no banco
+          const { data, error } = await supabase
+            .from('battle_logs')
+            .select('log, matchups, total_turns')
+            .eq('bracket_id', bracket.id)
+            .eq('participant1_id', foundMatch.team1.id)
+            .eq('participant2_id', foundMatch.team2.id)
+            .single();
+
+          if (error) throw error;
+
+          // 3. Montar objeto com dados carregados e renderizar simulação visual
+          const matchWithLogs = {
+            ...foundMatch,
+            log: data.log,
+            matchups: data.matchups,
+            totalTurns: data.total_turns
+          };
+          renderBattleModal(matchWithLogs);
+        } catch (err) {
+          console.error('Erro ao carregar detalhes da batalha:', err);
+          // 4. Mostrar erro no modal caso a consulta falhe
+          renderBattleModalError(foundMatch);
+        }
       }
     });
   });
@@ -371,14 +398,6 @@ function attachEvents() {
   container.querySelector('#modal-close')?.addEventListener('click', () => {
     document.getElementById('battle-modal').style.display = 'none';
   });
-
-  // Match click for battle log
-  container.querySelectorAll('.match-card.has-result').forEach(card => {
-    card.addEventListener('click', () => {
-      const matchId = card.dataset.matchid;
-      loadAndShowBattleLog(matchId);
-    });
-  });
 }
 
 async function handleGoHome() {
@@ -393,112 +412,6 @@ async function handleGoHome() {
     }
     cleanup();
     navigate('home');
-  }
-}
-
-async function loadAndShowBattleLog(matchId) {
-  // Encontra a partida correspondente no bracket local
-  let match = null;
-  const allMatches = [
-    ...(bracket.matches.quarters || []),
-    ...(bracket.matches.semis || []),
-    ...(bracket.matches.final || []),
-  ];
-  match = allMatches.find(m => m.id === matchId);
-  if (!match) return;
-
-  const modal = document.getElementById('battle-modal');
-  const content = document.getElementById('battle-modal-content');
-  if (!modal || !content) return;
-
-  content.innerHTML = `
-    <div class="battle-modal-header">
-      <div class="battle-modal-title">⚔️ ${match.team1.name} vs ${match.team2.name}</div>
-      <button class="btn-close-modal" id="modal-close-inner">×</button>
-    </div>
-    <div class="battle-modal-tabs">
-      <button class="battle-tab active" id="tab-matchups">Resumo 1v1</button>
-      <button class="battle-tab" id="tab-log">Log Completo</button>
-    </div>
-    <div class="battle-modal-content" style="display:flex; justify-content:center; align-items:center; min-height: 200px;">
-      <div class="thinking-spinner"></div>
-    </div>
-  `;
-  modal.style.display = 'flex';
-
-  document.getElementById('modal-close-inner').addEventListener('click', () => {
-    modal.style.display = 'none';
-  });
-
-  try {
-    const { data, error } = await supabase
-      .from('battle_logs')
-      .select('log, matchups, total_turns')
-      .eq('bracket_id', bracket.id)
-      .eq('participant1_id', match.team1.id)
-      .eq('participant2_id', match.team2.id)
-      .single();
-
-    if (error) throw error;
-
-    const modalContent = document.querySelector('.battle-modal-content');
-    const tabMatchups = document.getElementById('tab-matchups');
-    const tabLog = document.getElementById('tab-log');
-
-    const renderMatchups = () => {
-      const list = data.matchups?.map(m => `
-        <div class="matchup-row">
-          <div class="matchup-side ${m.winner.team === 1 ? 'winner left' : 'loser left'}">
-            <span class="matchup-name">${m.winner.team === 1 ? m.winner.name : m.loser.name}</span>
-            <img class="matchup-sprite" src="${m.winner.team === 1 ? m.winner.sprite : m.loser.sprite}">
-          </div>
-          <span class="matchup-vs">VS</span>
-          <div class="matchup-side ${m.winner.team === 2 ? 'winner right' : 'loser right'}">
-            <img class="matchup-sprite" src="${m.winner.team === 2 ? m.winner.sprite : m.loser.sprite}">
-            <span class="matchup-name">${m.winner.team === 2 ? m.winner.name : m.loser.name}</span>
-          </div>
-        </div>
-      `).join('') || '<p>Resumo indisponível.</p>';
-      
-      modalContent.innerHTML = `
-        <div style="margin-bottom: 1rem; text-align: center; color: var(--text-2); font-size: 0.9rem;">
-          Vencedor: <b>${match.winner.name}</b> em ${data.total_turns} turnos
-        </div>
-        <div class="matchup-list">${list}</div>
-      `;
-    };
-
-    const renderLog = () => {
-      modalContent.innerHTML = `
-        <div class="battle-log-scroll">
-          ${data.log.map(entry => `
-            <div class="log-entry log-${entry.type}">
-              ${entry.message}
-            </div>
-          `).join('')}
-        </div>
-      `;
-    };
-
-    tabMatchups.addEventListener('click', () => {
-      tabMatchups.classList.add('active'); tabLog.classList.remove('active');
-      renderMatchups();
-    });
-    tabLog.addEventListener('click', () => {
-      tabLog.classList.add('active'); tabMatchups.classList.remove('active');
-      renderLog();
-    });
-
-    // Default
-    renderMatchups();
-
-  } catch (err) {
-    console.error('Erro ao buscar log:', err);
-    document.querySelector('.battle-modal-content').innerHTML = `
-      <div style="text-align: center; color: var(--text-2);">
-        <p>Não foi possível carregar os detalhes desta batalha.</p>
-      </div>
-    `;
   }
 }
 
@@ -539,7 +452,7 @@ async function simulateMatchAndSave(match, roundName) {
 
     const winner = result.winner === 1 ? match.team1 : match.team2;
     const loser = result.winner === 1 ? match.team2 : match.team1;
-    const finalWinnerTeam = result.winner === 1 ? result.team1Final : result.team2Final;
+    const finalWinnerTeam = result.winner === 1 ? result.team1 : result.team2;
 
     // Calcula MVP: pokemon vivo ou morto com maior pontuação (KOs * 100 + dano)
     let mvp = null;
@@ -646,7 +559,7 @@ async function advanceRoundAndSave(roundName) {
             await supabase.from('hall_of_fame').insert({
               user_id: winnerMatch.user_id,
               room_name: room?.code || 'Torneio',
-              team_json: winnerMatch.pokemon.map(p => p.id) // Guarda só IDs ou o objeto todo? O DB espera JSONB, vamos guardar o objeto inteiro para preservar estado (como nickname se tivesse)
+              team_json: winnerMatch.pokemon // Guarda só IDs ou o objeto todo? O DB espera JSONB, vamos guardar o objeto inteiro para preservar estado (como nickname se tivesse)
             });
 
             // Incrementa wins do vencedor (rpc call if we had one, but we can do a simple read/write for MVP since it's only host doing it)
