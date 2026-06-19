@@ -8,6 +8,9 @@ let loading = false;
 
 export function render(cont) {
   container = cont;
+  isSignUp = false;
+  errorMessage = '';
+  loading = false;
   renderScreen();
 }
 
@@ -37,7 +40,7 @@ function renderScreen() {
             ${errorMessage ? `<div class="auth-error">⚠️ ${errorMessage}</div>` : ''}
 
             <button type="submit" class="btn-start btn-auth" ${loading ? 'disabled' : ''}>
-              ${loading ? '<span class="spinner"></span> Processando...' : (isSignUp ? 'Criar Conta' : 'Entrar')}
+              ${loading ? 'Processando...' : (isSignUp ? 'Criar Conta' : 'Entrar')}
             </button>
           </form>
 
@@ -78,13 +81,36 @@ function renderParticles() {
   }
 }
 
-function cleanUsernameForEmail(username) {
-  // Remove acentos, espaços e caracteres especiais para criar um e-mail válido interno
-  return username
+// Converte o username em e-mail fantasma válido
+function toFakeEmail(username) {
+  const clean = username
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '');
+  return `${clean}@gmail.com`;
+}
+
+// Cria senha complexa internamente para satisfazer políticas do Supabase
+function toSecurePassword(password) {
+  return `${password}Pkt@123`;
+}
+
+// Extrai mensagem legível de qualquer formato de erro
+function getErrorMessage(err) {
+  if (!err) return 'Erro desconhecido.';
+  if (typeof err === 'string') return err;
+
+  const raw = err.message || err.error_description || err.msg || err.error || '';
+  if (raw && raw !== '{}') return raw;
+
+  // Último recurso: serializa
+  try {
+    const s = JSON.stringify(err);
+    if (s && s !== '{}') return `Erro do servidor: ${s}`;
+  } catch (_) {}
+
+  return 'Erro de conexão com o servidor. Verifique se o projeto do Supabase está ativo.';
 }
 
 function attachEvents() {
@@ -94,76 +120,79 @@ function attachEvents() {
       e.preventDefault();
       if (loading) return;
 
+      // Lê os valores ANTES de re-renderizar (para não perder os inputs)
       const username = container.querySelector('#username').value.trim();
       const password = container.querySelector('#password').value;
+
+      if (!username || !password) {
+        errorMessage = 'Preencha o nome e a senha.';
+        renderScreen();
+        return;
+      }
+
+      const email = toFakeEmail(username);
+      const securePassword = toSecurePassword(password);
 
       loading = true;
       errorMessage = '';
       renderScreen();
-      
-      // Gera o e-mail fantasma correspondente (usamos gmail.com pois é um domínio garantidamente válido para qualquer validador)
-      const dummyEmail = `${cleanUsernameForEmail(username)}@gmail.com`;
-      // Gera uma senha complexa interna para satisfazer a política do Supabase (Letra Maiúscula, Minúscula, Número, Símbolo)
-      const securePassword = `${password}Pkt@123`;
 
       try {
+        console.log('🔐 Tentando auth com:', { email, isSignUp });
+
         if (isSignUp) {
-          // Cadastro
-          const { data, error } = await supabase.auth.signUp({
-            email: dummyEmail,
+          // Tentativa de cadastro
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
             password: securePassword,
             options: {
-              data: {
-                full_name: username
-              }
+              data: { full_name: username }
             }
           });
 
-          if (error) throw error;
+          console.log('📋 SignUp response:', { data: signUpData, error: signUpError });
+          if (signUpError) throw signUpError;
 
-          // Como usamos e-mail fictício, fazemos login automático após cadastro
-          const { error: loginErr } = await supabase.auth.signInWithPassword({
-            email: dummyEmail,
+          // Login automático após cadastro
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email,
             password: securePassword
           });
-          
-          if (loginErr) throw loginErr;
+
+          console.log('🔑 Login response:', { data: loginData, error: loginError });
+          if (loginError) throw loginError;
+
         } else {
-          // Login
-          const { error } = await supabase.auth.signInWithPassword({
-            email: dummyEmail,
+          // Login direto
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email,
             password: securePassword
           });
-          if (error) throw error;
+
+          console.log('🔑 Login response:', { data: loginData, error: loginError });
+          if (loginError) throw loginError;
         }
+
       } catch (err) {
-        console.error('❌ FULL AUTH ERROR:', err);
-        
-        let msg = 'Erro ao processar requisição';
-        if (err) {
-          if (typeof err === 'string') {
-            msg = err;
-          } else if (err.message && err.message !== '{}') {
-            msg = err.message;
-          } else if (err.error_description) {
-            msg = err.error_description;
-          } else {
-            msg = err.msg || err.error || err.statusText || JSON.stringify(err);
-            if (msg === '{}') {
-              msg = 'Erro na resposta do servidor. Verifique as credenciais do Supabase no arquivo .env ou na Vercel.';
-            }
-          }
+        console.error('❌ AUTH ERROR completo:', JSON.stringify(err, null, 2));
+        console.error('Status:', err?.status, '| Message:', err?.message, '| Name:', err?.name);
+        let msg = getErrorMessage(err);
+
+        // Traduções de erros comuns
+        if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+          msg = 'Usuário ou senha incorretos.';
+        } else if (msg.includes('User already registered') || msg.includes('already registered')) {
+          msg = 'Este treinador já está cadastrado. Escolha outro nome.';
+        } else if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
+          msg = 'Acesso bloqueado. Desative a opção "Confirm email" no painel do Supabase → Authentication → Email.';
+        } else if (msg.includes('invalid format') || msg.includes('Unable to validate')) {
+          msg = 'Nome de usuário inválido. Use apenas letras e números sem espaços.';
+        } else if (err.status === 500 || msg.includes('500')) {
+          msg = 'O projeto do Supabase pode estar pausado. Acesse supabase.com e reative o projeto.';
         }
+
         errorMessage = msg;
-        
-        // Traduz erros comuns do Supabase para ajudar o usuário
-        if (errorMessage.includes('Invalid login credentials')) {
-          errorMessage = 'Usuário ou senha incorretos.';
-        } else if (errorMessage.includes('User already registered')) {
-          errorMessage = 'Este treinador já está cadastrado. Escolha outro nome.';
-        } else if (errorMessage.includes('Email not confirmed')) {
-          errorMessage = 'E-mail não confirmado. Desative a opção "Confirm email" nas configurações do seu Supabase.';
-        }
+
       } finally {
         loading = false;
         renderScreen();

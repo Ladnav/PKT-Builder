@@ -16,6 +16,15 @@ export function registerScreen(name, screenModule) {
 export function navigate(name, params = {}) {
   if (currentScreen?.destroy) currentScreen.destroy();
 
+  // Salva a rota atual no sessionStorage para restaurar após refresh de token
+  if (name !== 'auth') {
+    try {
+      sessionStorage.setItem('pkt_route', JSON.stringify({ name, params }));
+    } catch (_) {}
+  } else {
+    sessionStorage.removeItem('pkt_route');
+  }
+
   appContainer.innerHTML = '';
   appContainer.className = `screen screen-${name}`;
 

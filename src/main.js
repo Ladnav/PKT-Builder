@@ -22,11 +22,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Monitora alterações no estado de login
   supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
+    if (event === 'SIGNED_IN') {
+      // Login explícito: tenta restaurar rota salva ou vai pra home
+      const saved = sessionStorage.getItem('pkt_route');
+      if (saved) {
+        try {
+          const { name, params } = JSON.parse(saved);
+          navigate(name, params);
+          return;
+        } catch (_) {}
+      }
       navigate('home');
-    } else {
+
+    } else if (event === 'SIGNED_OUT') {
+      // Logout: limpa rota salva e vai pra auth
+      sessionStorage.removeItem('pkt_route');
       navigate('auth');
+
+    } else if (event === 'INITIAL_SESSION') {
+      // Carga inicial da página (refresh, minimizar/restaurar)
+      if (session) {
+        const saved = sessionStorage.getItem('pkt_route');
+        if (saved) {
+          try {
+            const { name, params } = JSON.parse(saved);
+            navigate(name, params);
+            return;
+          } catch (_) {}
+        }
+        navigate('home');
+      } else {
+        navigate('auth');
+      }
     }
+    // TOKEN_REFRESHED e outros eventos: ignora (não muda a tela)
   });
 });
 

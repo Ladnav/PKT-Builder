@@ -284,11 +284,15 @@ async function handleAddBot() {
   if (!isHost || participants.length >= 8) return;
   errorMsg = '';
 
+  // Desabilita o botão visualmente durante o processo
+  const btn = container.querySelector('#btn-add-bot');
+  if (btn) btn.disabled = true;
+
   try {
     // Escolhe nome de bot não usado
     const takenNames = participants.filter(p => p.is_bot).map(p => p.bot_name);
     const availableNames = BOT_NAMES.filter(name => !takenNames.includes(name));
-    const botName = availableNames[Math.floor(Math.random() * availableNames.length)] || `BOT ${participants.length}`;
+    const botName = availableNames[Math.floor(Math.random() * availableNames.length)] || `BOT ${participants.length + 1}`;
 
     // Encontra primeiro slot livre
     const takenSlots = participants.map(p => p.slot);
@@ -300,7 +304,9 @@ async function handleAddBot() {
       }
     }
 
-    const { error } = await supabase
+    console.log('🤖 Adicionando BOT:', { botName, botSlot, roomId });
+
+    const { data, error } = await supabase
       .from('room_participants')
       .insert({
         room_id: roomId,
@@ -309,15 +315,19 @@ async function handleAddBot() {
         slot: botSlot,
         team: [],
         seed: Math.floor(Math.random() * 1000000)
-      });
+      })
+      .select();
 
+    console.log('🤖 Resultado:', { data, error });
     if (error) throw error;
+
   } catch (err) {
-    console.error(err);
-    errorMsg = 'Erro ao adicionar BOT.';
+    console.error('❌ Erro ao adicionar BOT:', err);
+    errorMsg = `Erro ao adicionar BOT: ${err.message || JSON.stringify(err)}`;
     renderLobby();
   }
 }
+
 
 async function handleKickParticipant(pId) {
   if (!isHost) return;
