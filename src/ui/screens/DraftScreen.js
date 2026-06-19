@@ -386,12 +386,12 @@ function renderDraftMain(isPlayer) {
 
     if (!isBlindMode && draftState.current_options && draftState.current_options.length > 0) {
       optionsInfo = `
-        <div style="margin-top: 1.5rem; opacity: 0.85; pointer-events: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0.5rem;">
+        <div class="other-user-options">
           ${draftState.current_options.map(p => {
             const gradColor = TYPE_COLORS[p.types[0]] || '#6c63ff';
             return `
-              <div class="pokemon-mini-card" style="--card-color: ${gradColor}; flex-direction: column; width: 90px; height: 115px; justify-content: center; text-align: center; padding: 0.6rem; gap: 0.4rem; border-left: none; border-top: 3px solid ${gradColor};" data-tooltip-info='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
-                <img src="${p.sprite}" alt="${p.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'" style="width: 55px; height: 55px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); margin: 0 auto;">
+              <div class="pokemon-mini-card" style="--card-color: ${gradColor}; flex-direction: column; width: 100%; max-width: 85px; height: 115px; justify-content: center; text-align: center; padding: 0.6rem; gap: 0.4rem; border-left: none; border-top: 3px solid ${gradColor};" data-tooltip-info='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
+                <img src="${p.sprite}" alt="${p.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'" style="width: 52px; height: 52px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); margin: 0 auto;">
                 <span class="mini-name" style="font-size: 0.75rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; display: block; color: var(--text-1);">${p.displayName}</span>
               </div>
             `;

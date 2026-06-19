@@ -2304,3 +2304,25 @@ input:checked + .toggle-slider:before {
 .bm-log-entry.type-eff-super { color: #00FF00; }
 .bm-log-entry.type-eff-not { color: #AAAAAA; }
 
+/* Outras escolhas do usuário no Draft */
+.other-user-options {
+  margin-top: 1.5rem;
+  opacity: 0.85;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.5rem;
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.5rem;
+  justify-items: center;
+}
+
+@media (max-width: 768px) {
+  .other-user-options {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 390px;
+  }
+}
+
