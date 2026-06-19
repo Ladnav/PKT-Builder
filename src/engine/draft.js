@@ -179,7 +179,7 @@ export function isPlayerTurn(state) {
 
 // Retorna % de progresso do draft
 export function getDraftProgress(state) {
-  const total = state.numTeams * ROUNDS;
-  const done = state.history.length;
-  return Math.round((done / total) * 100);
+  const total = (state.numTeams || 8) * ROUNDS;
+  const done = (state.history || []).length;
+  return Math.round((done / total) * 100) || 0;
 }
