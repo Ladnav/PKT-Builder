@@ -1,4 +1,4 @@
-﻿// src/ui/screens/HomeScreen.js
+// src/ui/screens/HomeScreen.js
 import { navigate } from '../router.js';
 import { DRAFT_MODES_INFO } from '../../engine/draft.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
@@ -701,10 +701,6 @@ async function handleJoinRoom(code) {
       throw new Error('Sala nao encontrada. Verifique o codigo.');
     }
 
-    if (room.status !== 'waiting') {
-      throw new Error('Esta sala ja iniciou o jogo.');
-    }
-
     const { data: participants, error: partError } = await supabase
       .from('room_participants')
       .select('*')
@@ -712,14 +708,24 @@ async function handleJoinRoom(code) {
 
     if (partError) throw partError;
 
-    if (participants.length >= 8) {
-      throw new Error('A sala esta cheia.');
-    }
-
     const alreadyIn = participants.find(p => p.user_id === user.id);
     if (alreadyIn) {
-      navigate('lobby', { code: room.code, roomId: room.id });
+      if (room.status === 'drafting') {
+        navigate('draft', { code: room.code, roomId: room.id });
+      } else if (room.status === 'tournament' || room.status === 'finished') {
+        navigate('bracket', { code: room.code, roomId: room.id });
+      } else {
+        navigate('lobby', { code: room.code, roomId: room.id });
+      }
       return;
+    }
+
+    if (room.status !== 'waiting') {
+      throw new Error('Esta sala ja iniciou o jogo.');
+    }
+
+    if (participants.length >= 8) {
+      throw new Error('A sala esta cheia.');
     }
 
     const takenSlots = participants.map(p => p.slot);
