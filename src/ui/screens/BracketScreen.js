@@ -146,11 +146,11 @@ function updateUI() {
     // Está nas quartas, semis ou final. Se perdeu em alguma etapa anterior, playerAlive = false.
     let lost = false;
     // Verifica quartas se já simulou seu jogo
-    const myQF = bracket.matches.quarters.find(m => m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
+    const myQF = bracket.matches.quarters?.find(m => m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
     if (myQF && myQF.simulated && myQF.winner?.user_id !== currentUserId) lost = true;
     
     // Verifica semis
-    const mySF = bracket.matches.semis.find(m => m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
+    const mySF = bracket.matches.semis?.find(m => m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
     if (mySF && mySF.simulated && mySF.winner?.user_id !== currentUserId) lost = true;
 
     playerAlive = !lost;
@@ -333,9 +333,9 @@ async function loadAndShowBattleLog(matchId) {
   // Encontra a partida correspondente no bracket local
   let match = null;
   const allMatches = [
-    ...bracket.matches.quarters,
-    ...bracket.matches.semis,
-    ...bracket.matches.final,
+    ...(bracket.matches.quarters || []),
+    ...(bracket.matches.semis || []),
+    ...(bracket.matches.final || []),
   ];
   match = allMatches.find(m => m.id === matchId);
   if (!match) return;
