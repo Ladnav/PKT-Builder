@@ -5,6 +5,7 @@ import { renderBattleModal, renderBattleModalLoading, renderBattleModalError } f
 import { createBattleState, simulateBattle } from '../../engine/battle.js';
 import { TYPE_COLORS } from '../../engine/types.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
+import { getTrainerAvatar } from '../../lib/avatars.js';
 
 const ROUNDS_NAMES = {
   quarters: 'Quartas de Final',
@@ -267,7 +268,12 @@ function renderMatch(match, isFinal = false) {
       <div class="match-team ${isWinner ? 'winner' : hasResult ? 'loser' : ''} ${team.isPlayer ? 'player' : ''}" style="--team-color: ${color}">
         ${sprite ? `<img class="match-sprite" src="${sprite}" alt="${team.name}" onerror="this.style.display='none'">` : ''}
         <div class="match-team-info">
-          <span class="match-team-name">${team.isPlayer ? '🎮 ' : '🤖 '}${team.name}</span>
+          <span class="match-team-name" style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid ${team.isPlayer ? 'var(--gold)' : 'var(--border)'}; flex-shrink: 0;">
+              <img src="${getTrainerAvatar(team)}" alt="${team.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            </span>
+            <span>${team.name}</span>
+          </span>
           <div class="match-team-types">
             ${team.pokemon.slice(0,3).map(p => `<img class="match-mini-sprite" src="${p.sprite}" alt="${p.displayName}" title="${p.displayName}" onerror="this.style.display='none'">`).join('')}
           </div>
@@ -297,7 +303,12 @@ function renderChampionBanner(isPlayer) {
       <div class="champion-content">
         <div class="champion-fireworks">🎆</div>
         <h2 class="champion-title">${isPlayer ? '🎉 VOCÊ É O CAMPEÃO!' : '🏆 CAMPEÃO!'}</h2>
-        <div class="champion-name">${isPlayer ? '🎮 Você' : `🤖 ${champ?.name}`}</div>
+        <div class="champion-name" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
+            <img src="${getTrainerAvatar(champ)}" alt="${champ?.name || ''}" style="width: 100%; height: 100%; object-fit: cover;">
+          </span>
+          <span>${isPlayer ? 'Você' : (champ?.name || '')}</span>
+        </div>
         ${sprite ? `<img class="champion-sprite" src="${sprite}" alt="campeão">` : ''}
         
         ${finalMatch?.mvp ? `

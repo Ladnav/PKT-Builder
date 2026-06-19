@@ -3,6 +3,7 @@ import { navigate } from '../router.js';
 import { initEmotes, destroyEmotes } from '../components/Emotes.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
+import { getTrainerAvatar } from '../../lib/avatars.js';
 
 const BOT_NAMES = ['Treinador Red', 'Treinador Blue', 'Ash Ketchum', 'Gary Oak', 'Campeã Cynthia', 'Campeão Lance', 'Misty', 'Brock', 'Steven Stone', 'Leon', 'Cynthia', 'N', 'Cyrus', 'Giovanni'];
 
@@ -222,7 +223,9 @@ function renderLobby() {
             return `
               <div class="lobby-slot ${typeClass}">
                 <span class="slot-num">${idx + 1}</span>
-                <span class="slot-avatar">${isBot ? '🤖' : '👤'}</span>
+                <span class="slot-avatar" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 2px solid ${isBot ? 'var(--accent-1)' : isSelf ? 'var(--gold)' : 'var(--border)'}; margin: 0 auto;">
+                  <img src="${getTrainerAvatar(p)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
+                </span>
                 <div class="slot-details">
                   <span class="slot-name">${name} ${isSelf ? '<small>(Você)</small>' : ''}</span>
                   <span class="slot-badge">${isBot ? 'BOT' : p.user_id === room?.host_id ? 'HOST' : 'Jogador'}</span>

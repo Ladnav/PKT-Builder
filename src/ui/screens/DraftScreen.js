@@ -9,6 +9,7 @@ import { createBracket } from '../../tournament/bracket.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
+import { getTrainerAvatar } from '../../lib/avatars.js';
 
 let roomId = null;
 let roomCode = null;
@@ -275,9 +276,25 @@ function updateUI() {
     turnInfo.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
     const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
     if (isPlayer) {
-      turnInfo.innerHTML = `🎯 SUA VEZ! <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>`;
+      turnInfo.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
+            <img src="${getTrainerAvatar(currentPart)}" alt="Você" style="width: 100%; height: 100%; object-fit: cover;">
+          </span>
+          <span>🎯 SUA VEZ!</span>
+          <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+        </div>
+      `;
     } else {
-      turnInfo.innerHTML = `⌛ Vez do ${name} <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>`;
+      turnInfo.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--accent-1); flex-shrink: 0;">
+            <img src="${getTrainerAvatar(currentPart)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
+          </span>
+          <span>⌛ Vez de ${name}</span>
+          <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+        </div>
+      `;
     }
   }
 
@@ -292,10 +309,12 @@ function updateUI() {
       const teamList = p.team || [];
       return `
         <div class="team-item ${active ? 'active' : ''} ${isMe ? 'player-team' : ''}">
-          <div class="team-header">
-            <span class="team-icon">${p.is_bot ? '🤖' : '👤'}</span>
-            <span class="team-name">${name}</span>
-            <span class="team-count">${teamList.length}/6</span>
+          <div class="team-header" style="display: flex; align-items: center; gap: 8px;">
+            <span class="team-icon" style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid ${p.is_bot ? 'var(--accent-1)' : isMe ? 'var(--gold)' : 'var(--border)'}; flex-shrink: 0;">
+              <img src="${getTrainerAvatar(p)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
+            </span>
+            <span class="team-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
+            <span class="team-count" style="flex-shrink: 0;">${teamList.length}/6</span>
           </div>
           ${showTeams || isMe ? `
             <div class="team-pokemon-row">
