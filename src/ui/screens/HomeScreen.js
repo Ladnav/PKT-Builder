@@ -817,7 +817,7 @@ function renderScreen() {
                 <select id="settings-mode" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
                   <option value="type">Draft Clássico (Aberto)</option>
                   <option value="blind">Draft Cego (Times Ocultos)</option>
-                  <option value="random">Draft Aleatório (Sorteio)</option>
+                  <option value="random" selected>Draft Aleatório (Sorteio)</option>
                 </select>
               </div>
 
@@ -828,7 +828,7 @@ function renderScreen() {
                   <option value="30">30 Segundos (Rápido)</option>
                   <option value="45">45 Segundos (Padrão)</option>
                   <option value="60">60 Segundos (Longo)</option>
-                  <option value="0">Sem Limite de Tempo</option>
+                  <option value="0" selected>Sem Limite de Tempo</option>
                 </select>
               </div>
 

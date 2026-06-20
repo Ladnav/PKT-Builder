@@ -1092,7 +1092,12 @@ function processTurn() {
   const isPlayer = currentPart.user_id === currentUserId;
 
   if (isNewTurn && isPlayer) {
-    playSFX('turnAlert');
+    const hasShinyOption = draftState.current_options && draftState.current_options.some(p => p && p.isShiny);
+    if (hasShinyOption) {
+      playSFX('shiny');
+    } else {
+      playSFX('turnAlert');
+    }
   }
 
   // Inicia ou reseta o timer apenas se for um turno novo ou o timer não estiver rodando

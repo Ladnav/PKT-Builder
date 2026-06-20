@@ -609,10 +609,26 @@ a { color: var(--accent-2); }
   background: linear-gradient(90deg, var(--card-color, var(--accent)), transparent);
 }
 
+@keyframes shinyGlow {
+  0% {
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.3), inset 0 0 4px rgba(251, 191, 36, 0.1);
+    border-color: rgba(251, 191, 36, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.7), 0 0 10px rgba(251, 191, 36, 0.3), inset 0 0 8px rgba(251, 191, 36, 0.2);
+    border-color: rgba(251, 191, 36, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.3), inset 0 0 4px rgba(251, 191, 36, 0.1);
+    border-color: rgba(251, 191, 36, 0.5);
+  }
+}
+
 .pokemon-card.shiny {
   border-color: rgba(251, 191, 36, 0.5);
   box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
   background: linear-gradient(145deg, var(--surface), rgba(251, 191, 36, 0.05));
+  animation: shinyGlow 2.5s infinite ease-in-out;
 }
 .pokemon-card.shiny::before {
   background: linear-gradient(90deg, #fbbf24, #f59e0b, transparent);
@@ -3043,33 +3059,80 @@ input:checked + .toggle-slider:before {
 @media (min-width: 901px) {
   .options-grid {
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 0.8rem !important;
+    gap: 0.4rem !important;
   }
   .options-grid .pokemon-card {
-    padding: 0.8rem !important;
-    gap: 0.3rem !important;
-    font-size: 0.85rem !important;
+    padding: 0.5rem !important;
+    gap: 0.2rem !important;
+    font-size: 0.75rem !important;
+  }
+  .options-grid .card-header {
+    font-size: 0.65rem !important;
+  }
+  .options-grid .card-number,
+  .options-grid .card-bst {
+    font-size: 0.6rem !important;
+    padding: 1px 4px !important;
   }
   .options-grid .card-sprite-wrap {
-    height: 75px !important;
+    height: 55px !important;
   }
   .options-grid .card-sprite {
-    width: 60px !important;
-    height: 60px !important;
+    width: 50px !important;
+    height: 50px !important;
+  }
+  .options-grid .card-name {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.1rem !important;
+  }
+  .options-grid .card-types {
+    gap: 2px !important;
+  }
+  .options-grid .type-badge {
+    padding: 1px 4px !important;
+    font-size: 0.55rem !important;
+    gap: 3px !important;
   }
   .options-grid .card-stats {
-    gap: 0.15rem !important;
+    gap: 2px !important;
   }
   .options-grid .stat-row {
-    font-size: 0.65rem !important;
+    grid-template-columns: 24px 1fr 18px !important;
+    gap: 3px !important;
+    font-size: 0.6rem !important;
+  }
+  .options-grid .stat-row > span:first-child {
+    font-size: 0.55rem !important;
+  }
+  .options-grid .stat-row > span:last-child {
+    font-size: 0.55rem !important;
+  }
+  .options-grid .stat-bar {
+    height: 2px !important;
   }
   .options-grid .card-moves {
-    margin-top: 0.15rem !important;
-    gap: 0.2rem !important;
+    margin-top: 0.1rem !important;
+    gap: 1px !important;
   }
   .options-grid .move-pill {
-    padding: 2px 4px !important;
-    font-size: 0.65rem !important;
+    padding: 1px 4px !important;
+    border: none !important;
+    background: rgba(0,0,0,0.3) !important;
+    font-size: 0.6rem !important;
+  }
+  .options-grid .move-info {
+    gap: 3px !important;
+  }
+  .options-grid .move-name {
+    font-size: 0.58rem !important;
+    max-width: 80px !important;
+  }
+  .options-grid .move-power {
+    font-size: 0.58rem !important;
+  }
+  .options-grid .move-class {
+    font-size: 0.5rem !important;
+    padding: 0px 2px !important;
   }
 }
 
