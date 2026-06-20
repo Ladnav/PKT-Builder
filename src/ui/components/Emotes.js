@@ -5,32 +5,8 @@ let currentChannel = null;
 const EMOTES_LIST = ['👍', '🔥', '😂', '🤯', '😡', '😱', '🎉', '🏆', '🧠', '💪', '👑', '🍀', '🤫', '💀'];
 
 export function initEmotes(container, roomId, currentUserId, currentUsername = 'Treinador') {
-  // Cleanup se já existir
-  destroyEmotes();
-
-  // Cria a UI da barra de emotes
-  const emoteBar = document.createElement('div');
-  emoteBar.id = 'emote-bar';
-  emoteBar.className = 'emote-bar';
-  
-  EMOTES_LIST.forEach(emoji => {
-    const btn = document.createElement('button');
-    btn.className = 'emote-btn';
-    btn.textContent = emoji;
-    btn.onclick = () => sendEmote(emoji, roomId, currentUserId, currentUsername);
-    emoteBar.appendChild(btn);
-  });
-
-  container.appendChild(emoteBar);
-
-  // Inscreve no canal de broadcast da sala
-  currentChannel = supabase.channel(`room-${roomId}-emotes`);
-  
-  currentChannel
-    .on('broadcast', { event: 'emote' }, (payload) => {
-      showFloatingEmote(payload.payload.emoji, payload.payload.userId, payload.payload.username);
-    })
-    .subscribe();
+  // Desativado temporariamente
+  return;
 }
 
 export function destroyEmotes() {
