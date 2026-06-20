@@ -1,4 +1,5 @@
 import { TYPE_COLORS, TYPE_ICONS } from '../../engine/types.js';
+import { getItemIconHtml } from './PokemonCard.js';
 
 let tooltipEl = null;
 
@@ -64,7 +65,7 @@ function renderTooltip(pokemon) {
     // It's an item
     tooltipEl.innerHTML = `
       <div class="tooltip-item" style="display: flex; align-items: center;">
-        <div style="font-size: 2rem;">${pokemon.icon}</div>
+        <div style="font-size: 2rem; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(255,255,255,0.05); border-radius: 6px;">${getItemIconHtml(pokemon, 28)}</div>
         <div style="margin-left: 0.5rem;">
           <h4 style="margin: 0;">${pokemon.displayName}</h4>
           <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: var(--text-2);">${pokemon.description}</p>
@@ -80,7 +81,7 @@ function renderTooltip(pokemon) {
   const itemHtml = pokemon.item ? `
     <div class="tooltip-item-equip" style="margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.5rem; font-size: 0.75rem; display: flex; align-items: center; gap: 6px;">
       <span style="color: var(--text-2);">Item:</span>
-      <span style="color: var(--gold); font-weight: bold;">${pokemon.item.icon} ${pokemon.item.displayName}</span>
+      <span style="color: var(--gold); font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">${getItemIconHtml(pokemon.item)} ${pokemon.item.displayName}</span>
       <span style="color: var(--text-3); font-size: 0.7rem; margin-left: auto;">${pokemon.item.description}</span>
     </div>
   ` : '';

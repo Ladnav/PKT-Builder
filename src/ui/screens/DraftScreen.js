@@ -1,7 +1,7 @@
 // src/ui/screens/DraftScreen.js
 import { navigate } from '../router.js';
 import { initEmotes, destroyEmotes } from '../components/Emotes.js';
-import { PokemonCard, PokemonMiniCard, PokemonRosterCard } from '../components/PokemonCard.js';
+import { PokemonCard, PokemonMiniCard, PokemonRosterCard, getItemIconHtml } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
 import { TYPE_NAMES_PT, TYPE_ICONS, TYPE_COLORS, ALL_TYPES, getTotalEffectiveness } from '../../engine/types.js';
 import { DRAFT_MODES, botChooseType, botChoosePokemon, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
@@ -93,6 +93,7 @@ export async function render(cont, params) {
 
     if (rErr) throw rErr;
     room = rData;
+    isHost = (room.host_id === currentUserId);
 
     // Busca participantes
     await fetchParticipants();
@@ -521,14 +522,14 @@ function renderPokemonOptions() {
           <h3 style="font-size: 1.1rem; color: var(--gold); margin-bottom: 0.8rem; text-align: center;">1. Selecione o Item</h3>
           <div class="items-select-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
             ${options.length === 0 ? `
-              <div class="bot-thinking" style="grid-column: 1/-1"><p>Gerando itens...</p></div>
-            ` : options.map(item => `
-              <div class="item-select-card" data-item-id="${item.id}" style="text-align: center; padding: 1.2rem; cursor: pointer; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-3); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
-                <div style="font-size: 2.8rem;">${item.icon}</div>
-                <h4 style="margin: 0; font-size: 1.05rem; color: white;">${item.displayName}</h4>
-                <p style="margin: 0; font-size: 0.75rem; color: var(--text-2); line-height: 1.3;">${item.description}</p>
-              </div>
-            `).join('')}
+               <div class="bot-thinking" style="grid-column: 1/-1"><p>Gerando itens...</p></div>
+             ` : options.map(item => `
+               <div class="item-select-card" data-item-id="${item.id}" style="text-align: center; padding: 1.2rem; cursor: pointer; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-3); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                 <div style="font-size: 2.8rem; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(255,255,255,0.05); border-radius: 12px; margin: 0 auto;">${getItemIconHtml(item, 48)}</div>
+                 <h4 style="margin: 0; font-size: 1.05rem; color: white;">${item.displayName}</h4>
+                 <p style="margin: 0; font-size: 0.75rem; color: var(--text-2); line-height: 1.3;">${item.description}</p>
+               </div>
+             `).join('')}
           </div>
         </div>
 
@@ -544,8 +545,8 @@ function renderPokemonOptions() {
                   <span style="font-size: 0.75rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; color: white;">${poke.displayName}</span>
                   <span style="font-size: 0.65rem; color: var(--text-3);">BST ${bst}</span>
                   ${poke.item ? `
-                    <div style="font-size: 0.65rem; color: var(--gold); background: rgba(251,191,36,0.1); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 3px; margin-top: 2px; display: inline-flex; align-items: center; gap: 2px;">
-                      ${poke.item.icon} ${poke.item.displayName}
+                    <div style="font-size: 0.65rem; color: var(--gold); background: rgba(251,191,36,0.1); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 4px; margin-top: 2px; display: inline-flex; align-items: center; gap: 4px;">
+                      ${getItemIconHtml(poke.item)} ${poke.item.displayName}
                     </div>
                   ` : ''}
                 </div>
@@ -740,14 +741,17 @@ async function selectItemForPokemon(item, pokemonIdx, participant) {
   const currentSlot = draftState.current_slot;
   const currentRound = draftState.current_round;
 
-  if (loading) return;
-  if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound) {
+  const isBot = participant.is_bot ?? false;
+  if (loading && !isBot) return;
+  if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound && !isBot) {
     console.log('Turno já processado por este cliente:', { currentSlot, currentRound });
     return;
   }
-  loading = true;
-  lastProcessedSlot = currentSlot;
-  lastProcessedRound = currentRound;
+  if (!isBot) {
+    loading = true;
+    lastProcessedSlot = currentSlot;
+    lastProcessedRound = currentRound;
+  }
 
   // Remove o modal se existir
   const modal = document.getElementById('equip-item-modal');
@@ -892,17 +896,21 @@ async function selectPokemon(pokemon) {
     return;
   }
 
-  if (loading) return;
-  if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound) {
+  const currentPart = participants.find(p => p.slot === currentSlot);
+  const isBot = currentPart?.is_bot ?? false;
+
+  if (loading && !isBot) return;
+  if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound && !isBot) {
     console.log('Turno já processado por este cliente:', { currentSlot, currentRound });
     return;
   }
-  loading = true;
-  lastProcessedSlot = currentSlot;
-  lastProcessedRound = currentRound;
+  if (!isBot) {
+    loading = true;
+    lastProcessedSlot = currentSlot;
+    lastProcessedRound = currentRound;
+  }
 
   try {
-    const currentPart = participants.find(p => p.slot === currentSlot);
     const updatedTeam = [...(currentPart.team || []), pokemon];
 
     // 1. Atualiza time do participante
