@@ -227,7 +227,7 @@ function getPlayerTournamentStatus(bracket, currentUserId) {
 
     const wonSF = mySF.winner?.user_id === currentUserId;
     if (!wonSF) {
-      return { completed: true, pointsChange: -5, reason: 'semis' };
+      return { completed: true, pointsChange: -5, reason: 'semis_4' };
     }
 
     // Won SF, check final
@@ -262,6 +262,8 @@ function triggerEloAnimation(currentElo, nextElo, pointsChange, reason) {
     reasonText = '🥈 Incrível! Você chegou à Final!';
   } else if (reason === 'semis') {
     reasonText = '🥉 Excelente! Você chegou às Semifinais!';
+  } else if (reason === 'semis_4') {
+    reasonText = '🚪 Eliminado nas Semifinais (1ª Rodada).';
   } else if (reason === 'quarters') {
     reasonText = '🚪 Eliminado nas Quartas de Final.';
   }
