@@ -10,6 +10,7 @@ import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
 import { getTrainerAvatar } from '../../lib/avatars.js';
+import { playBGM, playSFX, attachMuteToggleListener } from '../../lib/sounds.js';
 
 let roomId = null;
 let roomCode = null;
@@ -71,6 +72,7 @@ export async function render(cont, params) {
   botTurnInProgress = false;
 
   renderLayout();
+  playBGM('draft');
 
   try {
     const user = await getCurrentUser();
@@ -206,7 +208,10 @@ function renderLayout() {
         <div class="draft-turn-info" id="turn-info">
           Buscando turno...
         </div>
-        <button id="btn-leave-draft" style="margin-left: auto; background: #e74c3c; border: none; color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; font-family: inherit; transition: opacity 0.2s;">🚪 Sair</button>
+        <div style="margin-left: auto; display: flex; gap: 0.5rem; align-items: center;">
+          <button class="hs-btn-mute" id="btn-mute" title="Som"></button>
+          <button id="btn-leave-draft" style="background: #e74c3c; border: none; color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; font-family: inherit; transition: opacity 0.2s;">🚪 Sair</button>
+        </div>
       </header>
 
       <!-- BODY -->
@@ -355,10 +360,19 @@ function updateUI() {
   }
 
   // Eventos do cabeçalho
+  const btnMute = container.querySelector('#btn-mute');
+  if (btnMute && !btnMute.hasAttribute('data-audio-attached')) {
+    btnMute.setAttribute('data-audio-attached', 'true');
+    attachMuteToggleListener('btn-mute');
+  }
+
   const btnLeave = container.querySelector('#btn-leave-draft');
   if (btnLeave && !btnLeave.hasAttribute('data-attached')) {
     btnLeave.setAttribute('data-attached', 'true');
-    btnLeave.addEventListener('click', handleLeaveRoom);
+    btnLeave.addEventListener('click', () => {
+      playSFX('click');
+      handleLeaveRoom();
+    });
   }
 
   // 6. Painel central
@@ -419,9 +433,9 @@ function renderDraftMain(isPlayer) {
           ${draftState.current_options.map(p => {
             const gradColor = TYPE_COLORS[p.types[0]] || '#6c63ff';
             return `
-              <div class="pokemon-mini-card" style="--card-color: ${gradColor}; flex-direction: column; width: 100%; max-width: 85px; height: 115px; justify-content: center; text-align: center; padding: 0.6rem; gap: 0.4rem; border-left: none; border-top: 3px solid ${gradColor};" data-tooltip-info='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
-                <img src="${p.sprite}" alt="${p.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'" style="width: 52px; height: 52px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); margin: 0 auto;">
-                <span class="mini-name" style="font-size: 0.75rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; display: block; color: var(--text-1);">${p.displayName}</span>
+              <div class="pokemon-mini-card" style="--card-color: ${gradColor}; flex-direction: column; width: 100%; max-width: 120px; height: 155px; justify-content: center; text-align: center; padding: 0.8rem; gap: 0.5rem; border-left: none; border-top: 4px solid ${gradColor};" data-tooltip-info='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
+                <img src="${p.sprite}" alt="${p.displayName}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'" style="width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); margin: 0 auto;">
+                <span class="mini-name" style="font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; display: block; color: var(--text-1);">${p.displayName}</span>
               </div>
             `;
           }).join('')}
@@ -583,12 +597,16 @@ async function handleReroll() {
 function attachDraftEvents() {
   const btnReroll = container.querySelector('#btn-reroll');
   if (btnReroll) {
-    btnReroll.addEventListener('click', handleReroll);
+    btnReroll.addEventListener('click', () => {
+      playSFX('select');
+      handleReroll();
+    });
   }
 
   // Seleção de tipo
   container.querySelectorAll('.type-btn:not(.disabled)').forEach(btn => {
     btn.addEventListener('click', () => {
+      playSFX('select');
       const type = btn.dataset.type;
       selectType(type);
     });
@@ -597,6 +615,7 @@ function attachDraftEvents() {
   // Seleção de Pokémon / Item
   container.querySelectorAll('.pokemon-card.selectable').forEach(card => {
     card.addEventListener('click', () => {
+      playSFX('click');
       const rawId = card.dataset.id;
       const id = isNaN(parseInt(rawId)) ? rawId : parseInt(rawId); // items use string id
       const option = draftState.current_options.find(p => p.id === id);
@@ -837,6 +856,10 @@ function processTurn() {
   }
 
   const isPlayer = currentPart.user_id === currentUserId;
+
+  if (isNewTurn && isPlayer) {
+    playSFX('turnAlert');
+  }
 
   // Inicia ou reseta o timer apenas se for um turno novo ou o timer não estiver rodando
   if (isNewTurn || !turnTimerInterval) {

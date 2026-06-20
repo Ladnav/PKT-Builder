@@ -7,12 +7,14 @@ import * as LobbyScreen    from './ui/screens/LobbyScreen.js';
 import * as DraftScreen    from './ui/screens/DraftScreen.js';
 import * as BracketScreen  from './ui/screens/BracketScreen.js';
 import { supabase }        from './lib/supabase.js';
+import { initSounds }      from './lib/sounds.js';
 
 // Inicializa a app quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
   const appContainer = document.getElementById('app');
   if (!appContainer) return;
 
+  initSounds();
   initRouter(appContainer);
   registerScreen('auth',    AuthScreen);
   registerScreen('home',    HomeScreen);

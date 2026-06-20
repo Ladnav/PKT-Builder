@@ -5,6 +5,9 @@ import { getTotalEffectiveness, getEffectivenessText } from './types.js';
 
 const LEVEL = 50; // Nível padrão de todos os Pokémons
 
+const isLazy = (p) => p.name === 'slaking' || p.name === 'regigigas';
+
+
 // Calcula o dano de um ataque
 function calcDamage(attacker, defender, move, weather) {
   const isSpecial = move.damage_class === 'special';
@@ -88,11 +91,11 @@ export function createBattleState(team1, team2, seed = Date.now(), settings = {}
     weather,
     team1: t1.map(p => {
       const maxHp = p.stats.hp * 2 + 50;
-      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0 };
+      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0, mustRest: false };
     }),
     team2: t2.map(p => {
       const maxHp = p.stats.hp * 2 + 50;
-      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0 };
+      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0, mustRest: false };
     }),
     active1: 0,
     active2: 0,
@@ -207,12 +210,28 @@ function executeTurn(state) {
 
   // Primeiro ataque
   if (!first.fainted && !second.fainted) {
-    processAttack(state, first, second, moveFirst);
+    if (isLazy(first) && first.mustRest) {
+      log(state, `💤 <b>${first.displayName}</b> está descansando/preguiçoso neste turno!`, 'normal');
+      first.mustRest = false;
+    } else {
+      processAttack(state, first, second, moveFirst);
+      if (isLazy(first)) {
+        first.mustRest = true;
+      }
+    }
   }
 
   // Segundo ataque
   if (!second.fainted && !first.fainted) {
-    processAttack(state, second, first, moveSecond);
+    if (isLazy(second) && second.mustRest) {
+      log(state, `💤 <b>${second.displayName}</b> está descansando/preguiçoso neste turno!`, 'normal');
+      second.mustRest = false;
+    } else {
+      processAttack(state, second, first, moveSecond);
+      if (isLazy(second)) {
+        second.mustRest = true;
+      }
+    }
   }
 
   // End of turn effects (Leftovers)
@@ -239,6 +258,7 @@ function executeTurn(state) {
         state[activeKey] = anyAlive;
       } else {
         state[activeKey] = next;
+        team[next].mustRest = false; // Garante que ataca na entrada
         log(state, `🔄 <b>${team[next].displayName}</b> entra em campo!`, 'switch');
       }
     }

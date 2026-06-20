@@ -9,10 +9,10 @@
   --bg-1: #0d0d1e;
   --bg-2: #13132b;
   --bg-3: #1a1a38;
-  --surface: rgba(255,255,255,0.04);
-  --surface-hover: rgba(255,255,255,0.08);
-  --border: rgba(255,255,255,0.08);
-  --border-bright: rgba(255,255,255,0.15);
+  --surface: rgba(10, 10, 24, 0.84);
+  --surface-hover: rgba(20, 20, 48, 0.92);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-bright: rgba(255, 255, 255, 0.22);
   --accent: #7c6fff;
   --accent-2: #a78bfa;
   --gold: #fbbf24;
@@ -500,6 +500,8 @@ a { color: var(--accent-2); }
   gap: 3px;
   transition: all 0.2s;
   color: var(--text-1);
+  position: relative;
+  min-height: 58px;
 }
 
 .type-btn:hover:not(.disabled) {
@@ -509,8 +511,14 @@ a { color: var(--accent-2); }
 }
 
 .type-btn.disabled { opacity: 0.35; cursor: not-allowed; }
-.type-btn-icon { font-size: 1.2rem; }
-.type-btn-name { font-size: 0.7rem; font-weight: 600; }
+.type-btn-icon {
+  font-size: 0.8rem;
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  opacity: 0.8;
+}
+.type-btn-name { font-size: 0.7rem; font-weight: 600; margin-top: 2px; }
 .type-btn-count { font-size: 0.6rem; color: var(--text-3); }
 
 /* Grid de opções de Pokémon */
@@ -2078,6 +2086,7 @@ a { color: var(--accent-2); }
   padding: 0.25rem;
   border-radius: 50%;
   transition: all 0.2s ease;
+  z-index: 10;
 }
 
 .btn-kick-participant:hover {
@@ -2539,12 +2548,12 @@ input:checked + .toggle-slider:before {
 /* Outras escolhas do usuário no Draft */
 .other-user-options {
   margin-top: 1.5rem;
-  opacity: 0.85;
+  opacity: 0.95;
   pointer-events: none;
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 0.5rem;
-  max-width: 780px;
+  grid-template-columns: repeat(4, 1fr); /* 4 em cima, 4 embaixo */
+  gap: 1rem;
+  max-width: 540px;
   margin-left: auto;
   margin-right: auto;
   justify-items: center;
@@ -2982,7 +2991,46 @@ input:checked + .toggle-slider:before {
   }
 }
 
+/* ===================================================
+   GLASSMORPHISM & MUTE TOGGLE AUDIO BUTTON
+   =================================================== */
 
+.pokemon-card,
+.pokemon-mini-card,
+.pokemon-roster-card,
+.lobby-config-card,
+.lobby-slot,
+.auth-card,
+.mode-card,
+.type-btn,
+.team-item,
+.hs-profile-card,
+.hs-lb-card,
+.album-progress-box,
+.album-badge-card {
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
 
+.hs-btn-mute {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
 
-
+.hs-btn-mute:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}

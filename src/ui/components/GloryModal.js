@@ -1,6 +1,8 @@
 import { supabase } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
+import { getRankInfo } from '../../lib/rank.js';
+
 
 let container = null;
 let activeTab = 'leaderboard'; // 'leaderboard' | 'hall'
@@ -56,10 +58,12 @@ export async function openGloryModal() {
   render();
 
   try {
-    // Busca Leaderboard (Profiles ordenado por wins)
+    // Busca Leaderboard (Profiles ordenado por ELO)
     const { data: leads } = await supabase
       .from('profiles')
-      .select('id, username, avatar_url, wins, tournaments_played')
+      .select('id, username, avatar_url, wins, championships, tournaments_played, elo_points')
+      .order('elo_points', { ascending: false })
+      .order('championships', { ascending: false })
       .order('wins', { ascending: false })
       .limit(20);
       
@@ -125,20 +129,34 @@ function renderLeaderboard() {
 
   return `
     <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-      ${leaderboardData.map((p, idx) => `
+      ${leaderboardData.map((p, idx) => {
+        const rankInfo = getRankInfo(p.elo_points);
+        return `
         <div style="display: flex; align-items: center; background: var(--bg-3); padding: 1rem; border-radius: 8px; border-left: 4px solid ${idx === 0 ? 'var(--gold)' : idx === 1 ? 'silver' : idx === 2 ? '#cd7f32' : 'var(--border)'};">
           <h3 style="margin: 0 1rem 0 0; width: 30px; text-align: center; color: var(--text-2); font-size: 1.5rem;">#${idx+1}</h3>
           <img src="${p.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+p.username}" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); margin-right: 1rem;">
           <div style="flex: 1;">
-            <h4 style="margin: 0; font-size: 1.1rem;">${p.username}</h4>
+            <h4 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span>${p.username}</span>
+              <span style="font-size: 0.75rem; color: ${rankInfo.color}; font-weight: bold; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.03); display: inline-flex; align-items: center; gap: 3px;" title="Ranking ELO">
+                ${rankInfo.icon} ${rankInfo.fullName.replace(rankInfo.icon, '').trim()} (${p.elo_points || 0} pts)
+              </span>
+            </h4>
             <div style="font-size: 0.8rem; color: var(--text-3);">${p.tournaments_played || 0} torneios jogados</div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold);">${p.wins || 0}</div>
-            <div style="font-size: 0.7rem; color: var(--text-3); text-transform: uppercase;">Vitórias</div>
+          <div style="text-align: right; display: flex; gap: 1rem; align-items: center;">
+            <div style="text-align: center; min-width: 60px;">
+              <div style="font-size: 1.2rem; font-weight: bold; color: var(--gold);">${p.championships || 0}</div>
+              <div style="font-size: 0.6rem; color: var(--text-3); text-transform: uppercase;">Títulos</div>
+            </div>
+            <div style="text-align: center; min-width: 60px; border-left: 1px solid var(--border); padding-left: 1rem;">
+              <div style="font-size: 1.2rem; font-weight: bold; color: var(--text-1);">${p.wins || 0}</div>
+              <div style="font-size: 0.6rem; color: var(--text-3); text-transform: uppercase;">Vitórias</div>
+            </div>
           </div>
         </div>
-      `).join('')}
+        `;
+      }).join('')}
     </div>
   `;
 }

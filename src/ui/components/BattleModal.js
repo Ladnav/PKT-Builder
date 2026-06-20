@@ -1,4 +1,5 @@
 // src/ui/components/BattleModal.js
+import { playSFX } from '../../lib/sounds.js';
 
 let container = null;
 let interval = null;
@@ -266,11 +267,15 @@ function startSimulation(logs, t1, t2) {
     if (event.type === 'faint') {
       const pokeName = extractBoldName(event.message);
       if (pokeName) markFainted(pokeName, t1, t2);
+      playSFX('faint');
     } else if (event.type === 'switch') {
       const pokeName = extractBoldName(event.message);
       if (pokeName && event.message.includes('entra em campo')) {
         markActive(pokeName, t1, t2);
       }
+      playSFX('click');
+    } else if (event.type === 'use') {
+      playSFX('hit');
     }
     
     logIndex++;

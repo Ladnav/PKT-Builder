@@ -6,6 +6,8 @@ import { createBattleState, simulateBattle } from '../../engine/battle.js';
 import { TYPE_COLORS } from '../../engine/types.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import { getTrainerAvatar } from '../../lib/avatars.js';
+import { playBGM, playSFX, attachMuteToggleListener } from '../../lib/sounds.js';
+import { getRankInfo } from '../../lib/rank.js';
 
 const ROUNDS_NAMES = {
   quarters: 'Quartas de Final',
@@ -42,6 +44,7 @@ export async function render(cont, params) {
   simulationInProgress = false;
 
   renderLayout();
+  playBGM('battle');
 
   try {
     const user = await getCurrentUser();
@@ -144,6 +147,7 @@ function renderLayout() {
             Carregando chaveamento...
           </div>
           <button id="btn-show-champion" style="display: none; padding: 0.4rem 1rem; background: rgba(108, 99, 255, 0.1); border: 1px solid var(--primary); color: white; border-radius: var(--radius-md); cursor: pointer; font-weight: bold; transition: all 0.2s;">👑 Ver Campeão</button>
+          <button class="hs-btn-mute" id="btn-mute" title="Som"></button>
         </div>
       </header>
 
@@ -163,6 +167,284 @@ function renderLayout() {
       </div>
     </div>
   `;
+}
+
+function getTierBounds(elo) {
+  if (elo < 100) {
+    return { min: 0, max: 100 };
+  }
+  if (elo >= 2100) {
+    return { min: 2100, max: 2100 };
+  }
+  const offset = (elo - 100) % 100;
+  const min = elo - offset;
+  const max = min + 100;
+  return { min, max };
+}
+
+function getPlayerTournamentStatus(bracket, currentUserId) {
+  if (!bracket || !bracket.matches) return { completed: false };
+
+  const hasQuarters = bracket.matches.quarters && bracket.matches.quarters.length > 0;
+
+  if (hasQuarters) {
+    // 8-player tournament
+    const myQF = bracket.matches.quarters.find(m => m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
+    if (!myQF) return { completed: false };
+    if (!myQF.simulated) return { completed: false };
+
+    const wonQF = myQF.winner?.user_id === currentUserId;
+    if (!wonQF) {
+      return { completed: true, pointsChange: -10, reason: 'quarters' };
+    }
+
+    // Won QF, check semis
+    const mySF = bracket.matches.semis?.find(m => m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
+    if (!mySF) return { completed: false };
+    if (!mySF.simulated) return { completed: false };
+
+    const wonSF = mySF.winner?.user_id === currentUserId;
+    if (!wonSF) {
+      return { completed: true, pointsChange: 5, reason: 'semis' };
+    }
+
+    // Won SF, check final
+    const finalMatch = bracket.matches.final?.[0];
+    if (!finalMatch) return { completed: false };
+    if (!finalMatch.simulated) return { completed: false };
+
+    const wonFinal = finalMatch.winner?.user_id === currentUserId;
+    if (wonFinal) {
+      return { completed: true, pointsChange: 20, reason: 'champion' };
+    } else {
+      return { completed: true, pointsChange: 10, reason: 'finalist' };
+    }
+  } else {
+    // 4-player tournament
+    const mySF = bracket.matches.semis?.find(m => m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
+    if (!mySF) return { completed: false };
+    if (!mySF.simulated) return { completed: false };
+
+    const wonSF = mySF.winner?.user_id === currentUserId;
+    if (!wonSF) {
+      return { completed: true, pointsChange: -5, reason: 'semis' };
+    }
+
+    // Won SF, check final
+    const finalMatch = bracket.matches.final?.[0];
+    if (!finalMatch) return { completed: false };
+    if (!finalMatch.simulated) return { completed: false };
+
+    const wonFinal = finalMatch.winner?.user_id === currentUserId;
+    if (wonFinal) {
+      return { completed: true, pointsChange: 10, reason: 'champion' };
+    } else {
+      return { completed: true, pointsChange: 2, reason: 'finalist' };
+    }
+  }
+}
+
+function triggerEloAnimation(currentElo, nextElo, pointsChange, reason) {
+  injectEloStyles();
+
+  let overlay = document.getElementById('elo-animation-overlay');
+  if (overlay) overlay.remove();
+
+  overlay = document.createElement('div');
+  overlay.id = 'elo-animation-overlay';
+  overlay.className = 'battle-modal-overlay';
+  overlay.style.cssText = 'display: flex; align-items: center; justify-content: center; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);';
+
+  let reasonText = 'Torneio Finalizado';
+  if (reason === 'champion') {
+    reasonText = '🥇 Parabéns! Você foi o Grande Campeão! 🎉';
+  } else if (reason === 'finalist') {
+    reasonText = '🥈 Incrível! Você chegou à Final!';
+  } else if (reason === 'semis') {
+    reasonText = '🥉 Excelente! Você chegou às Semifinais!';
+  } else if (reason === 'quarters') {
+    reasonText = '🚪 Eliminado nas Quartas de Final.';
+  }
+
+  const initialRank = getRankInfo(currentElo);
+  const initialBounds = getTierBounds(currentElo);
+  let initialPct = 0;
+  if (currentElo >= 2100) {
+    initialPct = 100;
+  } else {
+    initialPct = ((currentElo - initialBounds.min) / (initialBounds.max - initialBounds.min)) * 100;
+  }
+
+  const diffText = pointsChange >= 0 ? `+${pointsChange}` : `${pointsChange}`;
+  const diffBg = pointsChange >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
+  const diffColor = pointsChange >= 0 ? '#10b981' : '#ef4444';
+
+  overlay.innerHTML = `
+    <div class="elo-animation-card" style="background: rgba(15, 23, 42, 0.95); border: 2px solid var(--border-bright); border-radius: var(--radius-lg); padding: 3rem; text-align: center; max-width: 485px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 25px rgba(124, 58, 237, 0.2); position: relative; overflow: hidden; backdrop-filter: blur(10px); animation: modalFadeIn 0.4s ease-out;">
+      <h2 style="font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; color: var(--text-1); text-transform: uppercase; margin-bottom: 1.5rem;">Resultado do ELO</h2>
+      
+      <div id="elo-placement-text" style="color: var(--text-2); font-size: 0.95rem; margin-bottom: 2rem; font-weight: bold; background: rgba(255,255,255,0.03); padding: 0.5rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        ${reasonText}
+      </div>
+
+      <div class="emblem-container" style="position: relative; width: 140px; height: 140px; margin: 0 auto 1.5rem auto; display: flex; align-items: center; justify-content: center;">
+        <div id="emblem-glow" style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, ${initialRank.color}44 0%, rgba(0,0,0,0) 70%); filter: blur(8px); animation: pulseGlow 2s infinite ease-in-out;"></div>
+        <div id="emblem-icon" style="font-size: 5rem; z-index: 1; transition: all 0.3s ease; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));">
+          ${initialRank.icon}
+        </div>
+      </div>
+
+      <div id="elo-rank-title" style="font-size: 1.8rem; font-weight: 900; letter-spacing: 1px; color: ${initialRank.color}; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+        ${initialRank.fullName}
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 1.5rem;">
+        <span id="elo-points-display" style="font-size: 2.2rem; font-weight: 900; color: white; font-family: monospace;">${currentElo}</span>
+        <span style="font-size: 1.2rem; font-weight: bold; color: var(--text-3);">PTS</span>
+        <span id="elo-diff-display" style="font-size: 1.2rem; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 5px; background: ${diffBg}; color: ${diffColor};">
+          ${diffText}
+        </span>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.08); height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03); margin-bottom: 2.5rem; position: relative;">
+        <div id="elo-progress-bar" style="width: ${initialPct}%; height: 100%; background: linear-gradient(90deg, #7c3aed 0%, #d946ef 100%); border-radius: 6px; transition: width 0.1s linear;"></div>
+      </div>
+
+      <div id="elo-alert-banner" style="position: absolute; top: 0; left: 0; width: 100%; padding: 0.8rem; background: linear-gradient(90deg, #10b981 0%, #059669 100%); color: white; font-weight: 900; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 2px; transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        SUBIU DE TIER! 🎉
+      </div>
+
+      <button id="btn-elo-ok" class="btn-play-again" style="width: 100%; padding: 0.8rem; background: var(--primary); border: none; color: white; border-radius: var(--radius-md); font-weight: bold; cursor: pointer; font-size: 1.1rem; display: none; opacity: 0; transition: opacity 0.5s ease;">
+        Continuar
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('btn-elo-ok').addEventListener('click', () => {
+    playSFX('click');
+    overlay.remove();
+  });
+
+  let tempElo = currentElo;
+  const step = nextElo > currentElo ? 1 : -1;
+  let lastFullName = initialRank.fullName;
+
+  if (pointsChange > 0) {
+    playSFX('select');
+  } else {
+    playSFX('error');
+  }
+
+  const animInterval = setInterval(() => {
+    if (tempElo === nextElo) {
+      clearInterval(animInterval);
+      const btnOk = document.getElementById('btn-elo-ok');
+      if (btnOk) {
+        btnOk.style.display = 'block';
+        setTimeout(() => {
+          btnOk.style.opacity = '1';
+        }, 50);
+      }
+      return;
+    }
+
+    tempElo += step;
+
+    const info = getRankInfo(tempElo);
+    const bounds = getTierBounds(tempElo);
+
+    let pct = 0;
+    if (tempElo >= 2100) {
+      pct = 100;
+    } else {
+      pct = ((tempElo - bounds.min) / (bounds.max - bounds.min)) * 100;
+    }
+
+    const ptsDisplay = document.getElementById('elo-points-display');
+    const rTitleDisplay = document.getElementById('elo-rank-title');
+    const iconDisplay = document.getElementById('emblem-icon');
+    const pBarDisplay = document.getElementById('elo-progress-bar');
+    const glowDisplay = document.getElementById('emblem-glow');
+
+    if (ptsDisplay) ptsDisplay.textContent = tempElo;
+    if (rTitleDisplay) {
+      rTitleDisplay.textContent = info.fullName;
+      rTitleDisplay.style.color = info.color;
+    }
+    if (iconDisplay) iconDisplay.textContent = info.icon;
+    if (pBarDisplay) pBarDisplay.style.width = `${pct}%`;
+    if (glowDisplay) {
+      glowDisplay.style.background = `radial-gradient(circle, ${info.color}44 0%, rgba(0,0,0,0) 70%)`;
+    }
+
+    if (lastFullName && lastFullName !== info.fullName) {
+      const isPromo = nextElo > currentElo;
+      if (isPromo) {
+        playSFX('shiny');
+        if (iconDisplay) {
+          iconDisplay.style.animation = 'none';
+          void iconDisplay.offsetWidth;
+          iconDisplay.style.animation = 'promoScale 0.8s ease-out';
+        }
+        const banner = document.getElementById('elo-alert-banner');
+        if (banner) {
+          banner.textContent = 'SUBIU DE TIER! 🎉';
+          banner.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)';
+          banner.style.transform = 'translateY(0)';
+          setTimeout(() => {
+            banner.style.transform = 'translateY(-100%)';
+          }, 2000);
+        }
+      } else {
+        playSFX('error');
+        if (iconDisplay) {
+          iconDisplay.style.animation = 'none';
+          void iconDisplay.offsetWidth;
+          iconDisplay.style.animation = 'demoScale 0.8s ease-out';
+        }
+        const banner = document.getElementById('elo-alert-banner');
+        if (banner) {
+          banner.textContent = 'REBAIXADO! 💔';
+          banner.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
+          banner.style.transform = 'translateY(0)';
+          setTimeout(() => {
+            banner.style.transform = 'translateY(-100%)';
+          }, 2000);
+        }
+      }
+    }
+    lastFullName = info.fullName;
+
+  }, Math.max(30, Math.floor(1000 / Math.abs(pointsChange || 1))));
+}
+
+function injectEloStyles() {
+  if (document.getElementById('elo-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'elo-styles';
+  style.textContent = `
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.15); opacity: 0.7; }
+    }
+    @keyframes promoScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3) rotate(15deg); filter: brightness(1.5); }
+      100% { transform: scale(1); }
+    }
+    @keyframes demoScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.8) rotate(-15deg); filter: grayscale(100%); }
+      100% { transform: scale(1); }
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 function updateUI() {
@@ -237,6 +519,49 @@ function updateUI() {
     }
   }
 
+  // Sistema de Ranking de ELO
+  const isParticipant = participants.some(p => p.user_id === currentUserId);
+  if (isParticipant) {
+    const eloKey = `elo_processed_room_${roomId}`;
+    if (localStorage.getItem(eloKey) !== 'true') {
+      const isMyMatchAnimating = Object.keys(activeAnimations).some(matchId => {
+        const anim = activeAnimations[matchId];
+        const m = anim?.match;
+        return m && (m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
+      });
+
+      if (!isMyMatchAnimating) {
+        const status = getPlayerTournamentStatus(bracket, currentUserId);
+        if (status.completed) {
+          localStorage.setItem(eloKey, 'true');
+          (async () => {
+            try {
+              const pointsChange = status.pointsChange;
+              const reason = status.reason;
+
+              const { data: prof } = await supabase.from('profiles').select('elo_points').eq('id', currentUserId).single();
+              if (prof) {
+                const currentElo = prof.elo_points || 0;
+                const nextElo = Math.max(0, currentElo + pointsChange);
+                
+                await supabase.from('profiles').update({ 
+                  elo_points: nextElo
+                }).eq('id', currentUserId);
+                
+                console.log(`ELO atualizado: ${currentElo} -> ${nextElo} (${pointsChange > 0 ? '+' : ''}${pointsChange} pts)`);
+                
+                // Dispara a animação do ELO
+                triggerEloAnimation(currentElo, nextElo, pointsChange, reason);
+              }
+            } catch (e) {
+              console.error('Erro ao atualizar ELO:', e);
+            }
+          })();
+        }
+      }
+    }
+  }
+
   const playerPart = participants.find(p => p.user_id === currentUserId);
   
   // Encontra se jogador está vivo (ou se ganhou)
@@ -280,6 +605,7 @@ function updateUI() {
 
   // Champion Banner
   if (bracket.round === 'done') {
+    playBGM('victory');
     const existingBanner = container.querySelector('.champion-banner');
     if (!existingBanner) {
       const bannerWrap = document.createElement('div');
@@ -407,10 +733,56 @@ function renderMatch(match, isFinal = false) {
   `;
 }
 
+function calculateTournamentMvp(bracket, champId) {
+  if (!bracket || !bracket.matches) return null;
+  const accum = {};
+
+  for (const round of ['quarters', 'semis', 'final']) {
+    const matches = bracket.matches[round];
+    if (!matches) continue;
+
+    for (const m of matches) {
+      if (!m.simulated) continue;
+
+      const isTeam1 = m.team1?.id === champId;
+      const isTeam2 = m.team2?.id === champId;
+
+      if (isTeam1 || isTeam2) {
+        const team = isTeam1 ? m.team1 : m.team2;
+        if (team && team.pokemon) {
+          team.pokemon.forEach(p => {
+            if (!accum[p.id]) {
+              accum[p.id] = {
+                id: p.id,
+                displayName: p.displayName,
+                sprite: p.sprite,
+                types: p.types,
+                kos: 0,
+                damageDealt: 0
+              };
+            }
+            accum[p.id].kos += (p.kos || 0);
+            accum[p.id].damageDealt += (p.damageDealt || 0);
+          });
+        }
+      }
+    }
+  }
+
+  const pokes = Object.values(accum);
+  if (pokes.length === 0) return null;
+
+  return pokes.reduce((best, p) => {
+    const score = (p.kos * 100) + p.damageDealt;
+    const bestScore = (best.kos * 100) + best.damageDealt;
+    return score > bestScore ? p : best;
+  }, pokes[0]);
+}
+
 function renderChampionBanner(isPlayer) {
   const finalMatch = bracket.matches.final[0];
   const champ = finalMatch?.winner;
-  const mvp = finalMatch?.mvp;
+  const mvp = calculateTournamentMvp(bracket, champ?.id);
   const avatarUrl = getTrainerAvatar(champ);
 
   return `
@@ -450,12 +822,12 @@ function renderChampionBanner(isPlayer) {
         
         ${mvp ? `
           <div class="champion-mvp" style="margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 215, 0, 0.1); border-radius: var(--radius-md); border: 1px solid gold; display: flex; flex-direction: column; align-items: center;">
-            <h4 style="color: gold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">⭐ MVP da Final ⭐</h4>
+            <h4 style="color: gold; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">⭐ MVP do Campeonato ⭐</h4>
             <div style="display: flex; align-items: center; gap: 0.8rem;">
               <img src="${mvp.sprite}" style="width: 50px; height: 50px; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));">
               <div style="text-align: left;">
                 <div style="font-weight: bold; font-size: 1.1rem;">${mvp.displayName}</div>
-                <div style="font-size: 0.8rem; opacity: 0.8;">KOs: ${mvp.kos || 0} | Dano: ${mvp.damageDealt || 0}</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;">KOs Totais: ${mvp.kos || 0} | Dano Total: ${mvp.damageDealt || 0}</div>
               </div>
             </div>
           </div>
@@ -479,16 +851,30 @@ function renderChampionBanner(isPlayer) {
 }
 
 function attachEvents() {
+  // Sincroniza o botão de mute
+  const btnMute = container.querySelector('#btn-mute');
+  if (btnMute && !btnMute.hasAttribute('data-audio-attached')) {
+    btnMute.setAttribute('data-audio-attached', 'true');
+    attachMuteToggleListener('btn-mute');
+  }
+
   // Back
-  container.querySelector('#btn-back')?.addEventListener('click', handleGoHome);
+  container.querySelector('#btn-back')?.addEventListener('click', () => {
+    playSFX('click');
+    handleGoHome();
+  });
 
   // Play again
-  container.querySelector('#btn-play-again')?.addEventListener('click', handleGoHome);
+  container.querySelector('#btn-play-again')?.addEventListener('click', () => {
+    playSFX('click');
+    handleGoHome();
+  });
 
   // View Battle (simulação visual animada + resumos 1v1 + log completo)
   container.querySelectorAll('.match-card.has-result').forEach(el => {
     el.style.cursor = 'pointer';
     el.addEventListener('click', async (e) => {
+      playSFX('click');
       const matchId = e.currentTarget.dataset.matchid;
       // find match in bracket
       let foundMatch = null;
@@ -532,18 +918,21 @@ function attachEvents() {
 
   // View Bracket (hide banner)
   container.querySelector('#btn-view-bracket')?.addEventListener('click', () => {
+    playSFX('click');
     const banner = container.querySelector('.champion-banner');
     if (banner) banner.style.display = 'none';
   });
 
   // Show Champion (show banner)
   container.querySelector('#btn-show-champion')?.addEventListener('click', () => {
+    playSFX('click');
     const banner = container.querySelector('.champion-banner');
     if (banner) banner.style.display = 'flex';
   });
 
   // Close modal
   container.querySelector('#modal-close')?.addEventListener('click', () => {
+    playSFX('click');
     document.getElementById('battle-modal').style.display = 'none';
   });
 
@@ -600,11 +989,20 @@ function attachEvents() {
           if (myParticipant) {
             const shinies = myParticipant.team.filter(poke => poke.isShiny && poke.stats);
             for (const shiny of shinies) {
-              await supabase.from('user_shinies').insert({
-                user_id: currentUserId,
-                pokemon_id: shiny.id,
-                pokemon_data: shiny
-              });
+              const { data: existing } = await supabase
+                .from('user_shinies')
+                .select('id')
+                .eq('user_id', currentUserId)
+                .eq('pokemon_id', shiny.id)
+                .maybeSingle();
+
+              if (!existing) {
+                await supabase.from('user_shinies').insert({
+                  user_id: currentUserId,
+                  pokemon_id: shiny.id,
+                  pokemon_data: shiny
+                });
+              }
             }
           }
 
@@ -617,6 +1015,7 @@ function attachEvents() {
           btnClaim.style.cursor = 'not-allowed';
           btnClaim.textContent = 'Recompensas Recebidas! 📦✓';
           
+          playSFX('boosterOpen');
           alert('Recompensas coletadas! 1 Booster Pack foi adicionado ao seu perfil.');
         }
       } catch (err) {
@@ -701,6 +1100,10 @@ async function simulateMatchAndSave(match, roundName) {
       }, finalWinnerTeam[0]);
     }
 
+    // Salva os Pokémons simulados com suas estatísticas de KOs e dano
+    match.team1.pokemon = result.team1;
+    match.team2.pokemon = result.team2;
+
     match.winner = winner;
     match.loser = loser;
     match.simulated = true;
@@ -726,7 +1129,8 @@ async function simulateMatchAndSave(match, roundName) {
 
     // 2. Atualiza estatísticas persistentes
     const isChampionship = roundName === 'final';
-    await updateUserStats(winner, loser, isChampionship, mvp);
+    const tournMvp = isChampionship ? calculateTournamentMvp(bracket, winner.id) : null;
+    await updateUserStats(winner, loser, isChampionship, tournMvp || mvp);
 
     // 3. Atualiza o bracket no banco
     const { error: brkErr } = await supabase
@@ -820,11 +1224,20 @@ async function advanceRoundAndSave(roundName) {
               // Checa shinies no time do jogador
               const shinies = p.team.filter(poke => poke.isShiny && poke.stats);
               for (const shiny of shinies) {
-                await supabase.from('user_shinies').insert({
-                  user_id: p.user_id,
-                  pokemon_id: shiny.id,
-                  pokemon_data: shiny
-                });
+                const { data: existing } = await supabase
+                  .from('user_shinies')
+                  .select('id')
+                  .eq('user_id', p.user_id)
+                  .eq('pokemon_id', shiny.id)
+                  .maybeSingle();
+
+                if (!existing) {
+                  await supabase.from('user_shinies').insert({
+                    user_id: p.user_id,
+                    pokemon_id: shiny.id,
+                    pokemon_data: shiny
+                  });
+                }
               }
             }
           }

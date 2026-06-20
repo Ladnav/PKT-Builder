@@ -8,6 +8,9 @@ import { initBoosterModal, openBoosterModal } from '../components/BoosterModal.j
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
+import { playBGM, playSFX, attachMuteToggleListener } from '../../lib/sounds.js';
+import { getRankInfo } from '../../lib/rank.js';
+
 
 const getPokemonOrItemDetails = (p) => {
   if (typeof p === 'number') {
@@ -81,6 +84,7 @@ export async function render(cont) {
   errorMsg = '';
   generateRandomSeeds();
   renderScreen();
+  playBGM('lobby');
 
   initGloryModal(document.body);
 
@@ -162,6 +166,7 @@ function renderScreen() {
 
   const totalGames = (profile?.wins || 0) + (profile?.losses || 0);
   const winRate = totalGames > 0 ? ((profile.wins / totalGames) * 100).toFixed(1) : '0';
+  const rankInfo = getRankInfo(profile?.elo_points);
 
   container.innerHTML = `
     <style>
@@ -229,8 +234,8 @@ function renderScreen() {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.09);
+        background: var(--surface);
+        border: 1px solid var(--border);
         border-radius: 40px;
         padding: 0.35rem 0.35rem 0.35rem 0.9rem;
         backdrop-filter: blur(10px);
@@ -297,6 +302,26 @@ function renderScreen() {
       }
       .hs-btn-logout:hover {
         background: rgba(239,68,68,0.28);
+        transform: scale(1.1);
+      }
+      .hs-btn-mute {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: background 0.2s, transform 0.2s;
+        flex-shrink: 0;
+        margin-left: 0.5rem;
+      }
+      .hs-btn-mute:hover {
+        background: rgba(255,255,255,0.16);
         transform: scale(1.1);
       }
       .hs-main {
@@ -581,18 +606,19 @@ function renderScreen() {
                 <span class="hs-profile-name" style="display: flex; align-items: center; gap: 0.25rem;">
                   ${profile?.username || 'Treinador'} ✏️
                 </span>
-                <span class="hs-profile-stats">
+                <span class="hs-profile-stats" style="display: flex; align-items: center; gap: 0.2rem; flex-wrap: wrap;">
+                  <span class="hs-rank" style="color: ${rankInfo.color}; font-weight: bold; display: flex; align-items: center; gap: 2px;" title="Pontuação de Ranking ELO">${rankInfo.icon} ${rankInfo.fullName.replace(rankInfo.icon, '').trim()}</span>
+                  <span class="hs-stat-sep">&#183;</span>
                   <span class="hs-champ">&#127942; ${profile?.championships || 0}</span>
                   <span class="hs-stat-sep">&#183;</span>
                   <span class="hs-wins">${profile?.wins || 0}V</span>
                   <span class="hs-stat-sep">/</span>
                   <span class="hs-losses">${profile?.losses || 0}D</span>
-                  <span class="hs-stat-sep">&#183;</span>
-                  <span class="hs-wr">${winRate}%</span>
                 </span>
               </div>
             </div>
             <button class="hs-btn-logout" id="btn-logout" title="Sair da conta">&#x1F6AA;</button>
+            <button class="hs-btn-mute" id="btn-mute" title="Som"></button>
           </div>
         </div>
       </header>
@@ -614,7 +640,9 @@ function renderScreen() {
                 <h3 style="margin: 0; font-size: 1.05rem; font-weight: bold; color: white; display: flex; align-items: center; gap: 0.35rem;">
                   Treinador: ${profile?.username || 'Treinador'}
                 </h3>
-                <p style="margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--text-3); display: flex; align-items: center; gap: 0.5rem;">
+                <p style="margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--text-3); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <span style="color: ${rankInfo.color}; font-weight: bold;">${rankInfo.icon} ${rankInfo.fullName} (${profile?.elo_points || 0} pts)</span>
+                  <span>•</span>
                   <span>🏆 ${profile?.championships || 0} Campeonatos</span>
                   <span>•</span>
                   <span>⚔️ ${profile?.wins || 0}V / ${profile?.losses || 0}D</span>
@@ -892,11 +920,15 @@ function renderParticles() {
 }
 
 function attachEvents() {
+  // Sincroniza o botão de mute
+  attachMuteToggleListener('btn-mute');
+
   container.querySelectorAll('.mode-card').forEach(card => {
     card.addEventListener('click', () => {
       selectedMode = card.dataset.mode;
       container.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
+      playSFX('select');
     });
   });
 
@@ -907,30 +939,42 @@ function attachEvents() {
 
   if (btnOpenSettings) {
     btnOpenSettings.addEventListener('click', () => {
+      playSFX('click');
       if (settingsModal) settingsModal.style.display = 'flex';
     });
   }
   if (btnCloseSettings) {
     btnCloseSettings.addEventListener('click', () => {
+      playSFX('click');
       if (settingsModal) settingsModal.style.display = 'none';
     });
   }
   if (btnConfirmCreate) {
-    btnConfirmCreate.addEventListener('click', handleCreateRoom);
+    btnConfirmCreate.addEventListener('click', () => {
+      playSFX('click');
+      handleCreateRoom();
+    });
   }
 
   const btnJoin = container.querySelector('#btn-join-room');
   const inputCode = container.querySelector('#room-code-input');
   if (btnJoin && inputCode) {
-    btnJoin.addEventListener('click', () => handleJoinRoom(inputCode.value));
+    btnJoin.addEventListener('click', () => {
+      playSFX('click');
+      handleJoinRoom(inputCode.value);
+    });
     inputCode.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') handleJoinRoom(inputCode.value);
+      if (e.key === 'Enter') {
+        playSFX('click');
+        handleJoinRoom(inputCode.value);
+      }
     });
   }
 
   const btnOpenProfile = container.querySelector('#btn-open-profile');
   if (btnOpenProfile) {
     btnOpenProfile.addEventListener('click', () => {
+      playSFX('click');
       activeView = 'profile';
       renderScreen();
     });
@@ -939,6 +983,7 @@ function attachEvents() {
   const btnEditProfileHero = container.querySelector('#btn-edit-profile-hero');
   if (btnEditProfileHero) {
     btnEditProfileHero.addEventListener('click', () => {
+      playSFX('click');
       activeView = 'profile';
       renderScreen();
     });
@@ -947,6 +992,7 @@ function attachEvents() {
   const btnBackHome = container.querySelector('#btn-back-home');
   if (btnBackHome) {
     btnBackHome.addEventListener('click', () => {
+      playSFX('click');
       activeView = 'home';
       renderScreen();
     });
@@ -955,6 +1001,7 @@ function attachEvents() {
   // Seleção de Avatar
   container.querySelectorAll('.profile-avatar-option').forEach(opt => {
     opt.addEventListener('click', () => {
+      playSFX('select');
       container.querySelectorAll('.profile-avatar-option').forEach(o => {
         o.classList.remove('selected');
         o.style.borderColor = 'transparent';
@@ -970,6 +1017,7 @@ function attachEvents() {
   if (btnRegenerate) {
     btnRegenerate.addEventListener('click', (e) => {
       e.preventDefault();
+      playSFX('click');
       regenerateRandomSeeds();
       renderScreen();
     });
@@ -979,6 +1027,7 @@ function attachEvents() {
   const btnSaveProfile = container.querySelector('#btn-save-profile');
   if (btnSaveProfile) {
     btnSaveProfile.addEventListener('click', async () => {
+      playSFX('click');
       const inputUsername = container.querySelector('#profile-username-input');
       const newUsername = inputUsername ? inputUsername.value.trim() : '';
       const selectedOpt = container.querySelector('.profile-avatar-option.selected');
@@ -1020,17 +1069,33 @@ function attachEvents() {
   }
 
   const btnAlbum = container.querySelector('#btn-open-album');
-  if (btnAlbum) btnAlbum.addEventListener('click', openAlbumModal);
+  if (btnAlbum) {
+    btnAlbum.addEventListener('click', () => {
+      playSFX('click');
+      openAlbumModal();
+    });
+  }
 
   const btnOpenBoosters = container.querySelector('#btn-open-boosters');
-  if (btnOpenBoosters) btnOpenBoosters.addEventListener('click', openBoosterModal);
+  if (btnOpenBoosters) {
+    btnOpenBoosters.addEventListener('click', () => {
+      playSFX('click');
+      openBoosterModal();
+    });
+  }
 
   const btnGlory = container.querySelector('#btn-glory');
-  if (btnGlory) btnGlory.addEventListener('click', openGloryModal);
+  if (btnGlory) {
+    btnGlory.addEventListener('click', () => {
+      playSFX('click');
+      openGloryModal();
+    });
+  }
 
   const btnLogout = container.querySelector('#btn-logout');
   if (btnLogout) {
     btnLogout.addEventListener('click', async () => {
+      playSFX('click');
       await supabase.auth.signOut();
     });
   }

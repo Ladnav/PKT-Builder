@@ -4,6 +4,8 @@ import pokemonData from '../../data/pokemon-sample.json';
 import { TypeBadge } from './TypeBadge.js';
 import { TYPE_COLORS, TYPE_ICONS } from '../../engine/types.js';
 
+import { getRankInfo } from '../../lib/rank.js';
+
 const LEGENDARY_IDS = [150, 384, 483, 487, 491]; // Mewtwo, Rayquaza, Dialga, Giratina, Darkrai
 
 let modalContainer = null;
@@ -11,6 +13,7 @@ let currentUserId = null;
 let currentUsername = 'Treinador';
 let userCards = [];      // { pokemon_id, is_shiny, quantity }
 let userBadges = [];     // { badge_id, unlocked_at }
+let userEloPoints = 0;   // Pontos de ELO/PDL do jogador
 
 const totalCount = pokemonData.length;
 const count10 = Math.round(totalCount * 0.1);
@@ -24,7 +27,13 @@ const BADGES_CONFIG = {
   'type_water': { title: '💧 Líder de Água', desc: 'Colete todos os Pokémon do tipo Água', icon: '📛', type: 'water' },
   'type_grass': { title: '🌿 Líder de Planta', desc: 'Colete todos os Pokémon do tipo Planta', icon: '📛', type: 'grass' },
   'type_electric': { title: '⚡ Líder Elétrico', desc: 'Colete todos os Pokémon do tipo Elétrico', icon: '📛', type: 'electric' },
-  'type_dragon': { title: '🐉 Domador de Dragões', desc: 'Colete todos os Pokémon do tipo Dragão', icon: '📛', type: 'dragon' }
+  'type_dragon': { title: '🐉 Domador de Dragões', desc: 'Colete todos os Pokémon do tipo Dragão', icon: '📛', type: 'dragon' },
+  'rank_madeira': { title: '🪵 Insígnia de Madeira', desc: 'Alcance o ELO Madeira (100+ pontos)', icon: '🪵' },
+  'rank_ferro': { title: '⛓️ Insígnia de Ferro', desc: 'Alcance o ELO Ferro (500+ pontos)', icon: '⛓️' },
+  'rank_ouro': { title: '🪙 Insígnia de Ouro', desc: 'Alcance o ELO Ouro (900+ pontos)', icon: '🪙' },
+  'rank_platina': { title: '🛡️ Insígnia de Platina', desc: 'Alcance o ELO Platina (1300+ pontos)', icon: '🛡️' },
+  'rank_diamante': { title: '💎 Insígnia de Diamante', desc: 'Alcance o ELO Diamante (1700+ pontos)', icon: '💎' },
+  'rank_mestre': { title: '👑 Insígnia de Mestre', desc: 'Alcance o ELO Mestre (2100+ pontos)', icon: '👑' }
 };
 
 export function initAlbumModal(container, userId, username) {
@@ -98,6 +107,20 @@ async function loadCollectionData() {
 
   if (badgesErr) throw badgesErr;
   userBadges = badges || [];
+
+  // 3. Busca elo_points do perfil
+  const { data: prof, error: profErr } = await supabase
+    .from('profiles')
+    .select('elo_points')
+    .eq('id', currentUserId)
+    .single();
+
+  if (profErr) {
+    console.error('Erro ao buscar elo_points para o álbum:', profErr);
+    userEloPoints = 0;
+  } else {
+    userEloPoints = prof ? (prof.elo_points || 0) : 0;
+  }
 }
 
 // Verifica se cumpriu requisitos de conquistas e atualiza no Supabase
@@ -105,6 +128,7 @@ async function checkAndUnlockBadges() {
   const collectedIds = new Set(userCards.map(c => c.pokemon_id));
   const uniqueCount = collectedIds.size;
   const newBadgesToUnlock = [];
+  const badgesToRemove = [];
 
   const checkTypeComplete = (type) => {
     const pokesOfType = pokemonData.filter(p => p.types.includes(type)).map(p => p.id);
@@ -112,16 +136,58 @@ async function checkAndUnlockBadges() {
     return pokesOfType.every(id => collectedIds.has(id));
   };
 
-  // Verificações
-  if (uniqueCount >= count10 && !userBadges.some(b => b.badge_id === 'album_10')) newBadgesToUnlock.push('album_10');
-  if (uniqueCount >= count50 && !userBadges.some(b => b.badge_id === 'album_50')) newBadgesToUnlock.push('album_50');
-  if (uniqueCount >= totalCount && !userBadges.some(b => b.badge_id === 'album_100')) newBadgesToUnlock.push('album_100');
+  // Verificações para desbloquear ou remover
+  if (uniqueCount >= count10) {
+    if (!userBadges.some(b => b.badge_id === 'album_10')) newBadgesToUnlock.push('album_10');
+  } else {
+    if (userBadges.some(b => b.badge_id === 'album_10')) badgesToRemove.push('album_10');
+  }
 
-  if (checkTypeComplete('fire') && !userBadges.some(b => b.badge_id === 'type_fire')) newBadgesToUnlock.push('type_fire');
-  if (checkTypeComplete('water') && !userBadges.some(b => b.badge_id === 'type_water')) newBadgesToUnlock.push('type_water');
-  if (checkTypeComplete('grass') && !userBadges.some(b => b.badge_id === 'type_grass')) newBadgesToUnlock.push('type_grass');
-  if (checkTypeComplete('electric') && !userBadges.some(b => b.badge_id === 'type_electric')) newBadgesToUnlock.push('type_electric');
-  if (checkTypeComplete('dragon') && !userBadges.some(b => b.badge_id === 'type_dragon')) newBadgesToUnlock.push('type_dragon');
+  if (uniqueCount >= count50) {
+    if (!userBadges.some(b => b.badge_id === 'album_50')) newBadgesToUnlock.push('album_50');
+  } else {
+    if (userBadges.some(b => b.badge_id === 'album_50')) badgesToRemove.push('album_50');
+  }
+
+  if (uniqueCount >= totalCount) {
+    if (!userBadges.some(b => b.badge_id === 'album_100')) newBadgesToUnlock.push('album_100');
+  } else {
+    if (userBadges.some(b => b.badge_id === 'album_100')) badgesToRemove.push('album_100');
+  }
+
+  const typesToCheck = ['fire', 'water', 'grass', 'electric', 'dragon'];
+  for (const t of typesToCheck) {
+    const badgeId = `type_${t}`;
+    if (checkTypeComplete(t)) {
+      if (!userBadges.some(b => b.badge_id === badgeId)) newBadgesToUnlock.push(badgeId);
+    } else {
+      if (userBadges.some(b => b.badge_id === badgeId)) badgesToRemove.push(badgeId);
+    }
+  }
+
+  // Verificações de ELO
+  const eloThresholds = [
+    { badgeId: 'rank_madeira', minElo: 100 },
+    { badgeId: 'rank_ferro', minElo: 500 },
+    { badgeId: 'rank_ouro', minElo: 900 },
+    { badgeId: 'rank_platina', minElo: 1300 },
+    { badgeId: 'rank_diamante', minElo: 1700 },
+    { badgeId: 'rank_mestre', minElo: 2100 }
+  ];
+
+  for (const threshold of eloThresholds) {
+    if (userEloPoints >= threshold.minElo) {
+      if (!userBadges.some(b => b.badge_id === threshold.badgeId)) {
+        newBadgesToUnlock.push(threshold.badgeId);
+      }
+    } else {
+      if (userBadges.some(b => b.badge_id === threshold.badgeId)) {
+        badgesToRemove.push(threshold.badgeId);
+      }
+    }
+  }
+
+  let changed = false;
 
   if (newBadgesToUnlock.length > 0) {
     console.log('Novas conquistas desbloqueadas!', newBadgesToUnlock);
@@ -129,18 +195,35 @@ async function checkAndUnlockBadges() {
       user_id: currentUserId,
       badge_id: badge_id
     }));
-
     const { error } = await supabase.from('user_badges').insert(inserts);
-    if (!error) {
-      // Recarrega conquistas locais
-      const { data: updatedBadges } = await supabase
-        .from('user_badges')
-        .select('badge_id, unlocked_at')
-        .eq('user_id', currentUserId);
-      userBadges = updatedBadges || [];
-    } else {
+    if (error) {
       console.error('Erro ao salvar conquistas no banco:', error);
+    } else {
+      changed = true;
     }
+  }
+
+  if (badgesToRemove.length > 0) {
+    console.log('Removendo conquistas que não cumprem mais os requisitos:', badgesToRemove);
+    const { error } = await supabase
+      .from('user_badges')
+      .delete()
+      .eq('user_id', currentUserId)
+      .in('badge_id', badgesToRemove);
+    if (error) {
+      console.error('Erro ao remover conquistas do banco:', error);
+    } else {
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    // Recarrega conquistas locais
+    const { data: updatedBadges } = await supabase
+      .from('user_badges')
+      .select('badge_id, unlocked_at')
+      .eq('user_id', currentUserId);
+    userBadges = updatedBadges || [];
   }
 }
 

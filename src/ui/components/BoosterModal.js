@@ -3,6 +3,22 @@ import { supabase } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import { TypeBadge } from './TypeBadge.js';
 import { TYPE_COLORS, TYPE_ICONS } from '../../engine/types.js';
+import { playSFX } from '../../lib/sounds.js';
+
+export function PokeballIcon(size = 50) {
+  const borderSize = Math.max(2, Math.round(size * 0.06));
+  const centerSize = Math.round(size * 0.32);
+  const innerSize = Math.round(centerSize * 0.4);
+  
+  return `
+    <div class="pokeball-css" style="position: relative; width: ${size}px; height: ${size}px; background: white; border: ${borderSize}px solid #000; border-radius: 50%; overflow: hidden; box-shadow: inset -${Math.round(size*0.1)}px -${Math.round(size*0.1)}px 0px rgba(0,0,0,0.15); display: inline-block; vertical-align: middle;">
+      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: #ff3e3e; border-bottom: ${borderSize}px solid #000;"></div>
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: ${centerSize}px; height: ${centerSize}px; background: white; border: ${borderSize}px solid #000; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center;">
+        <div style="width: ${innerSize}px; height: ${innerSize}px; background: white; border: 1px solid #777; border-radius: 50%;"></div>
+      </div>
+    </div>
+  `;
+}
 
 let modalContainer = null;
 let currentUserId = null;
@@ -116,7 +132,7 @@ function renderBoosterScreen(count) {
         <div class="booster-pack">
           <div class="booster-pack-design">
             <div class="booster-pack-header">POKÉCHAMPION</div>
-            <div class="booster-pack-logo">🎒</div>
+            <div class="booster-pack-logo">${PokeballIcon(60)}</div>
             <div class="booster-pack-footer">CONTEÚDO: 3 CARTAS</div>
             <div class="booster-pack-stripe"></div>
             <div class="booster-pack-shine"></div>
@@ -207,6 +223,8 @@ async function openSinglePack(currentCount) {
         packGraphic.classList.add('booster-ripping');
       }
 
+      playSFX('boosterOpen');
+
       setTimeout(() => {
         renderRevealedCards(chosenList, nextCount);
       }, 600);
@@ -268,7 +286,7 @@ function renderRevealedCards(cardsList, nextCount) {
                 <!-- CARD BACK -->
                 <div class="booster-card-flip-back">
                   <div class="card-back-pattern">
-                    <div class="card-back-center-ball">🎒</div>
+                    <div class="card-back-center-ball" style="display: flex; align-items: center; justify-content: center;">${PokeballIcon(45)}</div>
                   </div>
                 </div>
                 <!-- CARD FRONT -->
@@ -305,6 +323,14 @@ function renderRevealedCards(cardsList, nextCount) {
       if (container.classList.contains('flipped')) return;
       container.classList.add('flipped');
       flippedCount++;
+
+      const idx = parseInt(container.getAttribute('data-idx'));
+      const cardDraw = cardsList[idx];
+      if (cardDraw && cardDraw.isShiny) {
+        playSFX('shiny');
+      } else {
+        playSFX('cardFlip');
+      }
 
       if (flippedCount === cardsList.length) {
         showRevealEndActions(nextCount);

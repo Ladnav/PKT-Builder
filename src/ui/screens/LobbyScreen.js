@@ -4,6 +4,7 @@ import { initEmotes, destroyEmotes } from '../components/Emotes.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import { getTrainerAvatar } from '../../lib/avatars.js';
+import { playBGM, playSFX, attachMuteToggleListener } from '../../lib/sounds.js';
 
 const BOT_NAMES = ['Treinador Red', 'Treinador Blue', 'Ash Ketchum', 'Gary Oak', 'Campeã Cynthia', 'Campeão Lance', 'Misty', 'Brock', 'Steven Stone', 'Leon', 'Cynthia', 'N', 'Cyrus', 'Giovanni'];
 
@@ -26,6 +27,7 @@ export async function render(cont, params) {
   loading = true;
   errorMsg = '';
   renderLobby();
+  playBGM('draft');
 
   try {
     const user = await getCurrentUser();
@@ -102,11 +104,17 @@ function setupSubscriptions() {
     .on('postgres_changes', {
       event: '*',
       schema: 'public',
-      table: 'room_participants',
-      filter: `room_id=eq.${roomId}`
-    }, async () => {
-      await fetchParticipants();
-      renderLobby();
+      table: 'room_participants'
+    }, async (payload) => {
+      const isInsertOrUpdate = payload.eventType === 'INSERT' || payload.eventType === 'UPDATE';
+      const isRelevant = isInsertOrUpdate 
+        ? (payload.new && payload.new.room_id === roomId) 
+        : true; // Recarrega em qualquer exclusão para garantir sincronia 100% confiável
+
+      if (isRelevant) {
+        await fetchParticipants();
+        renderLobby();
+      }
     })
     .subscribe();
 
@@ -162,8 +170,11 @@ function renderLobby() {
           </div>
         </div>
         
-        <div class="lobby-status-pill">
-          <span>👥</span> ${activeCount}/${targetSlots} Treinadores
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <div class="lobby-status-pill">
+            <span>👥</span> ${activeCount}/${targetSlots} Treinadores
+          </div>
+          <button class="hs-btn-mute" id="btn-mute" title="Som"></button>
         </div>
       </header>
 
@@ -267,18 +278,31 @@ function renderParticles() {
 }
 
 function attachEvents() {
+  // Sincroniza o botão de mute
+  attachMuteToggleListener('btn-mute');
+
   // Sair da sala
-  container.querySelector('#btn-leave-lobby')?.addEventListener('click', handleLeaveRoom);
+  container.querySelector('#btn-leave-lobby')?.addEventListener('click', () => {
+    playSFX('click');
+    handleLeaveRoom();
+  });
 
   // Adicionar bot
-  container.querySelector('#btn-add-bot')?.addEventListener('click', handleAddBot);
+  container.querySelector('#btn-add-bot')?.addEventListener('click', () => {
+    playSFX('click');
+    handleAddBot();
+  });
 
   // Iniciar jogo
-  container.querySelector('#btn-start-game')?.addEventListener('click', handleStartGame);
+  container.querySelector('#btn-start-game')?.addEventListener('click', () => {
+    playSFX('click');
+    handleStartGame();
+  });
 
   // Remover participante
   container.querySelectorAll('.btn-kick-participant').forEach(btn => {
     btn.addEventListener('click', () => {
+      playSFX('click');
       const pId = btn.dataset.id;
       handleKickParticipant(pId);
     });
