@@ -3012,7 +3012,6 @@ input:checked + .toggle-slider:before {
   -webkit-backdrop-filter: blur(14px) saturate(180%);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
-
 .hs-btn-mute {
   width: 34px;
   height: 34px;
@@ -3033,4 +3032,10 @@ input:checked + .toggle-slider:before {
   background: rgba(255, 255, 255, 0.16);
   border-color: rgba(255, 255, 255, 0.25);
   transform: scale(1.08);
+}
+
+@media (max-width: 600px) {
+  .hide-mobile-label {
+    display: none !important;
+  }
 }

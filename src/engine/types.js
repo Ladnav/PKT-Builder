@@ -23,7 +23,7 @@ export const TYPE_COLORS = {
 };
 
 const typeEmoji = {
-  normal:   '⬡',
+  normal:   '⚪',
   fire:     '🔥',
   water:    '💧',
   electric: '⚡',
@@ -31,8 +31,8 @@ const typeEmoji = {
   ice:      '❄️',
   fighting: '👊',
   poison:   '☠️',
-  ground:   '🪨',
-  flying:   '🌬️',
+  ground:   '🌍',
+  flying:   '🦅',
   psychic:  '🔮',
   bug:      '🐛',
   rock:     '🪨',
@@ -40,11 +40,11 @@ const typeEmoji = {
   dragon:   '🐉',
   dark:     '🌑',
   steel:    '⚙️',
-  fairy:    '✨',
+  fairy:    '🧚',
 };
 
 const iconUrl = (type, color) =>
-  `<span style="display:inline-flex;align-items:center;justify-content:center;width:1.15em;height:1.15em;border-radius:50%;background:${color};box-shadow:0 0 6px ${color}99;font-size:0.65em;vertical-align:middle;flex-shrink:0;"></span>`;
+  `<span class="type-circle-icon" style="display:inline-flex;align-items:center;justify-content:center;width:1.35em;height:1.35em;border-radius:50%;background:${color};box-shadow:0 0 5px ${color}88;font-size:0.75em;vertical-align:middle;flex-shrink:0;line-height:1;user-select:none;color:white;text-shadow:0 1px 1px rgba(0,0,0,0.3);">${typeEmoji[type] || ''}</span>`;
 
 export const TYPE_ICONS = Object.fromEntries(
   Object.entries(TYPE_COLORS).map(([type, color]) => [type, iconUrl(type, color)])

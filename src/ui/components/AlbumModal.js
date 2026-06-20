@@ -310,11 +310,17 @@ function renderAlbumContent() {
             <option value="ice">❄️ Gelo</option>
             <option value="ghost">👻 Fantasma</option>
             <option value="steel">⚙️ Aço</option>
-            <option value="fairy">✨ Fada</option>
+            <option value="fairy">🧚 Fada</option>
           </select>
 
           <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; user-select: none;">
-            <input type="checkbox" id="album-filter-collected"> Apenas Coletadas
+            <input type="checkbox" id="album-filter-collected"> Coletados
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; user-select: none;">
+            <input type="checkbox" id="album-filter-repeated"> Repetidos (x2+)
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; user-select: none;">
+            <input type="checkbox" id="album-filter-shiny"> Foil/Shiny ✨
           </label>
         </div>
       </div>
@@ -375,25 +381,37 @@ function renderAlbumContent() {
   const searchInput = document.getElementById('album-search');
   const typeSelect = document.getElementById('album-filter-type');
   const collectedCheck = document.getElementById('album-filter-collected');
+  const repeatedCheck = document.getElementById('album-filter-repeated');
+  const shinyCheck = document.getElementById('album-filter-shiny');
 
   const filterAction = () => {
-    updateFilteredCards(collectedMap, searchInput.value, typeSelect.value, collectedCheck.checked);
+    updateFilteredCards(
+      collectedMap,
+      searchInput.value,
+      typeSelect.value,
+      collectedCheck.checked,
+      repeatedCheck.checked,
+      shinyCheck.checked
+    );
   };
 
   searchInput.addEventListener('input', filterAction);
   typeSelect.addEventListener('change', filterAction);
   collectedCheck.addEventListener('change', filterAction);
+  repeatedCheck.addEventListener('change', filterAction);
+  shinyCheck.addEventListener('change', filterAction);
 
   // Render inicial dos dados nas abas
-  updateFilteredCards(collectedMap, '', 'all', false);
+  updateFilteredCards(collectedMap, '', 'all', false, false, false);
   renderBadgesList();
 }
 
-function updateFilteredCards(collectedMap, search, typeFilter, onlyCollected) {
+function updateFilteredCards(collectedMap, search, typeFilter, onlyCollected, onlyRepeated, onlyShiny) {
   const grid = document.querySelector('.album-cards-grid');
   if (!grid) return;
 
   const filtered = pokemonData.filter(p => {
+    const col = collectedMap[p.id];
     // 1. Filtro busca
     if (search && !p.displayName.toLowerCase().includes(search.toLowerCase())) return false;
     
@@ -401,7 +419,19 @@ function updateFilteredCards(collectedMap, search, typeFilter, onlyCollected) {
     if (typeFilter !== 'all' && !p.types.includes(typeFilter)) return false;
     
     // 3. Filtro Apenas Coletadas
-    if (onlyCollected && !collectedMap[p.id]) return false;
+    if (onlyCollected && !col) return false;
+
+    // 4. Filtro Repetidos (Quantidade > 1)
+    if (onlyRepeated) {
+      const qty = col ? (col.normal + col.shiny) : 0;
+      if (qty <= 1) return false;
+    }
+
+    // 5. Filtro Shiny / Foil
+    if (onlyShiny) {
+      const hasShiny = col && col.shiny > 0;
+      if (!hasShiny) return false;
+    }
 
     return true;
   });
@@ -436,9 +466,9 @@ function updateFilteredCards(collectedMap, search, typeFilter, onlyCollected) {
         ${isCollected ? '' : '<div style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); z-index:1; pointer-events: none;"></div>'}
         
         <!-- CARD HEADER -->
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.6rem; color: var(--text-3); z-index: 2;">
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 0.6rem; color: var(--text-3); z-index: 2; padding-right: ${isCollected && totalQty > 1 ? '30px' : '0'};">
           <span>#${String(p.id).padStart(3, '0')}</span>
-          ${hasShiny ? '<span style="color: var(--gold); font-weight: bold;" title="Colecionado Versao Shiny! ✨">FOIL ✨</span>' : isLegendary && isCollected ? '<span style="color: #ff3e3e; font-weight: 900;" title="Pokemon Lendario/Mitico! 👑">LENDÁRIO 👑</span>' : ''}
+          ${hasShiny ? '<span style="color: var(--gold); font-weight: bold;" title="Colecionado Versao Shiny! ✨"><span class="hide-mobile-label">FOIL </span>✨</span>' : isLegendary && isCollected ? '<span style="color: #ff3e3e; font-weight: 900;" title="Pokemon Lendario/Mitico! 👑"><span class="hide-mobile-label">LENDÁRIO </span>👑</span>' : ''}
         </div>
 
         <!-- SPRITE -->
@@ -458,7 +488,7 @@ function updateFilteredCards(collectedMap, search, typeFilter, onlyCollected) {
 
         <!-- QUANTITY BADGE -->
         ${isCollected && totalQty > 1 ? `
-          <div class="card-qty-badge" style="position: absolute; bottom: 6px; right: 6px; background: var(--slot-color); color: white; font-weight: 900; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); z-index: 3;">
+          <div class="card-qty-badge" style="position: absolute; top: 6px; right: 6px; background: var(--slot-color); color: white; font-weight: 900; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); z-index: 3;">
             x${totalQty}
           </div>
         ` : ''}

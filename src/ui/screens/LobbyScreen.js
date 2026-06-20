@@ -352,6 +352,10 @@ async function handleAddBot() {
     console.log('🤖 Resultado error:', JSON.stringify(error));
     if (error) throw error;
 
+    // Recarrega localmente de forma imediata
+    await fetchParticipants();
+    renderLobby();
+
   } catch (err) {
     console.error('❌ Erro ao adicionar BOT:', err);
     errorMsg = `Erro ao adicionar BOT: ${err.message || JSON.stringify(err)}`;
@@ -371,6 +375,10 @@ async function handleKickParticipant(pId) {
       .eq('id', pId);
 
     if (error) throw error;
+
+    // Recarrega localmente de forma imediata
+    await fetchParticipants();
+    renderLobby();
   } catch (err) {
     console.error(err);
     errorMsg = 'Erro ao remover participante.';
@@ -436,6 +444,10 @@ async function handleStartGame() {
       .eq('id', roomId);
 
     if (roomErr) throw roomErr;
+
+    // Vai para o draft de forma imediata localmente
+    cleanup();
+    goToDraft();
 
   } catch (err) {
     console.error(err);
