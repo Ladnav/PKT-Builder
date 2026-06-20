@@ -3060,6 +3060,9 @@ input:checked + .toggle-slider:before {
   .options-grid {
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 0.4rem !important;
+    max-width: 880px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
   }
   .options-grid .pokemon-card {
     padding: 0.5rem !important;
@@ -3075,11 +3078,11 @@ input:checked + .toggle-slider:before {
     padding: 1px 4px !important;
   }
   .options-grid .card-sprite-wrap {
-    height: 55px !important;
+    height: 75px !important;
   }
   .options-grid .card-sprite {
-    width: 50px !important;
-    height: 50px !important;
+    width: 70px !important;
+    height: 70px !important;
   }
   .options-grid .card-name {
     font-size: 0.8rem !important;

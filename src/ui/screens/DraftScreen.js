@@ -566,16 +566,18 @@ function renderPokemonOptions() {
   }
 
   return `
-    <div class="pokemon-options-wrap">
-      <div class="options-header" style="position: relative;">
-        <h2 class="pick-title">
-          ${draftState.selected_type ? `${TYPE_ICONS[draftState.selected_type]} Pokémons do tipo ${TYPE_NAMES_PT[draftState.selected_type]}` : '🎲 Pokémons Aleatórios'}
-        </h2>
-        <p class="pick-sub">Escolha 1 Pokémon para o seu time (Slot ${(participants.find(p => p.user_id === currentUserId)?.team?.length || 0) + 1}/6)</p>
+    <div class="pokemon-options-wrap" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+      <div class="options-header" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; max-width: 880px; margin-bottom: 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; text-align: left;">
+        <div style="text-align: left;">
+          <h2 class="pick-title" style="text-align: left; margin: 0; font-size: 1.15rem; font-weight: 800;">
+            ${draftState.selected_type ? `${TYPE_ICONS[draftState.selected_type]} Pokémons do tipo ${TYPE_NAMES_PT[draftState.selected_type]}` : '🎲 Pokémons Aleatórios'}
+          </h2>
+          <p class="pick-sub" style="text-align: left; margin: 0.1rem 0 0 0; font-size: 0.8rem; color: var(--text-2);">Escolha 1 Pokémon para o seu time (Slot ${(participants.find(p => p.user_id === currentUserId)?.team?.length || 0) + 1}/6)</p>
+        </div>
         
         ${isPlayer && !hasRerolled() ? `
-          <div style="margin-top: 0.8rem; display: flex; justify-content: center;">
-            <button id="btn-reroll" style="padding: 0.6rem 1.2rem; background: rgba(251, 191, 36, 0.1); border: 1px solid var(--gold); color: var(--gold); border-radius: var(--radius-md); cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 0.9rem;">
+          <div style="margin: 0; display: flex; align-items: center; flex-shrink: 0;">
+            <button id="btn-reroll" style="padding: 0.5rem 1rem; background: rgba(251, 191, 36, 0.1); border: 1px solid var(--gold); color: var(--gold); border-radius: var(--radius-md); cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 0.8rem; margin: 0;">
               🎲 Reroll Aleatório (1x)
             </button>
           </div>
