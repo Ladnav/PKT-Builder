@@ -130,13 +130,24 @@ function renderBoosterScreen(count) {
       <!-- BOOSTER ENVELOPE CONTAINER -->
       <div class="booster-pack-container" id="booster-pack-graphic" style="flex-shrink: 0;">
         <div class="booster-pack">
-          <div class="booster-pack-design">
-            <div class="booster-pack-header">POKÉCHAMPION</div>
-            <div class="booster-pack-logo">${PokeballIcon(60)}</div>
-            <div class="booster-pack-footer">CONTEÚDO: 3 CARTAS</div>
-            <div class="booster-pack-stripe"></div>
-            <div class="booster-pack-shine"></div>
+          <!-- METADE SUPERIOR -->
+          <div class="booster-pack-half booster-pack-top">
+            <div class="booster-crimp booster-crimp-top"></div>
+            <div class="booster-pack-content-top">
+              <div class="booster-pack-header">POKÉCHAMPION</div>
+            </div>
           </div>
+          <!-- METADE INFERIOR -->
+          <div class="booster-pack-half booster-pack-bottom">
+            <div class="booster-pack-content-bottom">
+              <div class="booster-pack-logo">${PokeballIcon(60)}</div>
+              <div class="booster-pack-footer">CONTEÚDO: 3 CARTAS</div>
+              <div class="booster-pack-stripe"></div>
+            </div>
+            <div class="booster-crimp booster-crimp-bottom"></div>
+          </div>
+          <!-- SHINE EFFECT OVERLAY -->
+          <div class="booster-pack-shine"></div>
         </div>
       </div>
 

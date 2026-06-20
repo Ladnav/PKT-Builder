@@ -3153,3 +3153,295 @@ input:checked + .toggle-slider:before {
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
 }
+
+/* ===================================================
+   NEW PREMIUM BOOSTER PACK wrappers & animations
+   =================================================== */
+
+.booster-pack-container {
+  perspective: 1000px;
+  width: 190px;
+  height: 280px;
+  margin: 1.5rem auto;
+  position: relative;
+}
+
+.booster-pack {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.booster-pack:hover {
+  transform: scale(1.06) translateY(-8px) rotate(1deg) !important;
+}
+
+.booster-pack-half {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(135deg, #1e1b4b 0%, #3b0764 40%, #581c87 60%, #1e1b4b 100%);
+  background-size: 100% 280px;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.65), 0 0 15px rgba(217, 70, 239, 0.15);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease-in, filter 0.6s ease-in;
+}
+
+.booster-pack-top {
+  top: 0;
+  height: 35%;
+  background-position: top left;
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  clip-path: polygon(
+    0% 0%, 100% 0%, 100% 100%,
+    95% 85%, 90% 100%, 85% 85%, 80% 100%, 75% 85%, 70% 100%, 65% 85%, 60% 100%, 55% 85%, 50% 100%,
+    45% 85%, 40% 100%, 35% 85%, 30% 100%, 25% 85%, 20% 100%, 15% 85%, 10% 100%, 5% 85%, 0% 100%
+  );
+}
+
+.booster-pack-bottom {
+  bottom: 0;
+  height: 66%;
+  background-position: bottom left;
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  clip-path: polygon(
+    0% 0%, 5% 15%, 10% 0%, 15% 15%, 20% 0%, 25% 15%, 30% 0%, 35% 15%, 40% 0%, 45% 15%, 50% 0%,
+    55% 15%, 60% 0%, 65% 15%, 70% 0%, 75% 15%, 80% 0%, 85% 15%, 90% 0%, 95% 15%, 100% 0%,
+    100% 100%, 0% 100%
+  );
+}
+
+.booster-crimp {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 22px;
+  background: repeating-linear-gradient(90deg, 
+    #52525b 0px, 
+    #71717a 2px, 
+    #a1a1aa 4px, 
+    #71717a 6px, 
+    #52525b 8px
+  );
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+.booster-crimp-top {
+  top: 0;
+  clip-path: polygon(
+    0% 40%, 2.5% 0%, 5% 40%, 7.5% 0%, 10% 40%, 12.5% 0%, 15% 40%, 17.5% 0%, 20% 40%, 22.5% 0%, 
+    25% 40%, 27.5% 0%, 30% 40%, 32.5% 0%, 35% 40%, 37.5% 0%, 40% 40%, 42.5% 0%, 45% 40%, 47.5% 0%, 
+    50% 40%, 52.5% 0%, 55% 40%, 57.5% 0%, 60% 40%, 62.5% 0%, 65% 40%, 67.5% 0%, 70% 40%, 72.5% 0%, 
+    75% 40%, 77.5% 0%, 80% 40%, 82.5% 0%, 85% 40%, 87.5% 0%, 90% 40%, 92.5% 0%, 95% 40%, 97.5% 0%, 
+    100% 40%, 100% 100%, 0% 100%
+  );
+}
+
+.booster-crimp-bottom {
+  bottom: 0;
+  clip-path: polygon(
+    0% 0%, 100% 0%, 100% 60%, 
+    97.5% 100%, 95% 60%, 92.5% 100%, 90% 60%, 87.5% 100%, 85% 60%, 82.5% 100%, 80% 60%, 77.5% 100%, 
+    75% 60%, 72.5% 100%, 70% 60%, 67.5% 100%, 65% 60%, 62.5% 100%, 60% 60%, 57.5% 100%, 55% 60%, 
+    52.5% 100%, 50% 60%, 47.5% 100%, 45% 60%, 42.5% 100%, 40% 60%, 37.5% 100%, 35% 60%, 32.5% 100%, 
+    30% 60%, 27.5% 100%, 25% 60%, 22.5% 100%, 20% 60%, 17.5% 100%, 15% 60%, 12.5% 100%, 10% 60%, 
+    7.5% 100%, 5% 60%, 2.5% 100%, 0% 60%
+  );
+}
+
+.booster-pack-design {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.booster-pack-content-top {
+  width: 100%;
+  padding-top: 1.6rem;
+  display: flex;
+  justify-content: center;
+}
+
+.booster-pack-content-bottom {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem 0.5rem 1.6rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.booster-pack-header {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 3px;
+  text-shadow: 0 0 8px #d946ef, 0 2px 4px rgba(0,0,0,0.8);
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+}
+
+.booster-pack-logo {
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6)) !important;
+  animation: boosterFloat 2.5s ease-in-out infinite !important;
+  font-size: 3.5rem;
+}
+
+.booster-pack-footer {
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #fbbf24 !important;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  text-transform: uppercase;
+}
+
+.booster-pack-stripe {
+  position: absolute;
+  width: 100%;
+  height: 14px;
+  background: linear-gradient(90deg, transparent, #fbbf24 30%, #f59e0b 50%, #fbbf24 70%, transparent) !important;
+  top: 10% !important;
+  left: 0;
+  pointer-events: none;
+  opacity: 0.85;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+}
+
+.booster-pack-shine {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, 
+    transparent 35%, 
+    rgba(255, 255, 255, 0.05) 45%, 
+    rgba(255, 255, 255, 0.25) 50%, 
+    rgba(255, 255, 255, 0.05) 55%, 
+    transparent 65%
+  ) !important;
+  transform: rotate(-45deg);
+  transition: transform 0.5s;
+  pointer-events: none;
+  animation: boosterSheen 4.5s infinite linear !important;
+  z-index: 15;
+}
+
+.booster-shaking {
+  animation: packShake 0.15s infinite !important;
+}
+
+.booster-pack-container.booster-ripping .booster-pack-top {
+  transform: translateY(-250px) translateX(60px) rotate(25deg) scale(0.95);
+  opacity: 0;
+  filter: blur(2px);
+}
+
+.booster-pack-container.booster-ripping .booster-pack-bottom {
+  transform: translateY(250px) translateX(-35px) rotate(-15deg) scale(0.95);
+  opacity: 0;
+  filter: blur(2px);
+}
+
+.booster-pack-container.booster-ripping .booster-pack-shine {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+@media (max-width: 600px) {
+  .booster-pack-container {
+    width: 145px !important;
+    height: 215px !important;
+  }
+  .booster-pack-half {
+    background-size: 100% 215px !important;
+  }
+  .booster-pack-logo {
+    font-size: 2.5rem !important;
+  }
+  .booster-pack-header {
+    font-size: 0.85rem !important;
+    letter-spacing: 1.5px !important;
+  }
+  .booster-pack-content-top {
+    padding-top: 1rem !important;
+  }
+  .booster-pack-content-bottom {
+    padding-bottom: 1rem !important;
+  }
+}
+
+/* ===================================================
+   VOLUME SLIDER STYLING
+   =================================================== */
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 60px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  transition: width 0.3s ease, background 0.3s ease;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.volume-slider:hover,
+.volume-slider:focus {
+  background: rgba(255, 255, 255, 0.3);
+  width: 80px; /* Expands slightly when hovered or active! */
+}
+
+/* Chrome/Safari/Opera/Edge Thumb */
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d946ef 0%, #7c3aed 100%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 6px rgba(124, 58, 237, 0.5);
+  transition: transform 0.1s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+/* Firefox Thumb */
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d946ef 0%, #7c3aed 100%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 6px rgba(124, 58, 237, 0.5);
+  transition: transform 0.1s ease;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  transform: scale(1.25);
+}
+
+

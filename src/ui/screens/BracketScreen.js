@@ -513,8 +513,30 @@ function updateUI() {
                 tournaments_played: (prof.tournaments_played || 0) + 1 
               }).eq('id', currentUserId);
             }
+
+            // Checa e registra shinies no time do jogador atual de forma segura
+            const myParticipant = participants.find(p => p.user_id === currentUserId);
+            if (myParticipant && myParticipant.team) {
+              const shinies = myParticipant.team.filter(poke => poke.isShiny && poke.stats);
+              for (const shiny of shinies) {
+                const { data: existing } = await supabase
+                  .from('user_shinies')
+                  .select('id')
+                  .eq('user_id', currentUserId)
+                  .eq('pokemon_id', shiny.id)
+                  .maybeSingle();
+
+                if (!existing) {
+                  await supabase.from('user_shinies').insert({
+                    user_id: currentUserId,
+                    pokemon_id: shiny.id,
+                    pokemon_data: shiny
+                  });
+                }
+              }
+            }
           } catch (e) {
-            console.error('Erro ao incrementar torneios jogados:', e);
+            console.error('Erro ao incrementar torneios jogados e registrar shinies:', e);
           }
         })();
       }
@@ -863,16 +885,24 @@ function attachEvents() {
   }
 
   // Back
-  container.querySelector('#btn-back')?.addEventListener('click', () => {
-    playSFX('click');
-    handleGoHome();
-  });
+  const btnBack = container.querySelector('#btn-back');
+  if (btnBack && !btnBack.hasAttribute('data-attached')) {
+    btnBack.setAttribute('data-attached', 'true');
+    btnBack.addEventListener('click', () => {
+      playSFX('click');
+      handleGoHome();
+    });
+  }
 
   // Play again
-  container.querySelector('#btn-play-again')?.addEventListener('click', () => {
-    playSFX('click');
-    handleGoHome();
-  });
+  const btnPlayAgain = container.querySelector('#btn-play-again');
+  if (btnPlayAgain && !btnPlayAgain.hasAttribute('data-attached')) {
+    btnPlayAgain.setAttribute('data-attached', 'true');
+    btnPlayAgain.addEventListener('click', () => {
+      playSFX('click');
+      handleGoHome();
+    });
+  }
 
   // View Battle (simulação visual animada + resumos 1v1 + log completo)
   container.querySelectorAll('.match-card.has-result').forEach(el => {
@@ -1214,69 +1244,12 @@ async function advanceRoundAndSave(roundName) {
 
     if (error) throw error;
 
-    // Se o campeonato acabou, muda status da sala e processa Hall of Fame / Shinies
+    // Se o campeonato acabou, muda status da sala
     if (nextRound === 'done') {
       await supabase
         .from('rooms')
         .update({ status: 'finished', finished_at: new Date().toISOString() })
         .eq('id', roomId);
-
-      // Só o Host processa as recompensas para si mesmo (para outros, cada cliente processa a si próprio)
-      if (isHost) {
-        try {
-          const winnerMatch = bracket.matches.final[0].winner;
-          
-          // 1. Hall of Fame e Estatísticas do Vencedor (apenas se o host for o próprio vencedor)
-          if (winnerMatch && winnerMatch.user_id && winnerMatch.user_id === currentUserId) {
-            // Insere no Hall da Fama
-            await supabase.from('hall_of_fame').insert({
-              user_id: winnerMatch.user_id,
-              room_name: room?.code || 'Torneio',
-              team_json: winnerMatch.pokemon
-            });
-
-            // Incrementa wins e boosters_count do vencedor
-            const { data: prof } = await supabase.from('profiles').select('wins, boosters_count').eq('id', winnerMatch.user_id).single();
-            if (prof) {
-              await supabase.from('profiles').update({ 
-                wins: (prof.wins || 0) + 1,
-                boosters_count: (prof.boosters_count || 0) + 1
-              }).eq('id', winnerMatch.user_id);
-            }
-          }
-
-          // 2. Incrementar tournaments_played e checar Shinies (apenas se for o próprio host)
-          for (const p of participants) {
-            if (p.user_id && !p.is_bot && p.user_id === currentUserId) {
-              const { data: prof } = await supabase.from('profiles').select('tournaments_played').eq('id', p.user_id).single();
-              if (prof) {
-                await supabase.from('profiles').update({ tournaments_played: (prof.tournaments_played || 0) + 1 }).eq('id', p.user_id);
-              }
-
-              // Checa shinies no time do jogador
-              const shinies = p.team.filter(poke => poke.isShiny && poke.stats);
-              for (const shiny of shinies) {
-                const { data: existing } = await supabase
-                  .from('user_shinies')
-                  .select('id')
-                  .eq('user_id', p.user_id)
-                  .eq('pokemon_id', shiny.id)
-                  .maybeSingle();
-
-                if (!existing) {
-                  await supabase.from('user_shinies').insert({
-                    user_id: p.user_id,
-                    pokemon_id: shiny.id,
-                    pokemon_data: shiny
-                  });
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.error("Erro ao salvar recompensas do fim do torneio:", err);
-        }
-      }
     }
 
   } catch (err) {

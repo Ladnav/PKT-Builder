@@ -323,7 +323,8 @@ function updateUI() {
   // 4. Sidebar esquerda: todos os times
   const teamsList = container.querySelector('#teams-list');
   if (teamsList) {
-    const showTeams = room.mode !== DRAFT_MODES.BLIND;
+    const isBlindMode = room?.settings?.blind === true || room.mode === 'blind';
+    const showTeams = !isBlindMode;
     teamsList.innerHTML = participants.map(p => {
       const active = p.slot === currentSlot;
       const isMe = p.user_id === currentUserId;
@@ -398,7 +399,7 @@ function renderDraftMain(isPlayer) {
   const currentSlot = draftState.current_slot;
   const currentPart = participants.find(p => p.slot === currentSlot);
 
-  const isBlindMode = room.mode === DRAFT_MODES.BLIND;
+  const isBlindMode = room?.settings?.blind === true || room.mode === 'blind';
   let lastPickInfo = '';
   if (!isBlindMode && draftState.picks_history && draftState.picks_history.length > 0) {
     const pickHistoryOnly = draftState.picks_history.filter(h => h.pokemon);
@@ -1264,14 +1265,15 @@ async function handleLeaveRoom() {
   try {
     const myPart = participants.find(p => p.user_id === currentUserId);
     if (myPart) {
-      await supabase.from('room_participants').delete().eq('id', myPart.id);
+      supabase.from('room_participants').delete().eq('id', myPart.id)
+        .catch(e => console.error('Erro ao deletar participante:', e));
     }
   } catch (e) {
     console.error('Erro ao sair:', e);
-  } finally {
-    cleanup();
-    import('../router.js').then(m => m.navigate('home'));
   }
+  
+  cleanup();
+  import('../router.js').then(m => m.navigate('home'));
 }
 
 async function executeBotTurn(botParticipant) {

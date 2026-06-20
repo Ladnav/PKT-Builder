@@ -24,8 +24,9 @@ const SOUNDS = {
 let isMuted = localStorage.getItem('game_muted') === 'true';
 let currentBgmAudio = null;
 let currentBgmType = null;
-let bgmVolume = 0.25; // Volume de BGM mais baixo para agradar os ouvidos
-let sfxVolume = 0.5;
+let masterVolume = parseFloat(localStorage.getItem('game_volume') || '0.5');
+let bgmVolume = masterVolume * 0.5;
+let sfxVolume = masterVolume;
 
 export function initSounds() {
   // Registra ouvinte global para iniciar música após o primeiro clique do usuário
@@ -102,6 +103,35 @@ export function playSFX(type) {
   }
 }
 
+export function setVolume(val) {
+  masterVolume = Math.max(0, Math.min(1, parseFloat(val)));
+  localStorage.setItem('game_volume', String(masterVolume));
+  bgmVolume = masterVolume * 0.5;
+  sfxVolume = masterVolume;
+
+  // Se volume for maior que 0 e estava mutado, desmuta
+  if (masterVolume > 0 && isMuted) {
+    isMuted = false;
+    localStorage.setItem('game_muted', 'false');
+    window.dispatchEvent(new CustomEvent('mute_changed', { detail: { isMuted } }));
+  } else if (masterVolume === 0 && !isMuted) {
+    isMuted = true;
+    localStorage.setItem('game_muted', 'true');
+    window.dispatchEvent(new CustomEvent('mute_changed', { detail: { isMuted } }));
+  }
+
+  if (currentBgmAudio) {
+    currentBgmAudio.volume = isMuted ? 0 : bgmVolume;
+  }
+
+  // Dispara evento global para sincronizar os sliders
+  window.dispatchEvent(new CustomEvent('volume_changed', { detail: { volume: masterVolume } }));
+}
+
+export function getVolume() {
+  return masterVolume;
+}
+
 export function toggleMute() {
   isMuted = !isMuted;
   localStorage.setItem('game_muted', String(isMuted));
@@ -140,16 +170,56 @@ export function attachMuteToggleListener(btnId, callback) {
       playSFX('click');
       if (callback) callback(newMuted);
     };
+
+    // Criar e gerenciar o slider de volume dinamicamente
+    let slider = btn.parentNode.querySelector('.volume-slider');
+    if (!slider) {
+      slider = document.createElement('input');
+      slider.type = 'range';
+      slider.className = 'volume-slider';
+      slider.min = '0';
+      slider.max = '1';
+      slider.step = '0.05';
+      slider.value = isMuted ? '0' : String(masterVolume);
+      slider.title = 'Ajustar Volume';
+      btn.parentNode.insertBefore(slider, btn.nextSibling);
+    }
+
+    slider.oninput = (e) => {
+      e.stopPropagation();
+      const val = parseFloat(e.target.value);
+      setVolume(val);
+    };
   }
 
-  // Ouvinte de sincronização
+  // Ouvinte de sincronização de mute
   const syncListener = (e) => {
     const targetBtn = document.getElementById(btnId);
     if (targetBtn) {
       updateIcon(targetBtn, e.detail.isMuted);
+      const targetSlider = targetBtn.parentNode.querySelector('.volume-slider');
+      if (targetSlider) {
+        targetSlider.value = e.detail.isMuted ? '0' : String(masterVolume);
+      }
+    }
+  };
+
+  // Ouvinte de sincronização de volume
+  const syncVolumeListener = (e) => {
+    const targetBtn = document.getElementById(btnId);
+    if (targetBtn) {
+      const targetSlider = targetBtn.parentNode.querySelector('.volume-slider');
+      if (targetSlider) {
+        targetSlider.value = String(e.detail.volume);
+      }
     }
   };
 
   window.addEventListener('mute_changed', syncListener);
-  return () => window.removeEventListener('mute_changed', syncListener);
+  window.addEventListener('volume_changed', syncVolumeListener);
+  
+  return () => {
+    window.removeEventListener('mute_changed', syncListener);
+    window.removeEventListener('volume_changed', syncVolumeListener);
+  };
 }

@@ -816,7 +816,6 @@ function renderScreen() {
                 <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Modo de Jogo</label>
                 <select id="settings-mode" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
                   <option value="type">Draft Clássico (Aberto)</option>
-                  <option value="blind">Draft Cego (Times Ocultos)</option>
                   <option value="random" selected>Draft Aleatório (Sorteio)</option>
                 </select>
               </div>
@@ -884,6 +883,17 @@ function renderScreen() {
                 </label>
               </div>
 
+              <div class="setting-toggle-row">
+                <div class="setting-toggle-info">
+                  <span class="setting-toggle-title">🫣 Draft Cego</span>
+                  <span class="setting-toggle-desc">Oculta a escolha de picks e os times dos adversários até o torneio.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settings-blind">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
               <button class="hs-btn-create" id="btn-confirm-create" style="margin-top: 1rem; padding: 1rem; font-size: 1.1rem;">
                 Criar Sala
               </button>
@@ -935,7 +945,11 @@ function renderParticles() {
 
 function attachEvents() {
   // Sincroniza o botão de mute
-  attachMuteToggleListener('btn-mute');
+  const btnMute = container.querySelector('#btn-mute');
+  if (btnMute && !btnMute.hasAttribute('data-audio-attached')) {
+    btnMute.setAttribute('data-audio-attached', 'true');
+    attachMuteToggleListener('btn-mute');
+  }
 
   container.querySelectorAll('.mode-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -1142,8 +1156,9 @@ async function handleCreateRoom() {
   const weather = container.querySelector('#settings-weather')?.checked ?? false;
   const synergy = container.querySelector('#settings-synergy')?.checked ?? false;
   const items = container.querySelector('#settings-items')?.checked ?? false;
+  const blind = container.querySelector('#settings-blind')?.checked ?? false;
 
-  const roomSettings = { size: maxPlayers, turnTimer, shinies, weather, synergy, items };
+  const roomSettings = { size: maxPlayers, turnTimer, shinies, weather, synergy, items, blind };
 
   const settingsModal = container.querySelector('#settings-modal');
   if (settingsModal) settingsModal.style.display = 'none';

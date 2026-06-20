@@ -5,25 +5,19 @@ import { ALL_TYPES } from './types.js';
 
 export const DRAFT_MODES = {
   TYPE:   'type',    // Modo 1: escolhe tipo → 8 Pokémons desse tipo
-  RANDOM: 'random',  // Modo 2: 8 Pokémons aleatórios, vê os outros
-  BLIND:  'blind',   // Modo 3: escolhe tipo → 8 Pokémons, NÃO vê os outros
+  RANDOM: 'random',  // Modo 2: 8 Pokémons aleatórios
 };
 
 export const DRAFT_MODES_INFO = {
   type: {
     name: 'Draft por Tipo',
-    description: 'Escolha um tipo e veja 8 Pokémons desse tipo. Você pode ver o time dos outros!',
+    description: 'Escolha um tipo e veja 8 Pokémons desse tipo.',
     icon: '🎯',
   },
   random: {
     name: 'Draft Aleatório',
-    description: '8 Pokémons aleatórios aparecem para você escolher. Times visíveis para todos.',
+    description: '8 Pokémons aleatórios aparecem para escolher.',
     icon: '🎲',
-  },
-  blind: {
-    name: 'Draft Cego',
-    description: 'Escolha um tipo, mas não veja o time dos adversários. Pura estratégia!',
-    icon: '🫣',
   },
 };
 
@@ -97,10 +91,10 @@ export function advanceDraft(state) {
 }
 
 export function selectOptionsFromPool(available) {
-  // Aplica penalidade para lendários (BST >= 570 tem apenas 10% de chance de aparecer)
+  // Aplica penalidade para lendários (BST >= 570 tem apenas 5% de chance de aparecer)
   let filtered = available.filter(p => {
     const bst = Object.values(p.stats).reduce((sum, val) => sum + val, 0);
-    if (bst >= 570) return Math.random() < 0.10;
+    if (bst >= 570) return Math.random() < 0.05;
     return true;
   });
 

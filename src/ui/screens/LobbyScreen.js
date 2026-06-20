@@ -5,6 +5,7 @@ import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import { getTrainerAvatar } from '../../lib/avatars.js';
 import { playBGM, playSFX, attachMuteToggleListener } from '../../lib/sounds.js';
+import { getRankInfo } from '../../lib/rank.js';
 
 const BOT_NAMES = ['Treinador Red', 'Treinador Blue', 'Ash Ketchum', 'Gary Oak', 'Campeã Cynthia', 'Campeão Lance', 'Misty', 'Brock', 'Steven Stone', 'Leon', 'Cynthia', 'N', 'Cyrus', 'Giovanni'];
 
@@ -13,6 +14,7 @@ let roomCode = null;
 let currentUserId = null;
 let isHost = false;
 let participants = [];
+let globalRanks = {};
 let room = null;
 let container = null;
 let participantsSubscription = null;
@@ -79,13 +81,32 @@ async function fetchParticipants() {
     .from('room_participants')
     .select(`
       *,
-      profile:profiles(username, avatar_url)
+      profile:profiles(username, avatar_url, elo_points, championships, wins)
     `)
     .eq('room_id', roomId)
     .order('slot', { ascending: true });
 
   if (error) throw error;
   participants = data || [];
+
+  try {
+    const { data: allProfiles, error: rankErr } = await supabase
+      .from('profiles')
+      .select('id')
+      .order('elo_points', { ascending: false })
+      .order('championships', { ascending: false })
+      .order('wins', { ascending: false });
+
+    if (!rankErr && allProfiles) {
+      const ranksMap = {};
+      allProfiles.forEach((p, idx) => {
+        ranksMap[p.id] = idx + 1;
+      });
+      globalRanks = ranksMap;
+    }
+  } catch (e) {
+    console.error('Erro ao calcular ranks globais:', e);
+  }
 
   // Se o jogador não estiver mais na lista de participantes (foi kickado), volta pra home
   const stillIn = participants.some(p => p.user_id === currentUserId);
@@ -189,6 +210,10 @@ function renderLobby() {
             <span class="config-val">${getModeLabel(room?.mode)}</span>
           </div>
           <div class="lobby-config-row">
+            <span class="config-lbl">Draft Cego:</span>
+            <span class="config-val">${room?.settings?.blind ? '🫣 Ativado (Oculto)' : '👁️ Desativado (Aberto)'}</span>
+          </div>
+          <div class="lobby-config-row">
             <span class="config-lbl">Host da Sala:</span>
             <span class="config-val"><b>${participants.find(p => p.user_id === room?.host_id)?.profile?.username || 'Carregando...'}</b></span>
           </div>
@@ -231,6 +256,24 @@ function renderLobby() {
             const name = isBot ? p.bot_name : (p.profile?.username || 'Treinador');
             const typeClass = isSelf ? 'slot-self' : isBot ? 'slot-bot' : 'slot-player';
 
+            // ELO e Ranking para usuários reais
+            let eloHtml = '';
+            if (!isBot && p.profile) {
+              const eloPoints = p.profile.elo_points || 0;
+              const rankInfo = getRankInfo(eloPoints);
+              const globalRank = globalRanks[p.user_id] || '-';
+              eloHtml = `
+                <div class="slot-elo-info" style="display: flex; flex-direction: column; gap: 2px; margin-top: 5px; font-size: 0.72rem; line-height: 1.25;">
+                  <span class="slot-elo-badge" style="color: ${rankInfo.color}; font-weight: 700; display: flex; align-items: center; gap: 3px;" title="Pontos de ELO: ${eloPoints}">
+                    ${rankInfo.icon} ${rankInfo.fullName.replace(rankInfo.icon, '').trim()} (${eloPoints} pts)
+                  </span>
+                  <span class="slot-global-rank" style="color: var(--text-3); opacity: 0.85; font-weight: 500;">
+                    🏆 Rank Global: #${globalRank}
+                  </span>
+                </div>
+              `;
+            }
+
             return `
               <div class="lobby-slot ${typeClass}">
                 <span class="slot-num">${idx + 1}</span>
@@ -240,6 +283,7 @@ function renderLobby() {
                 <div class="slot-details">
                   <span class="slot-name">${name} ${isSelf ? '<small>(Você)</small>' : ''}</span>
                   <span class="slot-badge">${isBot ? 'BOT' : p.user_id === room?.host_id ? 'HOST' : 'Jogador'}</span>
+                  ${eloHtml}
                 </div>
                 ${isHost && !isSelf ? `
                   <button class="btn-kick-participant" data-id="${p.id}" title="Remover">✕</button>
@@ -293,7 +337,11 @@ function renderParticles() {
 
 function attachEvents() {
   // Sincroniza o botão de mute
-  attachMuteToggleListener('btn-mute');
+  const btnMute = container.querySelector('#btn-mute');
+  if (btnMute && !btnMute.hasAttribute('data-audio-attached')) {
+    btnMute.setAttribute('data-audio-attached', 'true');
+    attachMuteToggleListener('btn-mute');
+  }
 
   // Sair da sala
   container.querySelector('#btn-leave-lobby')?.addEventListener('click', () => {
@@ -406,22 +454,18 @@ async function handleLeaveRoom() {
   cleanup();
 
   try {
-    // Pega o participante correspondente ao usuário
     const part = participants.find(p => p.user_id === currentUserId);
     if (part) {
-      await supabase
+      supabase
         .from('room_participants')
         .delete()
-        .eq('id', part.id);
+        .eq('id', part.id)
+        .catch(e => console.error('Erro ao deletar participante:', e));
     }
-
-    // Se o host sair e for o único, ou se desejar fechar a sala, opcional.
-    // Deletar o participante causará re-render em outros clientes.
-    navigate('home');
   } catch (err) {
     console.error(err);
-    navigate('home');
   }
+  navigate('home');
 }
 
 async function handleStartGame() {
