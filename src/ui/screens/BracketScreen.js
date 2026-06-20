@@ -1057,13 +1057,15 @@ async function processEloPointsSilently() {
   }
 }
 
-async function handleGoHome() {
+function handleGoHome() {
   if (confirm('Deseja sair da sala e voltar ao menu principal?')) {
-    await processEloPointsSilently();
+    processEloPointsSilently().catch(e => console.error('Erro silencioso de ELO:', e));
+    
     try {
       const myPart = participants.find(p => p.user_id === currentUserId);
       if (myPart) {
-        await supabase.from('room_participants').delete().eq('id', myPart.id);
+        supabase.from('room_participants').delete().eq('id', myPart.id)
+          .catch(e => console.error('Erro ao deletar participante:', e));
       }
     } catch (e) {
       console.error(e);
