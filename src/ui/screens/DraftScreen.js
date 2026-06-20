@@ -285,16 +285,15 @@ function updateUI() {
   // 3. Info de turno
   const turnInfo = container.querySelector('#turn-info');
   if (turnInfo) {
-    turnInfo.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
-    const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
-    if (isPlayer) {
+    if (draftState.current_round === 7) {
+      const myPart = participants.find(p => p.user_id === currentUserId);
+      const hasEquipped = myPart && myPart.team && myPart.team.some(poke => poke.item !== undefined && poke.item !== null);
+
+      turnInfo.className = `draft-turn-info your-turn`;
       turnInfo.innerHTML = `
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
-              <img src="${getTrainerAvatar(currentPart)}" alt="Você" style="width: 100%; height: 100%; object-fit: cover;">
-            </span>
-            <span>🎯 SUA VEZ!</span>
+            <span>🎒 ${hasEquipped ? 'AGUARDANDO OS OUTROS...' : '🎯 EQUIPE SEU ITEM!'}</span>
             <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
           </div>
           <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
@@ -303,20 +302,39 @@ function updateUI() {
         </div>
       `;
     } else {
-      turnInfo.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--accent-1); flex-shrink: 0;">
-              <img src="${getTrainerAvatar(currentPart)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
-            </span>
-            <span>⌛ Vez de ${name}</span>
-            <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+      turnInfo.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
+      const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
+      if (isPlayer) {
+        turnInfo.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
+                <img src="${getTrainerAvatar(currentPart)}" alt="Você" style="width: 100%; height: 100%; object-fit: cover;">
+              </span>
+              <span>🎯 SUA VEZ!</span>
+              <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+            </div>
+            <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
+              <div id="timer-progress-bar" style="width: 100%; height: 100%; background: var(--gold); transition: width 1s linear, background-color 0.3s ease;"></div>
+            </div>
           </div>
-          <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
-            <div id="timer-progress-bar" style="width: 100%; height: 100%; background: var(--accent-1); transition: width 1s linear, background-color 0.3s ease;"></div>
+        `;
+      } else {
+        turnInfo.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--accent-1); flex-shrink: 0;">
+                <img src="${getTrainerAvatar(currentPart)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
+              </span>
+              <span>⌛ Vez de ${name}</span>
+              <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+            </div>
+            <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
+              <div id="timer-progress-bar" style="width: 100%; height: 100%; background: var(--accent-1); transition: width 1s linear, background-color 0.3s ease;"></div>
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      }
     }
   }
 
@@ -326,17 +344,24 @@ function updateUI() {
     const isBlindMode = room?.settings?.blind === true || room.mode === 'blind';
     const showTeams = !isBlindMode;
     teamsList.innerHTML = participants.map(p => {
-      const active = p.slot === currentSlot;
+      const hasItem = p.team && p.team.some(poke => poke.item !== undefined && poke.item !== null);
+      const active = draftState.current_round === 7 ? !hasItem : (p.slot === currentSlot);
       const isMe = p.user_id === currentUserId;
       const name = p.is_bot ? p.bot_name : (p.profile?.username || 'Treinador');
       const teamList = p.team || [];
+
+      let statusIcon = '';
+      if (draftState.current_round === 7) {
+        statusIcon = hasItem ? ' <span style="color: var(--success); font-size: 0.8rem;" title="Item Equipado">✅</span>' : ' <span style="color: var(--gold); font-size: 0.8rem; animation: pulseGlow 1.5s infinite;" title="Escolhendo Item...">⌛</span>';
+      }
+
       return `
         <div class="team-item ${active ? 'active' : ''} ${isMe ? 'player-team' : ''}">
           <div class="team-header" style="display: flex; align-items: center; gap: 8px;">
             <span class="team-icon" style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid ${p.is_bot ? 'var(--accent-1)' : isMe ? 'var(--gold)' : 'var(--border)'}; flex-shrink: 0;">
               <img src="${getTrainerAvatar(p)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
             </span>
-            <span class="team-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
+            <span class="team-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}${statusIcon}</span>
             <span class="team-count" style="flex-shrink: 0;">${teamList.length}/6</span>
           </div>
           ${showTeams || isMe ? `
@@ -426,6 +451,30 @@ function renderDraftMain(isPlayer) {
         <h2>Draft Concluído!</h2>
         <p>Todos os times foram montados. Criando campeonato...</p>
       </div>
+    `;
+  }
+
+  // Se for a rodada de itens, a escolha é simultânea
+  if (draftState.current_round === 7) {
+    const myPart = participants.find(p => p.user_id === currentUserId);
+    const hasEquipped = myPart && myPart.team && myPart.team.some(poke => poke.item !== undefined && poke.item !== null);
+
+    if (hasEquipped) {
+      return `
+        <div style="width: 100%;">
+          ${lastPickInfo}
+          <div class="draft-done-msg" style="padding: 2.5rem; text-align: center;">
+            <div class="thinking-spinner" style="margin: 0 auto 1.5rem auto;"></div>
+            <h2>Item Equipado com Sucesso!</h2>
+            <p style="color: var(--text-2); font-size: 1.1rem; margin-top: 0.5rem;">Aguardando os outros treinadores escolherem seus itens...</p>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      ${lastPickInfo}
+      ${renderPokemonOptions()}
     `;
   }
 
@@ -746,14 +795,20 @@ async function selectItemForPokemon(item, pokemonIdx, participant) {
 
   const isBot = participant.is_bot ?? false;
   if (loading && !isBot) return;
-  if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound && !isBot) {
-    console.log('Turno já processado por este cliente:', { currentSlot, currentRound });
-    return;
+  
+  if (currentRound !== 7) {
+    if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound && !isBot) {
+      console.log('Turno já processado por este cliente:', { currentSlot, currentRound });
+      return;
+    }
   }
+
   if (!isBot) {
     loading = true;
-    lastProcessedSlot = currentSlot;
-    lastProcessedRound = currentRound;
+    if (currentRound !== 7) {
+      lastProcessedSlot = currentSlot;
+      lastProcessedRound = currentRound;
+    }
   }
 
   // Remove o modal se existir
@@ -777,69 +832,122 @@ async function selectItemForPokemon(item, pokemonIdx, participant) {
 
     if (partErr) throw partErr;
 
-    // 2. Calcula próximo turno no snake draft
-    let nextSlot = draftState.current_slot;
-    let nextRound = draftState.current_round;
-    let nextDirection = draftState.snake_direction;
+    // Se for a rodada de itens (Round 7), a lógica de turno é simultânea
+    if (currentRound === 7) {
+      // Busca participantes atualizados do banco de dados para ver se todos já escolheram
+      const { data: updatedParts, error: fetchErr } = await supabase
+        .from('room_participants')
+        .eq('room_id', roomId);
 
-    const maxPlayers = room?.max_players || 8;
-    if (nextDirection === 1) {
-      if (nextSlot < maxPlayers - 1) {
-        nextSlot++;
+      if (fetchErr) throw fetchErr;
+
+      const allChosen = updatedParts.every(p => 
+        p.team && p.team.some(poke => poke.item !== undefined && poke.item !== null)
+      );
+
+      const nextHistory = [
+        ...(draftState.picks_history || []),
+        {
+          round: 7,
+          slot: participant.slot,
+          teamName: participant.is_bot ? participant.bot_name : (participant.profile?.username || 'Treinador'),
+          pokemon: item,
+          isPlayer: participant.user_id === currentUserId
+        }
+      ];
+
+      if (allChosen) {
+        // Todos escolheram! Avança a rodada para 8 (encerrando o draft) e limpa opções
+        const { error: draftErr } = await supabase
+          .from('draft_state')
+          .update({
+            current_round: 8,
+            current_options: [],
+            picks_history: nextHistory,
+            updated_at: new Date().toISOString()
+          })
+          .eq('room_id', roomId);
+
+        if (draftErr) throw draftErr;
+
+        if (isHost) {
+          await createBracketAndTransitionRoom();
+        }
       } else {
-        nextRound++;
-        nextDirection = -1;
+        // Apenas atualiza o histórico no draft_state para propagar
+        await supabase
+          .from('draft_state')
+          .update({
+            picks_history: nextHistory,
+            updated_at: new Date().toISOString()
+          })
+          .eq('room_id', roomId);
       }
     } else {
-      if (nextSlot > 0) {
-        nextSlot--;
+      // Lógica original de snake draft para rodadas de Pokémon 1 a 6
+      let nextSlot = draftState.current_slot;
+      let nextRound = draftState.current_round;
+      let nextDirection = draftState.snake_direction;
+
+      const maxPlayers = room?.max_players || 8;
+      if (nextDirection === 1) {
+        if (nextSlot < maxPlayers - 1) {
+          nextSlot++;
+        } else {
+          nextRound++;
+          nextDirection = -1;
+        }
       } else {
-        nextRound++;
-        nextDirection = 1;
+        if (nextSlot > 0) {
+          nextSlot--;
+        } else {
+          nextRound++;
+          nextDirection = 1;
+        }
       }
-    }
 
-    const totalRounds = room?.settings?.items ? 7 : 6;
-    const isDone = nextRound > totalRounds;
+      const totalRounds = room?.settings?.items ? 7 : 6;
+      const isDone = nextRound > totalRounds;
 
-    const nextHistory = [
-      ...(draftState.picks_history || []),
-      {
-        round: draftState.current_round,
-        slot: draftState.current_slot,
-        teamName: participant.is_bot ? participant.bot_name : (participant.profile?.username || 'Treinador'),
-        pokemon: item, // Salva o item no histórico
-        isPlayer: participant.user_id === currentUserId
+      const nextHistory = [
+        ...(draftState.picks_history || []),
+        {
+          round: draftState.current_round,
+          slot: draftState.current_slot,
+          teamName: participant.is_bot ? participant.bot_name : (participant.profile?.username || 'Treinador'),
+          pokemon: item,
+          isPlayer: participant.user_id === currentUserId
+        }
+      ];
+
+      const { error: draftErr } = await supabase
+        .from('draft_state')
+        .update({
+          current_round: nextRound,
+          current_slot: nextSlot,
+          snake_direction: nextDirection,
+          selected_type: null,
+          current_options: [],
+          picks_history: nextHistory,
+          updated_at: new Date().toISOString()
+        })
+        .eq('room_id', roomId)
+        .eq('current_slot', currentSlot)
+        .eq('current_round', currentRound);
+
+      if (draftErr) throw draftErr;
+
+      if (isDone && isHost) {
+        await createBracketAndTransitionRoom();
       }
-    ];
-
-    // 3. Atualiza estado global do draft com bloqueio otimista
-    const { error: draftErr } = await supabase
-      .from('draft_state')
-      .update({
-        current_round: nextRound,
-        current_slot: nextSlot,
-        snake_direction: nextDirection,
-        selected_type: null,
-        current_options: [],
-        picks_history: nextHistory,
-        updated_at: new Date().toISOString()
-      })
-      .eq('room_id', roomId)
-      .eq('current_slot', currentSlot)
-      .eq('current_round', currentRound);
-
-    if (draftErr) throw draftErr;
-
-    // 4. Se concluiu tudo e for host, cria o chaveamento
-    if (isDone && isHost) {
-      await createBracketAndTransitionRoom();
     }
 
   } catch (err) {
     console.error('Erro ao equipar item:', err);
-    lastProcessedSlot = null;
-    lastProcessedRound = null;
+    if (currentRound !== 7) {
+      lastProcessedSlot = null;
+      lastProcessedRound = null;
+    }
   } finally {
     loading = false;
   }
@@ -880,22 +988,11 @@ async function selectPokemon(pokemon) {
   const currentRound = draftState.current_round;
 
   if (currentRound === 7) {
-    const currentPart = participants.find(p => p.slot === currentSlot);
-    const team = currentPart.team || [];
-    let targetIdx = 0;
-    if (currentPart.is_bot) {
-      let highestBst = -1;
-      team.forEach((poke, idx) => {
-        const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
-        if (bst > highestBst) {
-          highestBst = bst;
-          targetIdx = idx;
-        }
-      });
-    } else {
-      targetIdx = team.length > 0 ? Math.floor(Math.random() * team.length) : 0;
-    }
-    await selectItemForPokemon(pokemon, targetIdx, currentPart);
+    const myPart = participants.find(p => p.user_id === currentUserId);
+    if (!myPart) return;
+    const team = myPart.team || [];
+    const targetIdx = team.length > 0 ? Math.floor(Math.random() * team.length) : 0;
+    await selectItemForPokemon(pokemon, targetIdx, myPart);
     return;
   }
 
@@ -1072,6 +1169,7 @@ function processTurn() {
   const currentRound = draftState.current_round;
   const currentHistoryLength = draftState.picks_history?.length || 0;
 
+  const isItemRound = draftState.current_round === 7;
   const isNewTurn = lastActiveSlot !== currentSlot || lastActiveRound !== currentRound || lastHistoryLength !== currentHistoryLength;
   
   if (isNewTurn) {
@@ -1087,7 +1185,7 @@ function processTurn() {
   
   let currentPart = participants.find(p => p.slot === currentSlot);
   
-  if (!currentPart) {
+  if (!currentPart && !isItemRound) {
     if (isHost) {
       console.log('Jogador abandonou o slot', currentSlot, '- substituindo por Bot');
       supabase.from('room_participants').insert({
@@ -1104,7 +1202,8 @@ function processTurn() {
     return;
   }
 
-  const isPlayer = currentPart.user_id === currentUserId;
+  // Na rodada de itens (Round 7), todos os humanos estão escolhendo ao mesmo tempo
+  const isPlayer = isItemRound ? true : (currentPart && currentPart.user_id === currentUserId);
 
   if (isNewTurn && isPlayer) {
     const hasShinyOption = draftState.current_options && draftState.current_options.some(p => p && p.isShiny);
@@ -1164,17 +1263,21 @@ function processTurn() {
           
           // Apenas o jogador do turno executa a ação de timeout
           if (isPlayer) {
-            const isItemRound = draftState.current_round === 7;
             if (room.mode !== DRAFT_MODES.RANDOM && !draftState.selected_type && !isItemRound) {
               import('../../engine/types.js').then(m => {
                 const t = m.ALL_TYPES[Math.floor(Math.random() * m.ALL_TYPES.length)];
                 selectType(t);
               });
             } else if (isItemRound) {
-              let pool = draftState.current_options || [];
-              if (pool.length === 0) pool = itemsData;
-              const it = pool[Math.floor(Math.random() * pool.length)];
-              selectPokemon(it);
+              // Se já escolheu o item, não faz timeout de novo
+              const myPart = participants.find(p => p.user_id === currentUserId);
+              const hasEquipped = myPart && myPart.team && myPart.team.some(poke => poke.item !== undefined && poke.item !== null);
+              if (!hasEquipped) {
+                let pool = draftState.current_options || [];
+                if (pool.length === 0) pool = itemsData;
+                const it = pool[Math.floor(Math.random() * pool.length)];
+                selectPokemon(it);
+              }
             } else {
               let pool = draftState.current_options || [];
               if (!pool || pool.length === 0) pool = selectOptionsFromPool(getAvailablePool().map(id => pokemonData.find(x => x.id === id)).filter(p => p));
@@ -1199,10 +1302,86 @@ function processTurn() {
     return;
   }
 
-  // Turno do BOT (somente o host roda a IA e grava)
-  if (currentPart.is_bot && isHost) {
-    const isItemRound = draftState.current_round === 7;
-    const botPhase = (!draftState.selected_type && room.mode !== DRAFT_MODES.RANDOM && !isItemRound) ? 'type' : 'pokemon';
+  // Se for a rodada de itens (Round 7), a escolha dos BOTs é feita em lote pelo Host
+  if (draftState.current_round === 7 && draftState.current_options && draftState.current_options.length > 0 && isHost) {
+    const botsNeedItem = participants.filter(p => p.is_bot && (!p.team || !p.team.some(poke => poke.item !== undefined && poke.item !== null)));
+    if (botsNeedItem.length > 0) {
+      (async () => {
+        let currentHistory = [...(draftState.picks_history || [])];
+        for (const bot of botsNeedItem) {
+          const pool = draftState.current_options;
+          const item = pool[Math.floor(Math.random() * pool.length)];
+          const botTeam = bot.team || [];
+          let bestPokeIdx = 0;
+          let highestBst = -1;
+          botTeam.forEach((poke, idx) => {
+            const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
+            if (bst > highestBst) {
+              highestBst = bst;
+              bestPokeIdx = idx;
+            }
+          });
+          
+          const updatedTeam = [...botTeam];
+          if (updatedTeam[bestPokeIdx]) {
+            updatedTeam[bestPokeIdx] = {
+              ...updatedTeam[bestPokeIdx],
+              item: item
+            };
+          }
+          
+          await supabase
+            .from('room_participants')
+            .update({ team: updatedTeam })
+            .eq('id', bot.id);
+            
+          currentHistory.push({
+            round: 7,
+            slot: bot.slot,
+            teamName: bot.bot_name,
+            pokemon: item,
+            isPlayer: false
+          });
+        }
+        
+        // Busca todos de novo para ver se todos (incluindo humanos) já escolheram
+        const { data: updatedParts } = await supabase
+          .from('room_participants')
+          .eq('room_id', roomId);
+          
+        const allChosen = updatedParts && updatedParts.every(p => 
+          p.team && p.team.some(poke => poke.item !== undefined && poke.item !== null)
+        );
+        
+        if (allChosen) {
+          await supabase
+            .from('draft_state')
+            .update({
+              current_round: 8,
+              current_options: [],
+              picks_history: currentHistory,
+              updated_at: new Date().toISOString()
+            })
+            .eq('room_id', roomId);
+            
+          await createBracketAndTransitionRoom();
+        } else {
+          await supabase
+            .from('draft_state')
+            .update({
+              picks_history: currentHistory,
+              updated_at: new Date().toISOString()
+            })
+            .eq('room_id', roomId);
+        }
+      })();
+      return;
+    }
+  }
+
+  // Turno do BOT em rodadas normais (1 a 6) (somente o host roda a IA e grava)
+  if (currentPart && currentPart.is_bot && isHost && !isItemRound) {
+    const botPhase = (!draftState.selected_type && room.mode !== DRAFT_MODES.RANDOM) ? 'type' : 'pokemon';
     if (lastProcessedBotSlot === currentSlot && lastProcessedBotRound === currentRound && lastProcessedBotPhase === botPhase) {
       console.log('Turno do BOT já processado pelo Host:', { currentSlot, currentRound, botPhase });
       return;
