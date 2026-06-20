@@ -1439,7 +1439,6 @@ async function generateItemOptionsAndSave() {
 
 async function handleLeaveRoom() {
   destroyEmotes();
-  if (!confirm('Tem certeza que deseja sair desta sala? Seu time e posição serão removidos.')) return;
   
   try {
     const myPart = participants.find(p => p.user_id === currentUserId);

@@ -1088,21 +1088,19 @@ async function processEloPointsSilently() {
 }
 
 function handleGoHome() {
-  if (confirm('Deseja sair da sala e voltar ao menu principal?')) {
-    processEloPointsSilently().catch(e => console.error('Erro silencioso de ELO:', e));
-    
-    try {
-      const myPart = participants.find(p => p.user_id === currentUserId);
-      if (myPart) {
-        supabase.from('room_participants').delete().eq('id', myPart.id)
-          .catch(e => console.error('Erro ao deletar participante:', e));
-      }
-    } catch (e) {
-      console.error(e);
+  processEloPointsSilently().catch(e => console.error('Erro silencioso de ELO:', e));
+  
+  try {
+    const myPart = participants.find(p => p.user_id === currentUserId);
+    if (myPart) {
+      supabase.from('room_participants').delete().eq('id', myPart.id)
+        .catch(e => console.error('Erro ao deletar participante:', e));
     }
-    cleanup();
-    navigate('home');
+  } catch (e) {
+    console.error(e);
   }
+  cleanup();
+  navigate('home');
 }
 
 // LÓGICA DO HOST PARA SIMULAÇÃO DO TORNEIO
