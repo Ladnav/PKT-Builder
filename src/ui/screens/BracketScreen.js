@@ -530,7 +530,8 @@ function updateUI() {
         return m && (m.team1?.user_id === currentUserId || m.team2?.user_id === currentUserId);
       });
 
-      if (!isMyMatchAnimating) {
+      // Apenas processa se o torneio estiver totalmente finalizado (round === 'done')
+      if (bracket.round === 'done' && !isMyMatchAnimating) {
         const status = getPlayerTournamentStatus(bracket, currentUserId);
         if (status.completed) {
           localStorage.setItem(eloKey, 'true');
@@ -1028,8 +1029,34 @@ function attachEvents() {
   }
 }
 
+async function processEloPointsSilently() {
+  const isParticipant = participants.some(p => p.user_id === currentUserId);
+  if (!isParticipant) return;
+
+  const eloKey = `elo_processed_room_${roomId}`;
+  if (localStorage.getItem(eloKey) === 'true') return;
+
+  const status = getPlayerTournamentStatus(bracket, currentUserId);
+  if (status.completed) {
+    localStorage.setItem(eloKey, 'true');
+    try {
+      const pointsChange = status.pointsChange;
+      const { data: prof } = await supabase.from('profiles').select('elo_points').eq('id', currentUserId).single();
+      if (prof) {
+        const currentElo = prof.elo_points || 0;
+        const nextElo = Math.max(0, currentElo + pointsChange);
+        await supabase.from('profiles').update({ elo_points: nextElo }).eq('id', currentUserId);
+        console.log(`[Silent] ELO atualizado: ${currentElo} -> ${nextElo} (${pointsChange > 0 ? '+' : ''}${pointsChange} pts)`);
+      }
+    } catch (e) {
+      console.error('Erro ao atualizar ELO de forma silenciosa:', e);
+    }
+  }
+}
+
 async function handleGoHome() {
   if (confirm('Deseja sair da sala e voltar ao menu principal?')) {
+    await processEloPointsSilently();
     try {
       const myPart = participants.find(p => p.user_id === currentUserId);
       if (myPart) {
