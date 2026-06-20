@@ -77,6 +77,14 @@ function renderTooltip(pokemon) {
   // It's a pokemon
   const bst = Object.values(pokemon.stats).reduce((a, b) => a + b, 0);
   
+  const itemHtml = pokemon.item ? `
+    <div class="tooltip-item-equip" style="margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.5rem; font-size: 0.75rem; display: flex; align-items: center; gap: 6px;">
+      <span style="color: var(--text-2);">Item:</span>
+      <span style="color: var(--gold); font-weight: bold;">${pokemon.item.icon} ${pokemon.item.displayName}</span>
+      <span style="color: var(--text-3); font-size: 0.7rem; margin-left: auto;">${pokemon.item.description}</span>
+    </div>
+  ` : '';
+
   tooltipEl.innerHTML = `
     <div class="tooltip-header" style="display: flex; align-items: center; gap: 0.5rem;">
       <img src="${pokemon.sprite}" width="40" height="40" style="object-fit: contain;">
@@ -87,12 +95,13 @@ function renderTooltip(pokemon) {
         </div>
       </div>
     </div>
-    <div class="tooltip-stats" style="margin-top: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.2rem; font-size: 0.75rem;">
+    <div class="tooltip-stats" style="margin-top: 0.5rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.2rem; font-size: 0.75rem;">
       <div>HP: <b style="color:var(--text-1)">${pokemon.stats.hp}</b></div>
       <div>ATK: <b style="color:var(--text-1)">${pokemon.stats.attack}</b></div>
       <div>DEF: <b style="color:var(--text-1)">${pokemon.stats.defense}</b></div>
       <div>SPA: <b style="color:var(--text-1)">${pokemon.stats.spAtk}</b></div>
-      <div>SPD: <b style="color:var(--text-1)">${pokemon.stats.speed}</b></div>
+      <div>SPD: <b style="color:var(--text-1)">${pokemon.stats.spDef}</b></div>
+      <div>SPE: <b style="color:var(--text-1)">${pokemon.stats.speed}</b></div>
     </div>
     <div class="tooltip-moves" style="margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.5rem;">
       ${pokemon.moves.map(m => `
@@ -102,5 +111,6 @@ function renderTooltip(pokemon) {
         </div>
       `).join('')}
     </div>
+    ${itemHtml}
   `;
 }

@@ -10,14 +10,14 @@
     "id": "item-2",
     "name": "choice-band",
     "displayName": "Choice Band",
-    "description": "Aumenta o Dano Físico em 30%, mas não permite usar ataques Especiais.",
+    "description": "Aumenta o Dano Físico em 30%, mas só permite usar ataques Físicos.",
     "icon": "🎽"
   },
   {
     "id": "item-3",
     "name": "choice-specs",
     "displayName": "Choice Specs",
-    "description": "Aumenta o Dano Especial em 30%, mas não permite usar ataques Físicos.",
+    "description": "Aumenta o Dano Especial em 30%, mas só permite usar ataques Especiais.",
     "icon": "🕶️"
   },
   {
@@ -54,5 +54,26 @@
     "displayName": "Expert Belt",
     "description": "Aumenta em 20% o dano de ataques que são Super Efetivos.",
     "icon": "🥋"
+  },
+  {
+    "id": "item-9",
+    "name": "shell-bell",
+    "displayName": "Shell Bell",
+    "description": "Restaura 12.5% (1/8) do dano causado ao inimigo a cada ataque realizado.",
+    "icon": "🔔"
+  },
+  {
+    "id": "item-10",
+    "name": "quick-claw",
+    "displayName": "Quick Claw",
+    "description": "Dá 20% de chance de atacar primeiro no turno, independente da velocidade.",
+    "icon": "💅"
+  },
+  {
+    "id": "item-11",
+    "name": "sitrus-berry",
+    "displayName": "Sitrus Berry",
+    "description": "Restaura 25% do HP máximo quando a vida cai abaixo de 50% (uma vez por batalha).",
+    "icon": "🍊"
   }
 ]

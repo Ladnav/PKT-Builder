@@ -288,22 +288,32 @@ function updateUI() {
     const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
     if (isPlayer) {
       turnInfo.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
-            <img src="${getTrainerAvatar(currentPart)}" alt="Você" style="width: 100%; height: 100%; object-fit: cover;">
-          </span>
-          <span>🎯 SUA VEZ!</span>
-          <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
+              <img src="${getTrainerAvatar(currentPart)}" alt="Você" style="width: 100%; height: 100%; object-fit: cover;">
+            </span>
+            <span>🎯 SUA VEZ!</span>
+            <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+          </div>
+          <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
+            <div id="timer-progress-bar" style="width: 100%; height: 100%; background: var(--gold); transition: width 1s linear, background-color 0.3s ease;"></div>
+          </div>
         </div>
       `;
     } else {
       turnInfo.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--accent-1); flex-shrink: 0;">
-            <img src="${getTrainerAvatar(currentPart)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
-          </span>
-          <span>⌛ Vez de ${name}</span>
-          <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--accent-1); flex-shrink: 0;">
+              <img src="${getTrainerAvatar(currentPart)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
+            </span>
+            <span>⌛ Vez de ${name}</span>
+            <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
+          </div>
+          <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
+            <div id="timer-progress-bar" style="width: 100%; height: 100%; background: var(--accent-1); transition: width 1s linear, background-color 0.3s ease;"></div>
+          </div>
         </div>
       `;
     }
@@ -496,22 +506,59 @@ function renderPokemonOptions() {
   const isPlayer = currentPart && currentPart.user_id === currentUserId;
 
   if (isItemRound) {
+    const playerPart = participants.find(p => p.user_id === currentUserId);
+    const team = playerPart?.team || [];
+
     return `
-      <div class="pokemon-options-wrap">
-        <div class="options-header">
-          <h2 class="pick-title">🎒 Escolha um Item Global para o Time</h2>
-          <p class="pick-sub">Este item será equipado na sua equipe durante as batalhas.</p>
+      <div class="pokemon-options-wrap" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="options-header" style="text-align: center;">
+          <h2 class="pick-title">🎒 Escolha um Item e Equipe em um Pokémon</h2>
+          <p class="pick-sub">Selecione 1 item e 1 Pokémon do seu time, depois clique em Confirmar.</p>
         </div>
-        <div class="options-grid" id="options-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
-          ${options.length === 0 ? `
-            <div class="bot-thinking" style="grid-column: 1/-1"><p>Gerando itens...</p></div>
-          ` : options.map(item => `
-            <div class="pokemon-card selectable" data-id="${item.id}" style="text-align: center; padding: 1.5rem; cursor: pointer; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-3); transition: all 0.2s;">
-              <div style="font-size: 3rem; margin-bottom: 1rem;">${item.icon}</div>
-              <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">${item.displayName}</h3>
-              <p style="font-size: 0.8rem; color: var(--text-2); line-height: 1.4;">${item.description}</p>
-            </div>
-          `).join('')}
+        
+        <!-- ROW 1: ITEMS -->
+        <div>
+          <h3 style="font-size: 1.1rem; color: var(--gold); margin-bottom: 0.8rem; text-align: center;">1. Selecione o Item</h3>
+          <div class="items-select-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            ${options.length === 0 ? `
+              <div class="bot-thinking" style="grid-column: 1/-1"><p>Gerando itens...</p></div>
+            ` : options.map(item => `
+              <div class="item-select-card" data-item-id="${item.id}" style="text-align: center; padding: 1.2rem; cursor: pointer; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-3); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                <div style="font-size: 2.8rem;">${item.icon}</div>
+                <h4 style="margin: 0; font-size: 1.05rem; color: white;">${item.displayName}</h4>
+                <p style="margin: 0; font-size: 0.75rem; color: var(--text-2); line-height: 1.3;">${item.description}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- ROW 2: POKEMONS -->
+        <div>
+          <h3 style="font-size: 1.1rem; color: var(--gold); margin-bottom: 0.8rem; text-align: center;">2. Escolha o Pokémon</h3>
+          <div class="pokes-select-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.8rem;">
+            ${team.map((poke, idx) => {
+              const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
+              return `
+                <div class="poke-select-card" data-idx="${idx}" style="text-align: center; padding: 0.8rem; cursor: pointer; border: 2px solid var(--border); border-radius: 10px; background: var(--bg-3); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; position: relative;">
+                  <img src="${poke.sprite}" alt="${poke.displayName}" style="width: 55px; height: 55px; object-fit: contain;">
+                  <span style="font-size: 0.75rem; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; color: white;">${poke.displayName}</span>
+                  <span style="font-size: 0.65rem; color: var(--text-3);">BST ${bst}</span>
+                  ${poke.item ? `
+                    <div style="font-size: 0.65rem; color: var(--gold); background: rgba(251,191,36,0.1); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 3px; margin-top: 2px; display: inline-flex; align-items: center; gap: 2px;">
+                      ${poke.item.icon} ${poke.item.displayName}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- ROW 3: CONFIRM BUTTON -->
+        <div style="display: flex; justify-content: center; margin-top: 0.5rem;">
+          <button id="btn-confirm-equip" disabled style="padding: 0.8rem 2.5rem; background: var(--border); border: none; color: var(--text-3); font-weight: bold; border-radius: 8px; cursor: not-allowed; font-size: 1.05rem; transition: all 0.2s; min-width: 250px;">
+            Confirmar Equipamento
+          </button>
         </div>
       </div>
     `;
@@ -595,6 +642,69 @@ async function handleReroll() {
 }
 
 function attachDraftEvents() {
+  if (draftState.current_round === 7) {
+    let selectedItemId = null;
+    let selectedPokeIdx = null;
+
+    const btnConfirm = container.querySelector('#btn-confirm-equip');
+
+    const updateConfirmButton = () => {
+      if (selectedItemId !== null && selectedPokeIdx !== null) {
+        btnConfirm.disabled = false;
+        btnConfirm.style.background = 'var(--gold)';
+        btnConfirm.style.color = '#000';
+        btnConfirm.style.cursor = 'pointer';
+        btnConfirm.style.boxShadow = '0 0 15px rgba(251, 191, 36, 0.4)';
+      } else {
+        btnConfirm.disabled = true;
+        btnConfirm.style.background = 'var(--border)';
+        btnConfirm.style.color = 'var(--text-3)';
+        btnConfirm.style.cursor = 'not-allowed';
+        btnConfirm.style.boxShadow = 'none';
+      }
+    };
+
+    container.querySelectorAll('.item-select-card').forEach(card => {
+      card.addEventListener('click', () => {
+        playSFX('select');
+        selectedItemId = card.dataset.itemId;
+        container.querySelectorAll('.item-select-card').forEach(c => {
+          c.style.borderColor = 'var(--border)';
+          c.style.boxShadow = 'none';
+        });
+        card.style.borderColor = 'var(--gold)';
+        card.style.boxShadow = '0 0 10px rgba(251, 191, 36, 0.2)';
+        updateConfirmButton();
+      });
+    });
+
+    container.querySelectorAll('.poke-select-card').forEach(card => {
+      card.addEventListener('click', () => {
+        playSFX('select');
+        selectedPokeIdx = parseInt(card.dataset.idx);
+        container.querySelectorAll('.poke-select-card').forEach(c => {
+          c.style.borderColor = 'var(--border)';
+          c.style.boxShadow = 'none';
+        });
+        card.style.borderColor = 'var(--gold)';
+        card.style.boxShadow = '0 0 10px rgba(251, 191, 36, 0.2)';
+        updateConfirmButton();
+      });
+    });
+
+    btnConfirm?.addEventListener('click', () => {
+      if (selectedItemId === null || selectedPokeIdx === null) return;
+      playSFX('click');
+      const item = draftState.current_options.find(it => it.id === selectedItemId);
+      const playerPart = participants.find(p => p.user_id === currentUserId);
+      if (item && playerPart) {
+        selectItemForPokemon(item, selectedPokeIdx, playerPart);
+      }
+    });
+
+    return;
+  }
+
   const btnReroll = container.querySelector('#btn-reroll');
   if (btnReroll) {
     btnReroll.addEventListener('click', () => {
@@ -619,9 +729,113 @@ function attachDraftEvents() {
       const rawId = card.dataset.id;
       const id = isNaN(parseInt(rawId)) ? rawId : parseInt(rawId); // items use string id
       const option = draftState.current_options.find(p => p.id === id);
-      if (option) selectPokemon(option); // We reuse selectPokemon for items
+      if (option) {
+        selectPokemon(option);
+      }
     });
   });
+}
+
+async function selectItemForPokemon(item, pokemonIdx, participant) {
+  const currentSlot = draftState.current_slot;
+  const currentRound = draftState.current_round;
+
+  if (loading) return;
+  if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound) {
+    console.log('Turno já processado por este cliente:', { currentSlot, currentRound });
+    return;
+  }
+  loading = true;
+  lastProcessedSlot = currentSlot;
+  lastProcessedRound = currentRound;
+
+  // Remove o modal se existir
+  const modal = document.getElementById('equip-item-modal');
+  if (modal) modal.remove();
+
+  try {
+    const updatedTeam = [...(participant.team || [])];
+    if (updatedTeam[pokemonIdx]) {
+      updatedTeam[pokemonIdx] = {
+        ...updatedTeam[pokemonIdx],
+        item: item
+      };
+    }
+
+    // 1. Atualiza time do participante
+    const { error: partErr } = await supabase
+      .from('room_participants')
+      .update({ team: updatedTeam })
+      .eq('id', participant.id);
+
+    if (partErr) throw partErr;
+
+    // 2. Calcula próximo turno no snake draft
+    let nextSlot = draftState.current_slot;
+    let nextRound = draftState.current_round;
+    let nextDirection = draftState.snake_direction;
+
+    const maxPlayers = room?.max_players || 8;
+    if (nextDirection === 1) {
+      if (nextSlot < maxPlayers - 1) {
+        nextSlot++;
+      } else {
+        nextRound++;
+        nextDirection = -1;
+      }
+    } else {
+      if (nextSlot > 0) {
+        nextSlot--;
+      } else {
+        nextRound++;
+        nextDirection = 1;
+      }
+    }
+
+    const totalRounds = room?.settings?.items ? 7 : 6;
+    const isDone = nextRound > totalRounds;
+
+    const nextHistory = [
+      ...(draftState.picks_history || []),
+      {
+        round: draftState.current_round,
+        slot: draftState.current_slot,
+        teamName: participant.is_bot ? participant.bot_name : (participant.profile?.username || 'Treinador'),
+        pokemon: item, // Salva o item no histórico
+        isPlayer: participant.user_id === currentUserId
+      }
+    ];
+
+    // 3. Atualiza estado global do draft com bloqueio otimista
+    const { error: draftErr } = await supabase
+      .from('draft_state')
+      .update({
+        current_round: nextRound,
+        current_slot: nextSlot,
+        snake_direction: nextDirection,
+        selected_type: null,
+        current_options: [],
+        picks_history: nextHistory,
+        updated_at: new Date().toISOString()
+      })
+      .eq('room_id', roomId)
+      .eq('current_slot', currentSlot)
+      .eq('current_round', currentRound);
+
+    if (draftErr) throw draftErr;
+
+    // 4. Se concluiu tudo e for host, cria o chaveamento
+    if (isDone && isHost) {
+      await createBracketAndTransitionRoom();
+    }
+
+  } catch (err) {
+    console.error('Erro ao equipar item:', err);
+    lastProcessedSlot = null;
+    lastProcessedRound = null;
+  } finally {
+    loading = false;
+  }
 }
 
 async function selectType(type) {
@@ -657,6 +871,26 @@ async function selectType(type) {
 async function selectPokemon(pokemon) {
   const currentSlot = draftState.current_slot;
   const currentRound = draftState.current_round;
+
+  if (currentRound === 7) {
+    const currentPart = participants.find(p => p.slot === currentSlot);
+    const team = currentPart.team || [];
+    let targetIdx = 0;
+    if (currentPart.is_bot) {
+      let highestBst = -1;
+      team.forEach((poke, idx) => {
+        const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
+        if (bst > highestBst) {
+          highestBst = bst;
+          targetIdx = idx;
+        }
+      });
+    } else {
+      targetIdx = team.length > 0 ? Math.floor(Math.random() * team.length) : 0;
+    }
+    await selectItemForPokemon(pokemon, targetIdx, currentPart);
+    return;
+  }
 
   if (loading) return;
   if (lastProcessedSlot === currentSlot && lastProcessedRound === currentRound) {
@@ -885,10 +1119,24 @@ function processTurn() {
       const display = document.getElementById('timer-display');
       if (display) display.textContent = `(${turnTimeLeft}s)`;
       
+      const updateProgressBar = () => {
+        const pBar = document.getElementById('timer-progress-bar');
+        if (pBar) {
+          const pct = Math.max(0, (turnTimeLeft / timerSetting) * 100);
+          pBar.style.width = `${pct}%`;
+          if (pct < 25) {
+            pBar.style.backgroundColor = '#e74c3c';
+          }
+        }
+      };
+      
+      updateProgressBar();
+      
       turnTimerInterval = setInterval(() => {
         turnTimeLeft--;
         const display = document.getElementById('timer-display');
         if (display) display.textContent = `(${turnTimeLeft}s)`;
+        updateProgressBar();
         
         if (turnTimeLeft <= 0) {
           clearInterval(turnTimerInterval);
@@ -917,6 +1165,12 @@ function processTurn() {
         }
       }, 1000);
     }
+  }
+
+  // Se for a rodada de itens e opções estiverem vazias, o HOST é responsável por gerar
+  if (draftState.current_round === 7 && (!draftState.current_options || draftState.current_options.length === 0) && isHost) {
+    generateItemOptionsAndSave();
+    return;
   }
 
   // Se for o modo Random e opções estiverem vazias, o HOST é responsável por gerar
@@ -966,6 +1220,24 @@ async function generateRandomOptionsAndSave() {
   }
 }
 
+async function generateItemOptionsAndSave() {
+  const shuffled = [...itemsData].sort(() => Math.random() - 0.5);
+  const itemOptions = shuffled.slice(0, 3);
+
+  try {
+    const { error } = await supabase
+      .from('draft_state')
+      .update({
+        current_options: itemOptions,
+        updated_at: new Date().toISOString()
+      })
+      .eq('room_id', roomId);
+    if (error) throw error;
+  } catch (err) {
+    console.error('Erro ao gerar opções de itens:', err);
+  }
+}
+
 async function handleLeaveRoom() {
   destroyEmotes();
   if (!confirm('Tem certeza que deseja sair desta sala? Seu time e posição serão removidos.')) return;
@@ -985,6 +1257,29 @@ async function handleLeaveRoom() {
 
 async function executeBotTurn(botParticipant) {
   try {
+    const isItemRound = draftState.current_round === 7;
+    if (isItemRound) {
+      let pool = draftState.current_options || [];
+      if (pool.length === 0) pool = itemsData;
+      const item = pool[Math.floor(Math.random() * pool.length)];
+
+      const botTeam = botParticipant.team || [];
+      let bestPokeIdx = 0;
+      let highestBst = -1;
+
+      botTeam.forEach((poke, idx) => {
+        const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
+        if (bst > highestBst) {
+          highestBst = bst;
+          bestPokeIdx = idx;
+        }
+      });
+
+      await selectItemForPokemon(item, bestPokeIdx, botParticipant);
+      botTurnInProgress = false;
+      return;
+    }
+
     let options = [];
 
     // Modo 1 ou 3: escolhe tipo → escolhe pokemon

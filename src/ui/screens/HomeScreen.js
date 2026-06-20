@@ -902,18 +902,32 @@ function renderScreen() {
 function renderParticles() {
   const containerParticles = document.getElementById('particles');
   if (!containerParticles) return;
-  const symbols = ['\u26A1','\uD83D\uDD25','\uD83D\uDCA7','\uD83C\uDF3F','\u2744\uFE0F','\uD83D\uDC4A','\u2620\uFE0F','\uD83D\uDD2E','\uD83D\uDC09','\uD83C\uDF11'];
   for (let i = 0; i < 15; i++) {
     const el = document.createElement('div');
     el.className = 'particle';
-    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    const pokeId = Math.floor(Math.random() * 151) + 1;
+    const imgUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokeId}.png`;
+    
+    const img = document.createElement('img');
+    img.src = imgUrl;
+    img.style.cssText = `
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+    `;
+    el.appendChild(img);
+    
     el.style.cssText = `
       left: ${Math.random() * 100}%;
       top: ${Math.random() * 100}%;
       animation-delay: ${Math.random() * 5}s;
-      animation-duration: ${4 + Math.random() * 4}s;
-      font-size: ${1 + Math.random() * 1.5}rem;
-      opacity: ${0.05 + Math.random() * 0.1};
+      animation-duration: ${6 + Math.random() * 6}s;
+      width: ${32 + Math.random() * 32}px;
+      height: ${32 + Math.random() * 32}px;
+      opacity: ${0.08 + Math.random() * 0.12};
+      position: absolute;
+      pointer-events: none;
     `;
     containerParticles.appendChild(el);
   }

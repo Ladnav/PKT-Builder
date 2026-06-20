@@ -125,6 +125,15 @@ function chooseMoveBot(attacker, defender) {
 
 // Escolhe move aleatório (para batalhas normais no campeonato)
 function chooseMoveRandom(pokemon) {
+  const item = pokemon.item?.name;
+  if (item === 'choice-band') {
+    const physMoves = pokemon.moves.filter(m => m.damage_class === 'physical');
+    if (physMoves.length > 0) return physMoves[Math.floor(Math.random() * physMoves.length)];
+  }
+  if (item === 'choice-specs') {
+    const specMoves = pokemon.moves.filter(m => m.damage_class === 'special');
+    if (specMoves.length > 0) return specMoves[Math.floor(Math.random() * specMoves.length)];
+  }
   return pokemon.moves[Math.floor(Math.random() * pokemon.moves.length)];
 }
 
@@ -168,6 +177,21 @@ function processAttack(state, attacker, defender, move) {
     log(state, `  🪖 <b>${attacker.displayName}</b> se machucou no Rocky Helmet (${recoil} HP)!`, 'damage');
   }
 
+  // Shell Bell (Lifesteal: heals 12.5% of damage dealt)
+  if (attacker.item?.name === 'shell-bell' && actualDmg > 0 && attacker.currentHp > 0) {
+    const heal = Math.floor(actualDmg * 0.125) || 1;
+    attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + heal);
+    log(state, `  🔔 <b>${attacker.displayName}</b> recuperou ${heal} HP com Shell Bell!`, 'heal');
+  }
+
+  // Sitrus Berry (Heals 25% max HP when HP drops below 50%, consumed once)
+  if (defender.item?.name === 'sitrus-berry' && defender.currentHp > 0 && defender.currentHp < defender.maxHp / 2) {
+    const heal = Math.floor(defender.maxHp * 0.25) || 1;
+    defender.currentHp = Math.min(defender.maxHp, defender.currentHp + heal);
+    log(state, `  🍊 <b>${defender.displayName}</b> consumiu a Sitrus Berry e recuperou ${heal} HP!`, 'heal');
+    defender.item = null; // Consumido!
+  }
+
   // Process Faints
   if (attacker.currentHp <= 0 && !attacker.fainted) {
     attacker.fainted = true;
@@ -200,9 +224,20 @@ function executeTurn(state) {
   const move1 = chooseMoveRandom(p1);
   const move2 = chooseMoveRandom(p2);
 
-  // Determina ordem (Speed)
+  // Determina ordem (Speed e Quick Claw)
   let first, second, moveFirst, moveSecond;
-  if (p1.stats.speed >= p2.stats.speed) {
+  const p1Claw = p1.item?.name === 'quick-claw' && Math.random() < 0.20;
+  const p2Claw = p2.item?.name === 'quick-claw' && Math.random() < 0.20;
+  let p1GoesFirst = p1.stats.speed >= p2.stats.speed;
+  if (p1Claw && !p2Claw) {
+    p1GoesFirst = true;
+    log(state, `💅 A Garra Rápida (Quick Claw) fez <b>${p1.displayName}</b> atacar primeiro!`, 'eff-super');
+  } else if (p2Claw && !p1Claw) {
+    p1GoesFirst = false;
+    log(state, `💅 A Garra Rápida (Quick Claw) fez <b>${p2.displayName}</b> atacar primeiro!`, 'eff-super');
+  }
+
+  if (p1GoesFirst) {
     first = p1; second = p2; moveFirst = move1; moveSecond = move2;
   } else {
     first = p2; second = p1; moveFirst = move2; moveSecond = move1;

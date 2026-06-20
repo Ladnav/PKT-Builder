@@ -92,8 +92,8 @@ export function simulateRound(bracket, roundName, settings = {}) {
     if (!match.team1 || !match.team2 || match.simulated) continue;
 
     const seed = Date.now() + Math.random() * 1000;
-    const t1 = match.team1.pokemon.map(p => ({ ...p, item: match.team1.item }));
-    const t2 = match.team2.pokemon.map(p => ({ ...p, item: match.team2.item }));
+    const t1 = match.team1.pokemon.map(p => ({ ...p, item: p.item || match.team1.item }));
+    const t2 = match.team2.pokemon.map(p => ({ ...p, item: p.item || match.team2.item }));
     const state = createBattleState(t1, t2, seed, settings);
     const result = simulateBattle(state);
 

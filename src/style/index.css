@@ -3039,3 +3039,36 @@ input:checked + .toggle-slider:before {
     display: none !important;
   }
 }
+
+@media (min-width: 901px) {
+  .options-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.8rem !important;
+  }
+  .options-grid .pokemon-card {
+    padding: 0.8rem !important;
+    gap: 0.3rem !important;
+    font-size: 0.85rem !important;
+  }
+  .options-grid .card-sprite-wrap {
+    height: 75px !important;
+  }
+  .options-grid .card-sprite {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  .options-grid .card-stats {
+    gap: 0.15rem !important;
+  }
+  .options-grid .stat-row {
+    font-size: 0.65rem !important;
+  }
+  .options-grid .card-moves {
+    margin-top: 0.15rem !important;
+    gap: 0.2rem !important;
+  }
+  .options-grid .move-pill {
+    padding: 2px 4px !important;
+    font-size: 0.65rem !important;
+  }
+}

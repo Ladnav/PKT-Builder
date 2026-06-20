@@ -50,6 +50,11 @@ export function PokemonCard(pokemon, options = {}) {
       <div class="card-glow"></div>
       <div class="card-header">
         <span class="card-number">#${String(pokemon.id).padStart(3,'0')}</span>
+        ${pokemon.item ? `
+          <span class="card-item-badge" title="${pokemon.item.displayName}: ${pokemon.item.description}" style="background: rgba(251, 191, 36, 0.2); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 4px; font-size: 0.7rem; color: var(--gold); font-weight: bold; display: flex; align-items: center; gap: 2px;">
+            ${pokemon.item.icon} ${pokemon.item.displayName}
+          </span>
+        ` : ''}
         <span class="card-bst">BST ${bst}</span>
       </div>
       <div class="card-sprite-wrap">
@@ -139,8 +144,13 @@ export function PokemonRosterCard(pokemon, options = {}) {
             <span class="roster-card-name">${pokemon.displayName}</span>
             <span class="roster-card-bst">BST ${bst}</span>
           </div>
-          <div class="roster-card-types">
-            ${pokemon.types.map(t => TypeBadge(t)).join('')}
+          <div class="roster-card-types" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>${pokemon.types.map(t => TypeBadge(t)).join('')}</div>
+            ${pokemon.item ? `
+              <span class="roster-item-badge" title="${pokemon.item.displayName}: ${pokemon.item.description}" style="background: rgba(251, 191, 36, 0.15); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 6px; font-size: 0.75rem; color: var(--gold); display: flex; align-items: center; gap: 4px; margin-left: auto;">
+                ${pokemon.item.icon} ${pokemon.item.displayName}
+              </span>
+            ` : ''}
           </div>
         </div>
       </div>

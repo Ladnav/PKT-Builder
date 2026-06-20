@@ -706,7 +706,8 @@ function renderMatch(match, isFinal = false) {
           <div class="match-team-types">
             ${team.pokemon.slice(0, 6).map((p, idx) => {
               const extraClass = getPokeClasses(p, idx);
-              return `<img class="match-mini-sprite ${extraClass}" src="${p.sprite}" alt="${p.displayName}" title="${p.displayName}" data-poke-name="${p.displayName}" data-poke-idx="${idx}" onerror="this.style.display='none'">`;
+              const itemTitle = p.item ? ` (${p.item.icon} ${p.item.displayName})` : '';
+              return `<img class="match-mini-sprite ${extraClass}" src="${p.sprite}" alt="${p.displayName}" title="${p.displayName}${itemTitle}" data-poke-name="${p.displayName}" data-poke-idx="${idx}" onerror="this.style.display='none'">`;
             }).join('')}
           </div>
         </div>
@@ -1108,8 +1109,8 @@ async function simulateMatchAndSave(match, roundName) {
   try {
     const seed = Date.now() + Math.floor(Math.random() * 10000);
     // Simula a batalha com o motor
-    const t1 = match.team1.pokemon.map(p => ({ ...p, item: match.team1.item }));
-    const t2 = match.team2.pokemon.map(p => ({ ...p, item: match.team2.item }));
+    const t1 = match.team1.pokemon.map(p => ({ ...p, item: p.item || match.team1.item }));
+    const t2 = match.team2.pokemon.map(p => ({ ...p, item: p.item || match.team2.item }));
     const state = createBattleState(t1, t2, seed, room?.settings || {});
     const result = simulateBattle(state);
 
