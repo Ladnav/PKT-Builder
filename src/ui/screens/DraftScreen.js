@@ -1073,6 +1073,10 @@ function processTurn() {
 
   const isNewTurn = lastActiveSlot !== currentSlot || lastActiveRound !== currentRound || lastHistoryLength !== currentHistoryLength;
   
+  if (isNewTurn) {
+    botTurnInProgress = false;
+  }
+  
   // Flag para detectar primeiro carregamento antes de atualizar os valores
   const isFirstLoad = lastActiveSlot === null;
   
