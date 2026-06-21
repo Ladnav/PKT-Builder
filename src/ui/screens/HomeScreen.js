@@ -1390,8 +1390,19 @@ async function handleJoinRoom(code) {
     renderScreen();
   }
 }
+let globalCountdownInterval = null;
 
-export function destroy() {}
+export function destroy() {
+  if (globalCountdownInterval) {
+    clearInterval(globalCountdownInterval);
+    globalCountdownInterval = null;
+  }
+  const modal = document.getElementById('global-shop-modal');
+  if (modal) {
+    modal.remove();
+  }
+  destroyEmotes();
+}
 
 // ===================================================
 // GLOBAL SHOP SYSTEM
@@ -1496,7 +1507,6 @@ function openGlobalShopModal() {
     return pokemonData.find(x => x.id === id) || pokemonData[0];
   };
 
-  let countdownInterval = null;
 
   const renderContent = () => {
     modal.innerHTML = `
@@ -1761,7 +1771,10 @@ function openGlobalShopModal() {
     const timeLeft = (lastRefresh + COOLDOWN_MS) - now;
 
     if (timeLeft <= 0) {
-      if (countdownInterval) clearInterval(countdownInterval);
+      if (globalCountdownInterval) {
+        clearInterval(globalCountdownInterval);
+        globalCountdownInterval = null;
+      }
       shopCards = generateNewGlobalShopCards(userId);
       renderContent();
     } else {
@@ -1775,8 +1788,9 @@ function openGlobalShopModal() {
   const attachEventsLocal = () => {
     const closeShop = () => {
       modal.style.display = 'none';
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
+      if (globalCountdownInterval) {
+        clearInterval(globalCountdownInterval);
+        globalCountdownInterval = null;
       }
       const goldCountEl = document.getElementById('hs-gold-count');
       if (goldCountEl) {
@@ -1920,7 +1934,9 @@ function openGlobalShopModal() {
       renderContent();
     });
   };
-
-  countdownInterval = setInterval(updateCountdown, 1000);
+  if (globalCountdownInterval) {
+    clearInterval(globalCountdownInterval);
+  }
+  globalCountdownInterval = setInterval(updateCountdown, 1000);
   renderContent();
 }

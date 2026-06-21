@@ -9,6 +9,7 @@ import * as BracketScreen  from './ui/screens/BracketScreen.js';
 import * as CampaignScreen from './ui/screens/CampaignScreen.js';
 import { supabase }        from './lib/supabase.js';
 import { initSounds }      from './lib/sounds.js';
+import { initTooltipSystem } from './ui/components/TooltipSystem.js';
 
 // Inicializa a app quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!appContainer) return;
 
   initSounds();
+  initTooltipSystem();
   initRouter(appContainer);
   registerScreen('auth',    AuthScreen);
   registerScreen('home',    HomeScreen);

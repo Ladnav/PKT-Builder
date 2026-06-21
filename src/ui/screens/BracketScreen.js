@@ -33,6 +33,7 @@ let loading = false;
 let errorMsg = '';
 let animatedMatchIds = new Set();
 let activeAnimations = {};
+let eloAnimInterval = null;
 
 export async function render(cont, params) {
   container = cont;
@@ -339,9 +340,13 @@ function triggerEloAnimation(currentElo, nextElo, pointsChange, reason) {
     playSFX('error');
   }
 
-  const animInterval = setInterval(() => {
+  if (eloAnimInterval) {
+    clearInterval(eloAnimInterval);
+  }
+  eloAnimInterval = setInterval(() => {
     if (tempElo === nextElo) {
-      clearInterval(animInterval);
+      clearInterval(eloAnimInterval);
+      eloAnimInterval = null;
       const btnOk = document.getElementById('btn-elo-ok');
       if (btnOk) {
         btnOk.style.display = 'block';
@@ -1334,6 +1339,11 @@ async function updateUserStats(winner, loser, isChampionship = false, mvp = null
 function cleanup() {
   clearTimeout(simulationTimer);
   
+  if (eloAnimInterval) {
+    clearInterval(eloAnimInterval);
+    eloAnimInterval = null;
+  }
+  
   // Limpa todos os timers de animação ativos
   for (const matchId in activeAnimations) {
     if (activeAnimations[matchId].interval) {
@@ -1347,6 +1357,7 @@ function cleanup() {
     bracketSubscription.unsubscribe();
     bracketSubscription = null;
   }
+  destroyEmotes();
 }
 
 export function destroy() {

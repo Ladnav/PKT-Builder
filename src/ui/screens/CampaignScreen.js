@@ -671,7 +671,7 @@ function renderScreen() {
     `;
   } else if (!unlocked) {
     btnBattleHtml = `
-      <button class="btn-primary" disabled style="width: 100%; margin-bottom: 0.5rem; filter: grayscale(1);">
+      <button class="campaign-btn-primary" disabled style="width: 100%; margin-bottom: 0.5rem;">
         🔒 Desafio Trancado
       </button>
     `;
@@ -680,13 +680,13 @@ function renderScreen() {
       <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); padding: 0.8rem; border-radius: 8px; color: #fca5a5; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem; text-align: center; line-height: 1.4;">
         ⚠️ Você possui apenas ${ownedCards.length} cartas no álbum. É necessário ter pelo menos 6 Pokémons para iniciar a campanha. Vá à Loja comprar boosters!
       </div>
-      <button class="btn-primary" disabled style="width: 100%; margin-bottom: 0.5rem; filter: grayscale(1);">
+      <button class="campaign-btn-primary" disabled style="width: 100%; margin-bottom: 0.5rem;">
         ⚔️ Desafiar ${currentStageObj.name}
       </button>
     `;
   } else if (selectedCityId === 'elite4' || isCurrent || activeStageIdx === activeCity.stages.length - 1) {
     btnBattleHtml = `
-      <button class="btn-primary" id="btn-challenge-stage" style="width: 100%; margin-bottom: 0.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #34d399;">
+      <button class="campaign-btn-primary" id="btn-challenge-stage" style="width: 100%; margin-bottom: 0.5rem;">
         ⚔️ Desafiar ${currentStageObj.name}
       </button>
     `;
@@ -828,7 +828,7 @@ function renderScreen() {
               ${btnBattleHtml}
               
               ${showShopBtn ? `
-                <button class="btn-primary" id="btn-campaign-shop" style="width: 100%; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24;">
+                <button class="campaign-btn-shop" id="btn-campaign-shop" style="width: 100%;">
                   🛒 Visitar Loja da Cidade
                 </button>
               ` : ''}
@@ -1068,7 +1068,7 @@ function openShopModal() {
           </div>
           
           <div class="campaign-modal-footer">
-            <button class="btn-primary" id="btn-shop-done" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);">
+            <button class="campaign-btn-secondary" id="btn-shop-done">
               Fechar Loja
             </button>
           </div>
@@ -1329,10 +1329,10 @@ function openPreMatchModal() {
           </div>
           
           <div class="campaign-modal-footer">
-            <button class="btn-primary" id="btn-prematch-cancel" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);">
+            <button class="campaign-btn-secondary" id="btn-prematch-cancel">
               Cancelar
             </button>
-            <button class="btn-primary" id="btn-prematch-battle" ${!canBattle ? 'disabled' : ''} style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #34d399; font-weight: 900;">
+            <button class="campaign-btn-primary" id="btn-prematch-battle" ${!canBattle ? 'disabled' : ''}>
               Começar Batalha!
             </button>
           </div>
@@ -1862,7 +1862,7 @@ function showCampaignOutcomeModal(playerWon, rewards, callback) {
     const spawnCoins = () => {
       for (let i = 0; i < 15; i++) {
         setTimeout(() => {
-          if (!emitter) return;
+          if (!emitter || !document.body.contains(emitter)) return;
           const coin = document.createElement('div');
           coin.className = 'floating-coin pkt-coin';
           coin.style.width = '16px';
