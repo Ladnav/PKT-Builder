@@ -11,6 +11,48 @@ import itemsData from '../../data/items-sample.json';
 
 // CITIES CONFIGURATION
 const CITIES_CONFIG = {
+  pallet: {
+    name: "Vila de Pallet",
+    leader: "Rival Azul",
+    type: "normal",
+    badge: null,
+    badgeName: "Começo da Jornada",
+    badgeIcon: "🏡",
+    badgeColor: "#94a3b8",
+    x: 28, y: 70,
+    stages: [
+      { name: "Treinador de Rota 1", type: "NPC", team: [{ id: 25 }, { id: 143 }, { id: 59 }, { id: 25 }, { id: 143 }, { id: 59 }] },
+      { name: "Rival Azul", type: "Leader", team: [
+        { id: 6, item: 'life-orb' },
+        { id: 9, item: 'assault-vest' },
+        { id: 3, item: 'leftovers' },
+        { id: 65, item: 'choice-specs' },
+        { id: 59, item: 'choice-band' },
+        { id: 143, item: 'leftovers', isShiny: true }
+      ]}
+    ]
+  },
+  viridian_visit: {
+    name: "Cidade de Viridian (Visita)",
+    leader: "Rival Azul",
+    type: "normal",
+    badge: null,
+    badgeName: "Visita a Viridian",
+    badgeIcon: "🟢",
+    badgeColor: "#22c55e",
+    x: 28, y: 55,
+    stages: [
+      { name: "Treinador da Rota 22", type: "NPC", team: [{ id: 25 }, { id: 143 }, { id: 59 }, { id: 25 }, { id: 143 }, { id: 59 }] },
+      { name: "Rival Azul (Rota 22)", type: "Leader", team: [
+        { id: 25, item: 'light-ball' },
+        { id: 143, item: 'leftovers' },
+        { id: 59, item: 'choice-band' },
+        { id: 3, item: 'leftovers' },
+        { id: 6, item: 'life-orb' },
+        { id: 9, item: 'assault-vest' }
+      ]}
+    ]
+  },
   pewter: {
     name: "Cidade de Pewter",
     leader: "Brock",
@@ -249,9 +291,14 @@ const CITIES_CONFIG = {
   }
 };
 
-const CITY_ORDER = ['pewter', 'cerulean', 'vermilion', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'viridian', 'elite4'];
+const CITY_ORDER = ['pallet', 'viridian_visit', 'pewter', 'cerulean', 'vermilion', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'viridian', 'elite4'];
 
 const CITY_SHOPS = {
+  viridian_visit: [
+    { id: 76, name: 'golem', cost: 50, isShiny: false, displayName: 'Golem' },
+    { id: 473, name: 'mamoswine', cost: 150, isShiny: false, displayName: 'Mamoswine' },
+    { id: 445, name: 'garchomp', cost: 1000, isShiny: true, displayName: 'Garchomp ⭐' }
+  ],
   pewter: [
     { id: 76, name: 'golem', cost: 50, isShiny: false, displayName: 'Golem' },
     { id: 214, name: 'heracross', cost: 150, isShiny: false, displayName: 'Heracross' },
@@ -398,7 +445,7 @@ export async function render(cont) {
       } catch (_) {}
     } else {
       progress = {
-        currentCity: 'pewter',
+        currentCity: 'pallet',
         currentStage: 0,
         completedCities: [],
         eliteFourIndex: 0
@@ -448,8 +495,36 @@ function getPokemonById(id) {
   return JSON.parse(JSON.stringify(p));
 }
 
+function getViridianActiveId() {
+  const hasCompletedVisit = progress.completedCities.includes('viridian_visit');
+  const isAtGiovanni = progress.currentCity === 'viridian' || progress.completedCities.includes('viridian');
+  if (isAtGiovanni) {
+    return 'viridian';
+  }
+  return 'viridian_visit';
+}
+
+function getNodeStatusClass(cityId) {
+  if (cityId === 'viridian') {
+    const hasCompletedGiovanni = progress.completedCities.includes('viridian');
+    const hasCompletedVisit = progress.completedCities.includes('viridian_visit');
+    const isAtGiovanni = progress.currentCity === 'viridian';
+    const isAtVisit = progress.currentCity === 'viridian_visit';
+
+    if (hasCompletedGiovanni) return 'completed';
+    if (isAtGiovanni) return 'active';
+    if (isAtVisit) return 'active';
+    if (hasCompletedVisit) return 'completed';
+    return isCityUnlocked('viridian_visit') ? '' : 'locked';
+  }
+
+  if (progress.completedCities.includes(cityId)) return 'completed';
+  if (progress.currentCity === cityId) return 'active';
+  return isCityUnlocked(cityId) ? '' : 'locked';
+}
+
 function isCityUnlocked(cityId) {
-  if (cityId === 'pewter') return true;
+  if (cityId === 'pallet') return true;
   const idx = CITY_ORDER.indexOf(cityId);
   if (idx === -1) return false;
   const prevCityId = CITY_ORDER[idx - 1];
@@ -480,7 +555,7 @@ function renderScreen() {
   } else if (isCurrent) {
     activeStageIdx = progress.currentStage;
   } else {
-    activeStageIdx = 3; // Replay del Leader
+    activeStageIdx = activeCity.stages.length - 1; // Replay del Leader
   }
 
   // Draw background roadmap SVG connections
@@ -495,18 +570,21 @@ function renderScreen() {
     return `<line x1="${c1.x}%" y1="${c1.y}%" x2="${c2.x}%" y2="${c2.y}%" class="campaign-svg-line" stroke="${color}" stroke-width="2.5" ${filter} />`;
   };
 
+
+  svgPaths += drawSvgLine('pallet', 'viridian_visit');
+  svgPaths += drawSvgLine('viridian_visit', 'pewter');
   svgPaths += drawSvgLine('pewter', 'cerulean');
-  svgPaths += drawSvgLine('pewter', 'viridian');
   svgPaths += drawSvgLine('cerulean', 'saffron');
   svgPaths += drawSvgLine('saffron', 'celadon');
   svgPaths += drawSvgLine('saffron', 'vermilion');
   svgPaths += drawSvgLine('celadon', 'fuchsia');
   svgPaths += drawSvgLine('fuchsia', 'cinnabar');
-  svgPaths += drawSvgLine('cinnabar', 'viridian');
+  svgPaths += drawSvgLine('cinnabar', 'pallet');
   svgPaths += drawSvgLine('viridian', 'elite4');
 
   // Render badges list
-  const badgeSlotsHtml = CITY_ORDER.slice(0, 8).map(cId => {
+  const BADGE_CITIES = ['pewter', 'cerulean', 'vermilion', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'viridian'];
+  const badgeSlotsHtml = BADGE_CITIES.map(cId => {
     const c = CITIES_CONFIG[cId];
     const hasBadge = ownedBadges.has(c.badge);
     const badgeColor = c.badgeColor || '#fbbf24';
@@ -557,7 +635,7 @@ function renderScreen() {
       } else if (isCurrent && progress.currentStage === i) {
         statusClass = 'active';
         statusText = 'Batalhar';
-      } else if (!isCurrent && i === 3) {
+      } else if (!isCurrent && i === activeCity.stages.length - 1) {
         statusClass = 'active'; // Replay Leader
         statusText = 'Replay';
       }
@@ -580,7 +658,7 @@ function renderScreen() {
   }
 
   // Active stage preview
-  const currentStageObj = activeCity.stages[activeStageIdx] || activeCity.stages[3];
+  const currentStageObj = activeCity.stages[activeStageIdx] || activeCity.stages[activeCity.stages.length - 1];
   const isChampionDefeated = selectedCityId === 'elite4' && progress.eliteFourIndex >= 5;
   const hasEnoughCards = ownedCards.length >= 6;
 
@@ -606,7 +684,7 @@ function renderScreen() {
         ⚔️ Desafiar ${currentStageObj.name}
       </button>
     `;
-  } else if (selectedCityId === 'elite4' || isCurrent || activeStageIdx === 3) {
+  } else if (selectedCityId === 'elite4' || isCurrent || activeStageIdx === activeCity.stages.length - 1) {
     btnBattleHtml = `
       <button class="btn-primary" id="btn-challenge-stage" style="width: 100%; margin-bottom: 0.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #34d399;">
         ⚔️ Desafiar ${currentStageObj.name}
@@ -657,56 +735,62 @@ function renderScreen() {
           <div class="campaign-map-canvas" id="campaign-map-canvas">
             ${svgPaths}
             
+            <!-- Pallet -->
+            <div class="map-node ${getNodeStatusClass('pallet')}" style="left: 28%; top: 70%;" data-city="pallet">
+              <div class="map-node-inner">🏡</div>
+              <div class="map-node-label">Vila de Pallet</div>
+            </div>
+
             <!-- Pewter -->
-            <div class="map-node ${progress.completedCities.includes('pewter') ? 'completed' : (progress.currentCity === 'pewter' ? 'active' : '')}" style="left: 30%; top: 25%;" data-city="pewter">
+            <div class="map-node ${getNodeStatusClass('pewter')}" style="left: 30%; top: 25%;" data-city="pewter">
               <div class="map-node-inner">🪨</div>
               <div class="map-node-label">Pewter (Brock)</div>
             </div>
             
             <!-- Cerulean -->
-            <div class="map-node ${progress.completedCities.includes('cerulean') ? 'completed' : (progress.currentCity === 'cerulean' ? 'active' : (isCityUnlocked('cerulean') ? '' : 'locked'))}" style="left: 65%; top: 15%;" data-city="cerulean">
+            <div class="map-node ${getNodeStatusClass('cerulean')}" style="left: 65%; top: 15%;" data-city="cerulean">
               <div class="map-node-inner">💧</div>
               <div class="map-node-label">Cerulean (Misty)</div>
             </div>
             
             <!-- Vermilion -->
-            <div class="map-node ${progress.completedCities.includes('vermilion') ? 'completed' : (progress.currentCity === 'vermilion' ? 'active' : (isCityUnlocked('vermilion') ? '' : 'locked'))}" style="left: 72%; top: 60%;" data-city="vermilion">
+            <div class="map-node ${getNodeStatusClass('vermilion')}" style="left: 72%; top: 60%;" data-city="vermilion">
               <div class="map-node-inner">⚡</div>
               <div class="map-node-label">Vermilion (Lt. Surge)</div>
             </div>
             
             <!-- Celadon -->
-            <div class="map-node ${progress.completedCities.includes('celadon') ? 'completed' : (progress.currentCity === 'celadon' ? 'active' : (isCityUnlocked('celadon') ? '' : 'locked'))}" style="left: 48%; top: 45%;" data-city="celadon">
+            <div class="map-node ${getNodeStatusClass('celadon')}" style="left: 48%; top: 45%;" data-city="celadon">
               <div class="map-node-inner">🌈</div>
               <div class="map-node-label">Celadon (Erika)</div>
             </div>
             
             <!-- Fuchsia -->
-            <div class="map-node ${progress.completedCities.includes('fuchsia') ? 'completed' : (progress.currentCity === 'fuchsia' ? 'active' : (isCityUnlocked('fuchsia') ? '' : 'locked'))}" style="left: 55%; top: 80%;" data-city="fuchsia">
+            <div class="map-node ${getNodeStatusClass('fuchsia')}" style="left: 55%; top: 80%;" data-city="fuchsia">
               <div class="map-node-inner">💜</div>
               <div class="map-node-label">Fuchsia (Koga)</div>
             </div>
             
             <!-- Saffron -->
-            <div class="map-node ${progress.completedCities.includes('saffron') ? 'completed' : (progress.currentCity === 'saffron' ? 'active' : (isCityUnlocked('saffron') ? '' : 'locked'))}" style="left: 65%; top: 45%;" data-city="saffron">
+            <div class="map-node ${getNodeStatusClass('saffron')}" style="left: 65%; top: 45%;" data-city="saffron">
               <div class="map-node-inner">🔮</div>
               <div class="map-node-label">Saffron (Sabrina)</div>
             </div>
             
             <!-- Cinnabar -->
-            <div class="map-node ${progress.completedCities.includes('cinnabar') ? 'completed' : (progress.currentCity === 'cinnabar' ? 'active' : (isCityUnlocked('cinnabar') ? '' : 'locked'))}" style="left: 28%; top: 85%;" data-city="cinnabar">
+            <div class="map-node ${getNodeStatusClass('cinnabar')}" style="left: 28%; top: 85%;" data-city="cinnabar">
               <div class="map-node-inner">🔥</div>
               <div class="map-node-label">Cinnabar (Blaine)</div>
             </div>
             
             <!-- Viridian -->
-            <div class="map-node ${progress.completedCities.includes('viridian') ? 'completed' : (progress.currentCity === 'viridian' ? 'active' : (isCityUnlocked('viridian') ? '' : 'locked'))}" style="left: 28%; top: 55%;" data-city="viridian">
+            <div class="map-node ${getNodeStatusClass('viridian')}" style="left: 28%; top: 55%;" data-city="viridian">
               <div class="map-node-inner">🟢</div>
-              <div class="map-node-label">Viridian (Giovanni)</div>
+              <div class="map-node-label">${progress.currentCity === 'viridian' || progress.completedCities.includes('viridian') ? 'Viridian (Giovanni)' : 'Viridian (Visita)'}</div>
             </div>
             
             <!-- Elite 4 -->
-            <div class="map-node ${progress.completedCities.includes('elite4') ? 'completed' : (progress.currentCity === 'elite4' ? 'active' : (isCityUnlocked('elite4') ? '' : 'locked'))}" style="left: 10%; top: 45%;" data-city="elite4">
+            <div class="map-node ${getNodeStatusClass('elite4')}" style="left: 10%; top: 45%;" data-city="elite4">
               <div class="map-node-inner">🏆</div>
               <div class="map-node-label">Planalto Indigo</div>
             </div>
@@ -791,7 +875,10 @@ function attachEvents() {
   // Map nodes click
   container.querySelectorAll('.map-node').forEach(node => {
     node.addEventListener('click', () => {
-      const cityId = node.dataset.city;
+      let cityId = node.dataset.city;
+      if (cityId === 'viridian') {
+        cityId = getViridianActiveId();
+      }
       if (!isCityUnlocked(cityId)) {
         playSFX('faint');
         showCampaignNoticeModal('Ginásio Bloqueado', 'Este ginásio está bloqueado! Derrote os líderes anteriores primeiro para liberar o acesso.', '🔒');
@@ -825,7 +912,7 @@ function attachEvents() {
 // ===================================================
 // CUSTOM NOTICE MODAL SYSTEM
 // ===================================================
-function showCampaignNoticeModal(title, message, icon = '⚠️') {
+function showCampaignNoticeModal(title, message, icon = '⚠️', onConfirm = null) {
   const modalContainer = container.querySelector('#campaign-modal-container');
   if (!modalContainer) return;
 
@@ -899,10 +986,24 @@ function showCampaignNoticeModal(title, message, icon = '⚠️') {
     </div>
   `;
 
-  modalContainer.querySelector('#btn-notice-ok').addEventListener('click', () => {
-    playSFX('click');
-    modalContainer.innerHTML = '';
-  });
+  const okBtn = modalContainer.querySelector('#btn-notice-ok');
+  if (okBtn) {
+    okBtn.disabled = true;
+    okBtn.style.opacity = '0.6';
+    okBtn.style.cursor = 'not-allowed';
+    setTimeout(() => {
+      okBtn.disabled = false;
+      okBtn.style.opacity = '1';
+      okBtn.style.cursor = 'pointer';
+    }, 500);
+
+    okBtn.addEventListener('click', () => {
+      if (okBtn.disabled) return;
+      playSFX('click');
+      modalContainer.innerHTML = '';
+      if (onConfirm) onConfirm();
+    });
+  }
 }
 
 // ===================================================
@@ -1024,16 +1125,13 @@ function openShopModal() {
         if (updErr) throw updErr;
 
         playSFX('boosterOpen');
-        showCampaignNoticeModal('Booster Comprado', 'Booster comprado com sucesso! O pacote foi adicionado à sua conta online e pode ser aberto no menu principal.', '📦');
+        showCampaignNoticeModal('Booster Comprado', 'Booster comprado com sucesso! O pacote foi adicionado à sua conta online e pode ser aberto no menu principal.', '📦', () => openShopModal());
 
       } catch (err) {
         console.error(err);
-        showCampaignNoticeModal('Erro na Compra', 'Ocorreu um erro ao processar a compra de booster. Tente novamente.', '❌');
+        showCampaignNoticeModal('Erro na Compra', 'Ocorreu um erro ao processar a compra de booster. Tente novamente.', '❌', () => openShopModal());
         gold += 100; // Refund
         localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
-      } finally {
-        // Re-render shop modal
-        openShopModal();
       }
     });
   }
@@ -1085,7 +1183,7 @@ function openShopModal() {
         }
 
         playSFX('click');
-        showCampaignNoticeModal('Carta Adquirida', `A carta ${item.displayName} foi comprada com sucesso e adicionada ao seu Álbum!`, '🎉');
+        showCampaignNoticeModal('Carta Adquirida', `A carta ${item.displayName} foi comprada com sucesso e adicionada ao seu Álbum!`, '🎉', () => openShopModal());
 
         // Update local list
         const { data: cards } = await supabase
@@ -1096,11 +1194,9 @@ function openShopModal() {
 
       } catch (err) {
         console.error(err);
-        showCampaignNoticeModal('Erro na Compra', 'Ocorreu um erro ao processar a compra de carta. Tente novamente.', '❌');
+        showCampaignNoticeModal('Erro na Compra', 'Ocorreu um erro ao processar a compra de carta. Tente novamente.', '❌', () => openShopModal());
         gold += item.cost; // Refund
         localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
-      } finally {
-        openShopModal();
       }
     });
   });
@@ -1494,7 +1590,7 @@ function startBattle(playerTeam) {
         }
 
       } else {
-        const isLeader = (activeStageIdx === 3);
+        const isLeader = (activeStageIdx === cityConfig.stages.length - 1);
         if (isLeader) {
           // Beat Gym Leader
           gold += 50;
@@ -1502,7 +1598,7 @@ function startBattle(playerTeam) {
 
           // Save badge in Supabase
           try {
-            if (!ownedBadges.has(cityConfig.badge)) {
+            if (cityConfig.badge && !ownedBadges.has(cityConfig.badge)) {
               await supabase
                 .from('user_badges')
                 .insert({ user_id: currentUserId, badge_id: cityConfig.badge });
