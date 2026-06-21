@@ -4247,4 +4247,28 @@ input:checked + .toggle-slider:before {
   box-shadow: none !important;
 }
 
+/* CAMPAIGN BACK BUTTON */
+#btn-campaign-back {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem !important;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+#btn-campaign-back:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  transform: translateX(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+
 

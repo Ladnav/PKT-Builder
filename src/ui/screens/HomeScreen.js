@@ -823,118 +823,117 @@ function renderScreen() {
             </div>
           </section>
         `}
-        
-        <!-- SETTINGS MODAL -->
-        <div id="settings-modal" class="battle-modal-overlay" style="display: none;">
-          <div class="battle-modal" style="max-width: 400px;">
-            <div class="battle-modal-header">
-              <div class="battle-modal-title">⚙️ Regras da Sala</div>
-              <button class="btn-close-modal" id="btn-close-settings">×</button>
+      </main>
+
+      <!-- SETTINGS MODAL -->
+      <div id="settings-modal" class="battle-modal-overlay" style="display: none; z-index: 99999;">
+        <div class="battle-modal" style="max-width: 400px;">
+          <div class="battle-modal-header">
+            <div class="battle-modal-title">⚙️ Regras da Sala</div>
+            <button class="btn-close-modal" id="btn-close-settings">×</button>
+          </div>
+          <div class="battle-modal-content" style="display: flex; flex-direction: column; gap: 1rem; max-height: 75vh; overflow-y: auto; padding-bottom: 1.5rem;">
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Modo de Jogo</label>
+              <select id="settings-mode" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
+                <option value="type">Draft Clássico (Aberto)</option>
+                <option value="random" selected>Draft Aleatório (Sorteio)</option>
+              </select>
             </div>
-            <div class="battle-modal-content" style="display: flex; flex-direction: column; gap: 1rem; max-height: 75vh; overflow-y: auto; padding-bottom: 1.5rem;">
-              
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Modo de Jogo</label>
-                <select id="settings-mode" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
-                  <option value="type">Draft Clássico (Aberto)</option>
-                  <option value="random" selected>Draft Aleatório (Sorteio)</option>
-                </select>
-              </div>
 
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tempo por Turno</label>
-                <select id="settings-timer" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
-                  <option value="10">10 Segundos (Ultra Rápido)</option>
-                  <option value="30">30 Segundos (Rápido)</option>
-                  <option value="45">45 Segundos (Padrão)</option>
-                  <option value="60">60 Segundos (Longo)</option>
-                  <option value="0" selected>Sem Limite de Tempo</option>
-                </select>
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tamanho da Sala</label>
-                <select id="settings-size" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
-                  <option value="8">8 Jogadores (Clássico)</option>
-                  <option value="4">4 Jogadores (Rápido)</option>
-                </select>
-              </div>
-
-              <div class="setting-toggle-row">
-                <div class="setting-toggle-info">
-                  <span class="setting-toggle-title">✨ Permitir Shinies</span>
-                  <span class="setting-toggle-desc">Pokémon raros com +15% de status (0,5% de chance).</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="settings-shinies" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="setting-toggle-row">
-                <div class="setting-toggle-info">
-                  <span class="setting-toggle-title">🌦️ Clima Dinâmico</span>
-                  <span class="setting-toggle-desc">Sorteia um clima global (Chuva, Sol, Neve) que afeta os danos.</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="settings-weather">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="setting-toggle-row">
-                <div class="setting-toggle-info">
-                  <span class="setting-toggle-title">🔗 Sinergia de Time</span>
-                  <span class="setting-toggle-desc">Draftar 3+ Pokémon do mesmo tipo dá +10% de stats para eles.</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="settings-synergy">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="setting-toggle-row">
-                <div class="setting-toggle-info">
-                  <span class="setting-toggle-title">🎒 Itens Equipáveis</span>
-                  <span class="setting-toggle-desc">Ativa uma rodada extra (Rodada 7) para pickar 1 Item Global para o time.</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="settings-items">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="setting-toggle-row">
-                <div class="setting-toggle-info">
-                  <span class="setting-toggle-title">🫣 Draft Cego</span>
-                  <span class="setting-toggle-desc">Oculta a escolha de picks e os times dos adversários até o torneio.</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="settings-blind">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div class="setting-toggle-row">
-                <div class="setting-toggle-info">
-                  <span class="setting-toggle-title">🪙 Limite de Créditos</span>
-                  <span class="setting-toggle-desc">Define um orçamento de 15 créditos para montar a equipe, limitando o uso excessivo de lendários.</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="settings-credits">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-
-              <button class="hs-btn-create" id="btn-confirm-create" style="margin-top: 1rem; padding: 1rem; font-size: 1.1rem;">
-                Criar Sala
-              </button>
-
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tempo por Turno</label>
+              <select id="settings-timer" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
+                <option value="10">10 Segundos (Ultra Rápido)</option>
+                <option value="30">30 Segundos (Rápido)</option>
+                <option value="45">45 Segundos (Padrão)</option>
+                <option value="60">60 Segundos (Longo)</option>
+                <option value="0" selected>Sem Limite de Tempo</option>
+              </select>
             </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <label style="color: var(--text-2); font-size: 0.85rem; font-weight: bold;">Tamanho da Sala</label>
+              <select id="settings-size" style="width: 100%; padding: 0.8rem; border-radius: 8px; background: var(--bg-3); border: 1px solid var(--border); color: white; outline: none; cursor: pointer;">
+                <option value="8">8 Jogadores (Clássico)</option>
+                <option value="4">4 Jogadores (Rápido)</option>
+              </select>
+            </div>
+
+            <div class="setting-toggle-row">
+              <div class="setting-toggle-info">
+                <span class="setting-toggle-title">✨ Permitir Shinies</span>
+                <span class="setting-toggle-desc">Pokémon raros com +15% de status (0,5% de chance).</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-shinies" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-toggle-row">
+              <div class="setting-toggle-info">
+                <span class="setting-toggle-title">🌦️ Clima Dinâmico</span>
+                <span class="setting-toggle-desc">Sorteia um clima global (Chuva, Sol, Neve) que afeta os danos.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-weather">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-toggle-row">
+              <div class="setting-toggle-info">
+                <span class="setting-toggle-title">🔗 Sinergia de Time</span>
+                <span class="setting-toggle-desc">Draftar 3+ Pokémon do mesmo tipo dá +10% de stats para eles.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-synergy">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-toggle-row">
+              <div class="setting-toggle-info">
+                <span class="setting-toggle-title">🎒 Itens Equipáveis</span>
+                <span class="setting-toggle-desc">Ativa uma rodada extra (Rodada 7) para pickar 1 Item Global para o time.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-items">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-toggle-row">
+              <div class="setting-toggle-info">
+                <span class="setting-toggle-title">🫣 Draft Cego</span>
+                <span class="setting-toggle-desc">Oculta a escolha de picks e os times dos adversários até o torneio.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-blind">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-toggle-row">
+              <div class="setting-toggle-info">
+                <span class="setting-toggle-title">🪙 Limite de Créditos</span>
+                <span class="setting-toggle-desc">Define um orçamento de 15 créditos para montar a equipe, limitando o uso excessivo de lendários.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-credits">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <button class="hs-btn-create" id="btn-confirm-create" style="margin-top: 1rem; padding: 1rem; font-size: 1.1rem;">
+              Criar Sala
+            </button>
+
           </div>
         </div>
-
-      </main>
+      </div>
     </div>
   `;
 
