@@ -4,6 +4,7 @@ import { playBGM, playSFX, attachMuteToggleListener } from '../../lib/sounds.js'
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
 import { renderBattleModal } from '../components/BattleModal.js';
+import { initAlbumModal, openAlbumModal } from '../components/AlbumModal.js';
 import { createBattleState, simulateBattle } from '../../engine/battle.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
@@ -20,9 +21,9 @@ const CITIES_CONFIG = {
     badgeColor: "#9ca3af",
     x: 30, y: 25,
     stages: [
-      { name: "Treinador Liam", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }] },
-      { name: "Treinador Jerry", type: "NPC", team: [{ id: 248 }, { id: 76 }, { id: 36 }] },
-      { name: "Treinadora Paula", type: "NPC", team: [{ id: 248 }, { id: 68 }, { id: 149 }] },
+      { name: "Treinador Liam", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 473 }, { id: 389 }, { id: 214 }] },
+      { name: "Treinador Jerry", type: "NPC", team: [{ id: 248 }, { id: 76 }, { id: 36 }, { id: 260 }, { id: 143 }, { id: 68 }] },
+      { name: "Treinadora Paula", type: "NPC", team: [{ id: 248 }, { id: 68 }, { id: 149 }, { id: 473 }, { id: 389 }, { id: 76 }] },
       { name: "Líder Brock", type: "Leader", team: [
         { id: 76, item: 'rocky-helmet' },
         { id: 248, item: 'leftovers' },
@@ -43,9 +44,9 @@ const CITIES_CONFIG = {
     badgeColor: "#38bdf8",
     x: 65, y: 15,
     stages: [
-      { name: "Treinador Daren", type: "NPC", team: [{ id: 134 }, { id: 9 }, { id: 25 }] },
-      { name: "Treinador Luis", type: "NPC", team: [{ id: 395 }, { id: 230 }, { id: 80 }] },
-      { name: "Treinadora Becky", type: "NPC", team: [{ id: 160 }, { id: 131 }, { id: 350 }] },
+      { name: "Treinador Daren", type: "NPC", team: [{ id: 134 }, { id: 9 }, { id: 25 }, { id: 131 }, { id: 160 }, { id: 230 }] },
+      { name: "Treinador Luis", type: "NPC", team: [{ id: 395 }, { id: 230 }, { id: 80 }, { id: 350 }, { id: 134 }, { id: 9 }] },
+      { name: "Treinadora Becky", type: "NPC", team: [{ id: 160 }, { id: 131 }, { id: 350 }, { id: 80 }, { id: 395 }, { id: 260 }] },
       { name: "Líder Misty", type: "Leader", team: [
         { id: 9, item: 'leftovers' },
         { id: 131, item: 'assault-vest' },
@@ -66,9 +67,9 @@ const CITIES_CONFIG = {
     badgeColor: "#eab308",
     x: 72, y: 60,
     stages: [
-      { name: "Treinador Jax", type: "NPC", team: [{ id: 25 }, { id: 82 }, { id: 143 }] },
-      { name: "Treinador Ron", type: "NPC", team: [{ id: 125 }, { id: 26 }, { id: 123 }] },
-      { name: "Treinadora Amy", type: "NPC", team: [{ id: 135 }, { id: 82 }, { id: 36 }] },
+      { name: "Treinador Jax", type: "NPC", team: [{ id: 25 }, { id: 82 }, { id: 143 }, { id: 26 }, { id: 125 }, { id: 135 }] },
+      { name: "Treinador Ron", type: "NPC", team: [{ id: 125 }, { id: 26 }, { id: 123 }, { id: 82 }, { id: 25 }, { id: 135 }] },
+      { name: "Treinadora Amy", type: "NPC", team: [{ id: 135 }, { id: 82 }, { id: 36 }, { id: 26 }, { id: 125 }, { id: 149 }] },
       { name: "Líder Lt. Surge", type: "Leader", team: [
         { id: 26, item: 'choice-specs' },
         { id: 82, item: 'assault-vest' },
@@ -89,9 +90,9 @@ const CITIES_CONFIG = {
     badgeColor: "#10b981",
     x: 48, y: 45,
     stages: [
-      { name: "Treinadora Tina", type: "NPC", team: [{ id: 154 }, { id: 143 }, { id: 134 }] },
-      { name: "Treinador Clara", type: "NPC", team: [{ id: 389 }, { id: 254 }, { id: 36 }] },
-      { name: "Treinadora Rose", type: "NPC", team: [{ id: 3 }, { id: 254 }, { id: 154 }] },
+      { name: "Treinadora Tina", type: "NPC", team: [{ id: 154 }, { id: 143 }, { id: 134 }, { id: 3 }, { id: 254 }, { id: 389 }] },
+      { name: "Treinador Clara", type: "NPC", team: [{ id: 389 }, { id: 254 }, { id: 36 }, { id: 154 }, { id: 3 }, { id: 214 }] },
+      { name: "Treinadora Rose", type: "NPC", team: [{ id: 3 }, { id: 254 }, { id: 154 }, { id: 389 }, { id: 131 }, { id: 468 }] },
       { name: "Líder Erika", type: "Leader", team: [
         { id: 3, item: 'leftovers' },
         { id: 154, item: 'sitrus-berry' },
@@ -112,9 +113,9 @@ const CITIES_CONFIG = {
     badgeColor: "#a855f7",
     x: 55, y: 80,
     stages: [
-      { name: "Treinador Kirk", type: "NPC", team: [{ id: 94 }, { id: 3 }, { id: 197 }] },
-      { name: "Treinador Ned", type: "NPC", team: [{ id: 461 }, { id: 94 }, { id: 65 }] },
-      { name: "Treinadora Sue", type: "NPC", team: [{ id: 94 }, { id: 229 }, { id: 68 }] },
+      { name: "Treinador Kirk", type: "NPC", team: [{ id: 94 }, { id: 3 }, { id: 197 }, { id: 461 }, { id: 229 }, { id: 359 }] },
+      { name: "Treinador Ned", type: "NPC", team: [{ id: 461 }, { id: 94 }, { id: 65 }, { id: 197 }, { id: 3 }, { id: 229 }] },
+      { name: "Treinadora Sue", type: "NPC", team: [{ id: 94 }, { id: 229 }, { id: 68 }, { id: 461 }, { id: 197 }, { id: 359 }] },
       { name: "Líder Koga", type: "Leader", team: [
         { id: 94, item: 'life-orb' },
         { id: 461, item: 'expert-belt' },
@@ -135,9 +136,9 @@ const CITIES_CONFIG = {
     badgeColor: "#ec4899",
     x: 65, y: 45,
     stages: [
-      { name: "Treinador Igor", type: "NPC", team: [{ id: 80 }, { id: 124 }, { id: 65 }] },
-      { name: "Treinador Yuri", type: "NPC", team: [{ id: 196 }, { id: 282 }, { id: 475 }] },
-      { name: "Treinadora Miki", type: "NPC", team: [{ id: 376 }, { id: 282 }, { id: 196 }] },
+      { name: "Treinador Igor", type: "NPC", team: [{ id: 80 }, { id: 124 }, { id: 65 }, { id: 196 }, { id: 282 }, { id: 376 }] },
+      { name: "Treinador Yuri", type: "NPC", team: [{ id: 196 }, { id: 282 }, { id: 475 }, { id: 65 }, { id: 80 }, { id: 376 }] },
+      { name: "Treinadora Miki", type: "NPC", team: [{ id: 376 }, { id: 282 }, { id: 196 }, { id: 475 }, { id: 124 }, { id: 65 }] },
       { name: "Líder Sabrina", type: "Leader", team: [
         { id: 65, item: 'focus-sash' },
         { id: 196, item: 'life-orb' },
@@ -158,9 +159,9 @@ const CITIES_CONFIG = {
     badgeColor: "#ef4444",
     x: 28, y: 85,
     stages: [
-      { name: "Treinador Burt", type: "NPC", team: [{ id: 38 }, { id: 136 }, { id: 59 }] },
-      { name: "Treinador Cole", type: "NPC", team: [{ id: 126 }, { id: 157 }, { id: 229 }] },
-      { name: "Treinador Ryan", type: "NPC", team: [{ id: 257 }, { id: 392 }, { id: 6 }] },
+      { name: "Treinador Burt", type: "NPC", team: [{ id: 38 }, { id: 136 }, { id: 59 }, { id: 6 }, { id: 126 }, { id: 157 }] },
+      { name: "Treinador Cole", type: "NPC", team: [{ id: 126 }, { id: 157 }, { id: 229 }, { id: 59 }, { id: 257 }, { id: 392 }] },
+      { name: "Treinador Ryan", type: "NPC", team: [{ id: 257 }, { id: 392 }, { id: 6 }, { id: 136 }, { id: 38 }, { id: 157 }] },
       { name: "Líder Blaine", type: "Leader", team: [
         { id: 6, item: 'life-orb' },
         { id: 59, item: 'choice-band' },
@@ -181,9 +182,9 @@ const CITIES_CONFIG = {
     badgeColor: "#22c55e",
     x: 28, y: 55,
     stages: [
-      { name: "Recruta Team Rocket", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }] },
-      { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 260 }, { id: 473 }, { id: 389 }] },
-      { name: "Admin Petrel", type: "NPC", team: [{ id: 445 }, { id: 149 }, { id: 248 }] },
+      { name: "Recruta Team Rocket", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 445 }, { id: 260 }, { id: 473 }] },
+      { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 260 }, { id: 473 }, { id: 389 }, { id: 76 }, { id: 248 }, { id: 143 }] },
+      { name: "Admin Petrel", type: "NPC", team: [{ id: 445 }, { id: 149 }, { id: 248 }, { id: 473 }, { id: 389 }, { id: 76 }] },
       { name: "Líder Giovanni", type: "Leader", team: [
         { id: 445, item: 'life-orb' },
         { id: 248, item: 'leftovers' },
@@ -293,6 +294,44 @@ const CITY_SHOPS = {
   ]
 };
 
+const LEADER_AVATARS = {
+  "Brock": "https://play.pokemonshowdown.com/sprites/trainers/brock.png",
+  "Misty": "https://play.pokemonshowdown.com/sprites/trainers/misty.png",
+  "Lt. Surge": "https://play.pokemonshowdown.com/sprites/trainers/lt_surge.png",
+  "Lt.Surge": "https://play.pokemonshowdown.com/sprites/trainers/lt_surge.png",
+  "Erika": "https://play.pokemonshowdown.com/sprites/trainers/erika.png",
+  "Koga": "https://play.pokemonshowdown.com/sprites/trainers/koga.png",
+  "Sabrina": "https://play.pokemonshowdown.com/sprites/trainers/sabrina.png",
+  "Blaine": "https://play.pokemonshowdown.com/sprites/trainers/blaine.png",
+  "Giovanni": "https://play.pokemonshowdown.com/sprites/trainers/giovanni.png",
+  "Lorelei": "https://play.pokemonshowdown.com/sprites/trainers/lorelei.png",
+  "Bruno": "https://play.pokemonshowdown.com/sprites/trainers/bruno.png",
+  "Agatha": "https://play.pokemonshowdown.com/sprites/trainers/agatha.png",
+  "Lance": "https://play.pokemonshowdown.com/sprites/trainers/lance.png",
+  "Cynthia": "https://play.pokemonshowdown.com/sprites/trainers/cynthia.png"
+};
+
+function getTrainerAvatar(name) {
+  for (const [key, url] of Object.entries(LEADER_AVATARS)) {
+    if (name.includes(key)) {
+      return url;
+    }
+  }
+  if (name.includes("Recruta Rocket") || name.includes("Rocket")) {
+    if (name.includes("Fêmea")) {
+      return "https://play.pokemonshowdown.com/sprites/trainers/rocketgruntf.png";
+    }
+    return "https://play.pokemonshowdown.com/sprites/trainers/rocketgrunt.png";
+  }
+  if (name.includes("Petrel")) {
+    return "https://play.pokemonshowdown.com/sprites/trainers/petrel.png";
+  }
+  if (name.includes("Treinadora")) {
+    return "https://play.pokemonshowdown.com/sprites/trainers/lass.png";
+  }
+  return "https://play.pokemonshowdown.com/sprites/trainers/camper.png";
+}
+
 // UI SCREEN STATE
 let container = null;
 let currentUserId = null;
@@ -307,7 +346,7 @@ let progress = {
 let ownedBadges = new Set();
 let selectedCityId = 'pewter';
 let activeModal = null; // 'shop' | 'prematch' | null
-let selectedMode = 'draft'; // 'album' | 'draft'
+let selectedMode = 'album'; // 'album' | 'draft'
 let selectedRoster = []; // Coleção personal selection
 let draftRoster = []; // Draft selection
 let draftRound = 1;
@@ -340,6 +379,8 @@ export async function render(cont) {
 
     if (profErr) throw profErr;
     profile = prof;
+
+    initAlbumModal(document.body, currentUserId, profile?.username);
 
     // Load local storage gold & progress
     const savedGold = localStorage.getItem(`pkt_campaign_gold_${currentUserId}`);
@@ -490,11 +531,17 @@ function renderScreen() {
         statusClass = 'active';
         statusText = 'Desafiar';
       }
+      const avatarUrl = getTrainerAvatar(stg.name);
       return `
         <div class="campaign-stage-item ${statusClass}">
-          <div style="display: flex; flex-direction: column;">
-            <span style="font-weight: bold; color: white;">${stg.name}</span>
-            <span style="font-size: 0.75rem; color: var(--text-3);">${i === 4 ? 'Desafio de Campeão' : 'Elite dos Quatro'}</span>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <img src="${avatarUrl}" style="height: 100%; width: 100%; object-fit: contain; image-rendering: pixelated;" />
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: bold; color: white;">${stg.name}</span>
+              <span style="font-size: 0.75rem; color: var(--text-3);">${i === 4 ? 'Desafio de Campeão' : 'Elite dos Quatro'}</span>
+            </div>
           </div>
           <span class="stage-badge ${statusClass}">${statusText}</span>
         </div>
@@ -514,11 +561,17 @@ function renderScreen() {
         statusClass = 'active'; // Replay Leader
         statusText = 'Replay';
       }
+      const avatarUrl = getTrainerAvatar(stg.name);
       return `
         <div class="campaign-stage-item ${statusClass}">
-          <div style="display: flex; flex-direction: column;">
-            <span style="font-weight: bold; color: white;">${stg.name}</span>
-            <span style="font-size: 0.75rem; color: var(--text-3);">${stg.type === 'Leader' ? 'Líder de Ginásio' : 'Treinador NPC'}</span>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <img src="${avatarUrl}" style="height: 100%; width: 100%; object-fit: contain; image-rendering: pixelated;" />
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: bold; color: white;">${stg.name}</span>
+              <span style="font-size: 0.75rem; color: var(--text-3);">${stg.type === 'Leader' ? 'Líder de Ginásio' : 'Treinador NPC'}</span>
+            </div>
           </div>
           <span class="stage-badge ${statusClass}">${statusText}</span>
         </div>
@@ -529,6 +582,7 @@ function renderScreen() {
   // Active stage preview
   const currentStageObj = activeCity.stages[activeStageIdx] || activeCity.stages[3];
   const isChampionDefeated = selectedCityId === 'elite4' && progress.eliteFourIndex >= 5;
+  const hasEnoughCards = ownedCards.length >= 6;
 
   let btnBattleHtml = '';
   if (isChampionDefeated) {
@@ -541,6 +595,15 @@ function renderScreen() {
     btnBattleHtml = `
       <button class="btn-primary" disabled style="width: 100%; margin-bottom: 0.5rem; filter: grayscale(1);">
         🔒 Desafio Trancado
+      </button>
+    `;
+  } else if (!hasEnoughCards) {
+    btnBattleHtml = `
+      <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); padding: 0.8rem; border-radius: 8px; color: #fca5a5; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem; text-align: center; line-height: 1.4;">
+        ⚠️ Você possui apenas ${ownedCards.length} cartas no álbum. É necessário ter pelo menos 6 Pokémons para iniciar a campanha. Vá à Loja comprar boosters!
+      </div>
+      <button class="btn-primary" disabled style="width: 100%; margin-bottom: 0.5rem; filter: grayscale(1);">
+        ⚔️ Desafiar ${currentStageObj.name}
       </button>
     `;
   } else if (selectedCityId === 'elite4' || isCurrent || activeStageIdx === 3) {
@@ -561,7 +624,7 @@ function renderScreen() {
           ⬅️ Voltar
         </button>
         
-        <h1 class="campaign-header-title">🗺️ JORNADA DE KANTO (Offline)</h1>
+        <h1 class="campaign-header-title">🗺️ CAMPANHA: JORNADA DE KANTO</h1>
         
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div class="campaign-gold-badge">
@@ -721,15 +784,7 @@ function attachEvents() {
   if (albumBtn) {
     albumBtn.addEventListener('click', () => {
       playSFX('click');
-      // Navigate to personal album screen or trigger a modal
-      // We can open the existing album modal or navigate to album
-      // Let's open the album modal! Wait, let's just trigger / navigate to album if a route is available.
-      // But wait! Is there a route for album? The router has 'home', 'auth', 'lobby', 'draft', 'bracket'.
-      // The Album is normally rendered as a modal in HomeScreen! Let's check how HomeScreen opens the album.
-      // Let's run a grep search for AlbumModal to see how it is triggered.
-      // Actually, we can just render the album modal here if we import it, or alert.
-      // Let's look up how to trigger AlbumModal.
-      alert('Seu álbum pode ser visto na tela principal do jogo online clicando em "Meu Álbum".');
+      openAlbumModal();
     });
   }
 
@@ -994,118 +1049,64 @@ function openPreMatchModal() {
     return p;
   });
 
+  selectedMode = 'album'; // Force album mode
+
   // Local helper to render modal layout
   const renderPreMatchContent = () => {
-    let modeContentHtml = '';
-
-    if (selectedMode === 'album') {
-      // Personal Album Selection View
-      const gridCardsHtml = ownedCards.map(c => {
-        const p = getPokemonById(c.pokemon_id);
-        p.isShiny = c.is_shiny;
-        const isSelected = selectedRoster.some(x => x.id === p.id && x.isShiny === p.isShiny);
-        return `
-          <div class="owned-card-item" data-id="${p.id}" data-shiny="${p.isShiny ? 'true' : 'false'}">
-            ${c.quantity > 1 ? `<div class="owned-card-qty-badge">x${c.quantity}</div>` : ''}
-            ${PokemonCard(p, { small: true, showStats: false, selectable: true, selected: isSelected })}
-          </div>
-        `;
-      }).join('');
-
-      modeContentHtml = `
-        <div style="margin-top: 1rem;">
-          <span style="font-weight: bold; color: var(--gold); font-size: 0.9rem;">Escolha 6 Pokémons do seu Álbum:</span>
-          
-          <div class="roster-preview-slots">
-            ${Array.from({ length: 6 }).map((_, i) => {
-              const p = selectedRoster[i];
-              if (p) {
-                return `
-                  <div class="roster-preview-slot filled" data-index="${i}">
-                    <button class="remove-btn" data-index="${i}">✕</button>
-                    <img src="${p.sprite}" alt="${p.displayName}" style="width: 100%; height: 100%; object-fit: contain;">
-                  </div>
-                `;
-              } else {
-                return `<div class="roster-preview-slot">?</div>`;
-              }
-            }).join('')}
-          </div>
-
-          ${ownedCards.length === 0 ? `
-            <p style="color: var(--text-3); text-align: center; margin: 2rem 0; font-size: 0.9rem;">
-              ⚠️ Você não possui nenhuma carta no seu álbum ainda! Compre boosters na loja ou use o Modo Draft Rápido Local.
-            </p>
-          ` : `
-            <div class="owned-cards-grid">
-              ${gridCardsHtml}
-            </div>
-          `}
+    // Personal Album Selection View
+    const gridCardsHtml = ownedCards.map(c => {
+      const p = getPokemonById(c.pokemon_id);
+      p.isShiny = c.is_shiny;
+      const isSelected = selectedRoster.some(x => x.id === p.id && x.isShiny === p.isShiny);
+      return `
+        <div class="owned-card-item" data-id="${p.id}" data-shiny="${p.isShiny ? 'true' : 'false'}">
+          ${c.quantity > 1 ? `<div class="owned-card-qty-badge">x${c.quantity}</div>` : ''}
+          ${PokemonCard(p, { small: true, showStats: false, selectable: true, selected: isSelected })}
         </div>
       `;
+    }).join('');
 
-    } else {
-      // Quick Local Draft View
-      if (draftRoster.length < 6) {
-        // Drafting in progress
-        modeContentHtml = `
-          <div style="margin-top: 1rem; text-align: center;">
-            <div style="font-weight: 800; font-size: 1.1rem; color: var(--info); margin-bottom: 0.5rem;">
-              Draft Local: Rodada ${draftRound} de 6
-            </div>
-            <p style="color: var(--text-3); font-size: 0.85rem; margin-top: 0; margin-bottom: 1.25rem;">
-              Selecione 1 dos 3 pokémons sorteados abaixo para sua equipe:
-            </p>
-            
-            <div class="draft-options-row">
-              ${draftOptions.map((opt, i) => `
-                <div class="draft-option-card" data-idx="${i}">
-                  ${PokemonCard(opt, { showStats: true })}
-                </div>
-              `).join('')}
-            </div>
-
-            <div style="margin-top: 1rem;">
-              <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-2);">Seu Time Atual:</span>
-              <div class="roster-preview-slots" style="margin-top: 0.5rem;">
-                ${Array.from({ length: 6 }).map((_, i) => {
-                  const p = draftRoster[i];
-                  return p ? `
-                    <div class="roster-preview-slot filled">
-                      <img src="${p.sprite}" alt="${p.displayName}" style="width: 100%; height: 100%; object-fit: contain;">
-                    </div>
-                  ` : `<div class="roster-preview-slot">?</div>`;
-                }).join('')}
-              </div>
-            </div>
-          </div>
-        `;
-      } else {
-        // Draft finished
-        modeContentHtml = `
-          <div style="margin-top: 1rem; text-align: center;">
-            <div style="font-weight: 800; font-size: 1.1rem; color: #34d399; margin-bottom: 0.5rem;">
-              🎉 Time Draftado com Sucesso!
-            </div>
-            
-            <div class="roster-preview-slots">
-              ${draftRoster.map(p => `
-                <div class="roster-preview-slot filled">
+    const modeContentHtml = `
+      <div style="margin-top: 1rem;">
+        <span style="font-weight: bold; color: var(--gold); font-size: 0.9rem;">Escolha 6 Pokémons do seu Álbum:</span>
+        
+        <div class="roster-preview-slots">
+          ${Array.from({ length: 6 }).map((_, i) => {
+            const p = selectedRoster[i];
+            if (p) {
+              return `
+                <div class="roster-preview-slot filled" data-index="${i}">
+                  <button class="remove-btn" data-index="${i}">✕</button>
                   <img src="${p.sprite}" alt="${p.displayName}" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
-              `).join('')}
-            </div>
-            
-            <button class="btn-primary" id="btn-redraft" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); margin-top: 0.5rem; font-size: 0.85rem;">
-              🔄 Refazer Draft
-            </button>
-          </div>
-        `;
-      }
-    }
+              `;
+            } else {
+              return `<div class="roster-preview-slot">?</div>`;
+            }
+          }).join('')}
+        </div>
 
-    const canBattle = (selectedMode === 'album' && selectedRoster.length === 6) ||
-                     (selectedMode === 'draft' && draftRoster.length === 6);
+        ${ownedCards.length === 0 ? `
+          <p style="color: var(--text-3); text-align: center; margin: 2rem 0; font-size: 0.9rem;">
+            ⚠️ Você não possui nenhuma carta no seu álbum ainda! Compre boosters na loja para conseguir Pokémons.
+          </p>
+        ` : `
+          <div class="owned-cards-grid">
+            ${gridCardsHtml}
+          </div>
+        `}
+      </div>
+    `;
+
+    const canBattle = selectedRoster.length === 6;
+
+    // Resolve Level display text
+    let levelText = "Nível 50";
+    if (stage.name.includes("Cynthia")) {
+      levelText = "Nível 75";
+    } else if (stage.type === 'Leader' || stage.type === 'Elite4') {
+      levelText = "Nível 70";
+    }
 
     return `
       <div class="campaign-modal">
@@ -1118,9 +1119,14 @@ function openPreMatchModal() {
           <div class="campaign-modal-body">
             <!-- Opponent Preview -->
             <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); padding: 0.8rem 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-              <div>
-                <span style="font-size: 0.75rem; color: var(--danger); font-weight: bold; text-transform: uppercase;">Oponente:</span>
-                <h3 style="margin: 0; font-size: 1.1rem; color: white;">${stage.name}</h3>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.3); border: 2px solid var(--danger); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <img src="${getTrainerAvatar(stage.name)}" style="height: 100%; width: 100%; object-fit: contain; image-rendering: pixelated;" />
+                </div>
+                <div>
+                  <span style="font-size: 0.75rem; color: var(--danger); font-weight: bold; text-transform: uppercase;">Oponente:</span>
+                  <h3 style="margin: 0; font-size: 1.1rem; color: white;">${stage.name} <span style="font-size: 0.85rem; color: var(--text-3); font-weight: normal;">(${levelText})</span></h3>
+                </div>
               </div>
               
               <div style="display: flex; gap: 6px;">
@@ -1132,23 +1138,9 @@ function openPreMatchModal() {
               </div>
             </div>
 
-            <!-- Mode Selector Cards -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="team-mode-card ${selectedMode === 'draft' ? 'active' : ''}" id="mode-select-draft">
-                <div class="team-mode-radio"></div>
-                <div>
-                  <span style="font-weight: 700; color: white; display: block; font-size: 0.9rem;">Draft Rápido Local</span>
-                  <span style="font-size: 0.75rem; color: var(--text-3);">Monte um time sorteando 6 cartas rodada a rodada. Grátis e rápido.</span>
-                </div>
-              </div>
-              
-              <div class="team-mode-card ${selectedMode === 'album' ? 'active' : ''}" id="mode-select-album">
-                <div class="team-mode-radio"></div>
-                <div>
-                  <span style="font-weight: 700; color: white; display: block; font-size: 0.9rem;">Coleção Pessoal</span>
-                  <span style="font-size: 0.75rem; color: var(--text-3);">Crie sua equipe usando as cartas reais do seu álbum colecionado.</span>
-                </div>
-              </div>
+            <!-- Mode Title -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 0.6rem 1rem; color: #c4b5fd; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+              <span>🎒</span> Coleção Pessoal: Batalhe usando seus Pokémons colecionados no álbum
             </div>
 
             <!-- Mode Content Area -->
@@ -1177,27 +1169,6 @@ function openPreMatchModal() {
     modalContainer.querySelector('#btn-prematch-cancel').addEventListener('click', () => {
       playSFX('click');
       modalContainer.innerHTML = '';
-    });
-
-    // Mode toggles
-    modalContainer.querySelector('#mode-select-draft').addEventListener('click', () => {
-      if (selectedMode !== 'draft') {
-        playSFX('click');
-        selectedMode = 'draft';
-        draftRoster = [];
-        draftRound = 1;
-        generateDraftOptions();
-        updatePrematchUI();
-      }
-    });
-
-    modalContainer.querySelector('#mode-select-album').addEventListener('click', () => {
-      if (selectedMode !== 'album') {
-        playSFX('click');
-        selectedMode = 'album';
-        selectedRoster = [];
-        updatePrematchUI();
-      }
     });
 
     // Album Selection
@@ -1236,42 +1207,13 @@ function openPreMatchModal() {
       });
     });
 
-    // Draft Option Pick
-    modalContainer.querySelectorAll('.draft-option-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const idx = parseInt(card.dataset.idx, 10);
-        const pick = draftOptions[idx];
-        playSFX('click');
-        draftRoster.push(pick);
-
-        if (draftRound < 6) {
-          draftRound++;
-          generateDraftOptions();
-        }
-        updatePrematchUI();
-      });
-    });
-
-    // Redraft button
-    const redraftBtn = modalContainer.querySelector('#btn-redraft');
-    if (redraftBtn) {
-      redraftBtn.addEventListener('click', () => {
-        playSFX('click');
-        draftRoster = [];
-        draftRound = 1;
-        generateDraftOptions();
-        updatePrematchUI();
-      });
-    }
-
     // Battle trigger
     const startBattleBtn = modalContainer.querySelector('#btn-prematch-battle');
     if (startBattleBtn) {
       startBattleBtn.addEventListener('click', () => {
         playSFX('click');
         modalContainer.innerHTML = '';
-        const team = selectedMode === 'album' ? selectedRoster : draftRoster;
-        startBattle(team);
+        startBattle(selectedRoster);
       });
     }
   };
@@ -1280,11 +1222,6 @@ function openPreMatchModal() {
     modalContainer.innerHTML = renderPreMatchContent();
     attachPrematchEvents();
   };
-
-  // Initialize draft if selected
-  if (selectedMode === 'draft' && draftRoster.length === 0) {
-    generateDraftOptions();
-  }
 
   updatePrematchUI();
 }
@@ -1329,6 +1266,16 @@ function startBattle(playerTeam) {
   const opponentTeamRaw = stage.team.map(spec => {
     const p = getPokemonById(spec.id);
     p.isShiny = !!spec.isShiny;
+
+    // Assign level based on stage type/leader status
+    let lvl = 50;
+    if (stage.name.includes("Cynthia")) {
+      lvl = 75;
+    } else if (stage.type === 'Leader' || stage.type === 'Elite4' || stage.name.includes("Líder") || stage.name.includes("Elite Quatro")) {
+      lvl = 70;
+    }
+    p.level = lvl;
+
     if (spec.item) {
       const itemObj = itemsData.find(i => i.name === spec.item);
       if (itemObj) {
@@ -1381,6 +1328,46 @@ function startBattle(playerTeam) {
   renderBattleModal(match, async () => {
     // ON CLOSE CALLBACK
     const playerWon = state.winner === 1;
+    const rewards = {
+      gold: 0,
+      badge: null,
+      badgeIcon: null,
+      badgeName: null,
+      booster: false,
+      message: ""
+    };
+
+    const finishMatch = async () => {
+      // Restore BGM & re-render Campaign Screen
+      playBGM('lobby');
+      
+      // Reload state from supabase / local
+      loading = true;
+      renderScreen();
+      try {
+        const { data: dbBadges } = await supabase
+          .from('user_badges')
+          .select('badge_id')
+          .eq('user_id', currentUserId);
+        ownedBadges = new Set((dbBadges || []).map(b => b.badge_id));
+        
+        const { data: cards } = await supabase
+          .from('user_cards')
+          .select('pokemon_id, is_shiny, quantity')
+          .eq('user_id', currentUserId);
+        ownedCards = cards || [];
+
+        // Reload profiles to refresh boosters_count
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUserId)
+          .single();
+        profile = prof;
+      } catch (_) {}
+      loading = false;
+      renderScreen();
+    };
 
     if (playerWon) {
       playBGM('victory');
@@ -1407,7 +1394,8 @@ function startBattle(playerTeam) {
             console.error('Erro ao atualizar conquistas da liga no Supabase:', e);
           }
 
-          alert('🏆 PARABÉNS! Você derrotou a Campeã Cynthia e se tornou o novo Campeão da Liga Pokémon! +150 Gold concedidos!');
+          rewards.gold = 150;
+          rewards.message = "Você derrotou a Campeã Cynthia e se tornou o novo Campeão da Liga Pokémon! Parabéns!";
         } else {
           // Beat Elite 4 member
           gold += 30;
@@ -1416,7 +1404,8 @@ function startBattle(playerTeam) {
           progress.eliteFourIndex++;
           localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
 
-          alert(`🎉 Vitória! Você derrotou ${stage.name}! Preparando para o próximo desafio da Elite dos Quatro. +30 Gold!`);
+          rewards.gold = 30;
+          rewards.message = `Você derrotou ${stage.name}! Preparando para o próximo desafio da Elite dos Quatro.`;
         }
 
       } else {
@@ -1466,7 +1455,12 @@ function startBattle(playerTeam) {
             localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
           }
 
-          alert(`🏆 PARABÉNS! Você derrotou o Líder ${cityConfig.leader}! Conquistou a ${cityConfig.badgeName}, +50 Gold e +1 Booster Pack!`);
+          rewards.gold = 50;
+          rewards.booster = true;
+          rewards.badge = cityConfig.badge;
+          rewards.badgeIcon = cityConfig.badgeIcon;
+          rewards.badgeName = cityConfig.badgeName;
+          rewards.message = `Você derrotou o Líder ${cityConfig.leader} e conquistou a ${cityConfig.badgeName}!`;
 
         } else {
           // Beat NPC
@@ -1478,7 +1472,8 @@ function startBattle(playerTeam) {
             localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
           }
 
-          alert(`🎉 Vitória! Você derrotou ${stage.name} e avançou no ginásio. +15 Gold!`);
+          rewards.gold = 15;
+          rewards.message = `Você derrotou ${stage.name} e avançou no ginásio.`;
         }
       }
     } else {
@@ -1488,40 +1483,224 @@ function startBattle(playerTeam) {
         // Reset Elite 4 progress!
         progress.eliteFourIndex = 0;
         localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
-        alert('💀 Derrota! Você foi eliminado da Liga Pokémon e terá que reiniciar o desafio da Elite dos Quatro a partir da Lorelei!');
+        rewards.message = 'Você foi eliminado da Liga Pokémon e terá que reiniciar o desafio da Elite dos Quatro a partir da Lorelei!';
       } else {
-        alert('💀 Derrota! Você foi vencido nesta batalha. Ajuste sua equipe na loja ou use outros pokémons e tente novamente!');
+        rewards.message = 'Você foi vencido nesta batalha. Ajuste sua equipe e tente novamente!';
       }
     }
 
-    // Restore BGM & re-render Campaign Screen
-    playBGM('lobby');
-    
-    // Reload state from supabase / local
-    loading = true;
-    renderScreen();
-    try {
-      const { data: dbBadges } = await supabase
-        .from('user_badges')
-        .select('badge_id')
-        .eq('user_id', currentUserId);
-      ownedBadges = new Set((dbBadges || []).map(b => b.badge_id));
-      
-      const { data: cards } = await supabase
-        .from('user_cards')
-        .select('pokemon_id, is_shiny, quantity')
-        .eq('user_id', currentUserId);
-      ownedCards = cards || [];
+    // Show custom modal
+    showCampaignOutcomeModal(playerWon, rewards, finishMatch);
+  });
+}
 
-      // Reload profiles to refresh boosters_count
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUserId)
-        .single();
-      profile = prof;
-    } catch (_) {}
-    loading = false;
-    renderScreen();
+function showCampaignOutcomeModal(playerWon, rewards, callback) {
+  const modalContainer = container.querySelector('#campaign-modal-container');
+  if (!modalContainer) {
+    callback();
+    return;
+  }
+
+  const goldEarned = rewards.gold || 0;
+  const badgeEarned = rewards.badge;
+  const boosterEarned = !!rewards.booster;
+  const msg = rewards.message || '';
+
+  let html = `
+    <div class="campaign-modal outcome-modal-open" style="z-index: 10000; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center;">
+      <style>
+        .outcome-card {
+          background: linear-gradient(180deg, #1e1e38 0%, #0d0d1a 100%);
+          border: 2px solid ${playerWon ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'};
+          border-radius: 24px;
+          padding: 2.5rem 2rem;
+          width: 90%;
+          max-width: 480px;
+          text-align: center;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 0 30px ${playerWon ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
+          animation: outcomeEntrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          position: relative;
+          overflow: hidden;
+        }
+        @keyframes outcomeEntrance {
+          0% { transform: scale(0.8) translateY(30px); opacity: 0; }
+          100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .outcome-header {
+          font-size: 2.2rem;
+          font-weight: 900;
+          letter-spacing: 2px;
+          margin-bottom: 0.5rem;
+          text-transform: uppercase;
+          background: ${playerWon ? 'linear-gradient(135deg, #10b981 0%, #34d399 50%, #fbbf24 100%)' : 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)'};
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 2px 8px ${playerWon ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'});
+        }
+        .outcome-subheader {
+          font-size: 1rem;
+          color: var(--text-2);
+          margin-bottom: 1.5rem;
+          line-height: 1.4;
+        }
+        .rewards-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          background: rgba(0,0,0,0.3);
+          border-radius: 16px;
+          padding: 1.2rem;
+          margin-bottom: 1.5rem;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+        .reward-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.6rem 0.8rem;
+          border-radius: 8px;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.03);
+          animation: rewardEntrance 0.4s ease forwards;
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        @keyframes rewardEntrance {
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        .reward-gold {
+          color: #fbbf24;
+          font-weight: 800;
+          font-size: 1.1rem;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .coin-spin {
+          animation: coinSpin 1.5s linear infinite;
+          font-size: 1.3rem;
+          display: inline-block;
+        }
+        @keyframes coinSpin {
+          0% { transform: rotateY(0deg); }
+          100% { transform: rotateY(360deg); }
+        }
+        .outcome-msg {
+          font-size: 0.9rem;
+          color: var(--text-3);
+          line-height: 1.5;
+          margin-bottom: 1.8rem;
+        }
+        .outcome-badge {
+          background: rgba(251, 191, 36, 0.1);
+          border: 1px solid rgba(251, 191, 36, 0.3);
+          color: #fbbf24;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: bold;
+          font-size: 0.9rem;
+          margin-top: 0.25rem;
+          box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+        }
+        /* Floating coin particles */
+        .floating-coin {
+          position: absolute;
+          pointer-events: none;
+          z-index: 1;
+          font-size: 1.2rem;
+          animation: floatCoinUp 2s ease-out forwards;
+        }
+        @keyframes floatCoinUp {
+          0% { transform: translateY(100px) translateX(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(-200px) translateX(var(--x-shift)) rotate(360deg); opacity: 0; }
+        }
+      </style>
+      <div class="outcome-card">
+        <!-- Floating Coins Container -->
+        <div class="coins-emitter" style="position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;"></div>
+        
+        <div style="position: relative; z-index: 10;">
+          <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">${playerWon ? '🎉' : '💀'}</div>
+          <h2 class="outcome-header">${playerWon ? 'Vitória!' : 'Derrota!'}</h2>
+          <p class="outcome-subheader">${msg}</p>
+          
+          ${playerWon ? `
+            <div class="rewards-list">
+              <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-3); text-align: left; display: block; margin-bottom: 0.25rem;">Recompensas Obtidas:</span>
+              
+              ${goldEarned > 0 ? `
+                <div class="reward-item" style="animation-delay: 0.1s;">
+                  <span style="color: var(--text-2);">Ouro Concedido</span>
+                  <div class="reward-gold">
+                    <span class="coin-spin">🪙</span> +${goldEarned} Gold
+                  </div>
+                </div>
+              ` : ''}
+              
+              ${badgeEarned ? `
+                <div class="reward-item" style="animation-delay: 0.25s; flex-direction: column; align-items: center; gap: 0.5rem; background: rgba(251, 191, 36, 0.05); border-color: rgba(251, 191, 36, 0.15); padding: 0.8rem 1.2rem;">
+                  <span style="color: var(--text-3); font-size: 0.75rem;">Nova Insígnia Conquistada!</span>
+                  <div class="outcome-badge">
+                    <span>${rewards.badgeIcon || '🏆'}</span>
+                    <span>${rewards.badgeName}</span>
+                  </div>
+                </div>
+              ` : ''}
+              
+              ${boosterEarned ? `
+                <div class="reward-item" style="animation-delay: 0.4s;">
+                  <span style="color: var(--text-2);">Pacote de Booster</span>
+                  <div style="color: #c084fc; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                    <span>📦</span> +1 Booster
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          ` : `
+            <p class="outcome-msg" style="color: #fca5a5; margin-bottom: 1.8rem;">
+              Não desanime! Ajuste a sua equipe na Loja, verifique se possui os melhores itens equipados e tente novamente.
+            </p>
+          `}
+          
+          <button class="btn-primary" id="btn-outcome-ok" style="width: 100%; font-weight: 800; padding: 0.8rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; background: ${playerWon ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(255,255,255,0.05)'}; border-color: ${playerWon ? '#34d399' : 'rgba(255,255,255,0.15)'}; color: white;">
+            ${playerWon ? 'Continuar Jornada' : 'Voltar ao Mapa'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modalContainer.innerHTML = html;
+
+  // Add floating coin animation if player won gold
+  if (playerWon && goldEarned > 0) {
+    const emitter = modalContainer.querySelector('.coins-emitter');
+    const spawnCoins = () => {
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+          if (!emitter) return;
+          const coin = document.createElement('div');
+          coin.className = 'floating-coin';
+          coin.textContent = '🪙';
+          coin.style.left = `${15 + Math.random() * 70}%`;
+          coin.style.bottom = '0px';
+          coin.style.setProperty('--x-shift', `${-40 + Math.random() * 80}px`);
+          coin.style.animationDelay = `${Math.random() * 0.5}s`;
+          emitter.appendChild(coin);
+          // Clean up
+          setTimeout(() => coin.remove(), 2000);
+        }, i * 80);
+      }
+    };
+    spawnCoins();
+  }
+
+  modalContainer.querySelector('#btn-outcome-ok').addEventListener('click', () => {
+    playSFX('click');
+    modalContainer.innerHTML = '';
+    callback();
   });
 }

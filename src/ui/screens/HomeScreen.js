@@ -5,6 +5,7 @@ import { DRAFT_MODES_INFO } from '../../engine/draft.js';
 import { initGloryModal, openGloryModal } from '../components/GloryModal.js';
 import { initAlbumModal, openAlbumModal } from '../components/AlbumModal.js';
 import { initBoosterModal, openBoosterModal } from '../components/BoosterModal.js';
+import { PokemonCard } from '../components/PokemonCard.js';
 import { supabase, getCurrentUser } from '../../lib/supabase.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
@@ -167,6 +168,7 @@ function renderScreen() {
   const totalGames = (profile?.wins || 0) + (profile?.losses || 0);
   const winRate = totalGames > 0 ? ((profile.wins / totalGames) * 100).toFixed(1) : '0';
   const rankInfo = getRankInfo(profile?.elo_points);
+  const savedGold = localStorage.getItem(`pkt_campaign_gold_${profile?.id}`) || '100';
 
   container.innerHTML = `
     <style>
@@ -584,6 +586,17 @@ function renderScreen() {
         </div>
 
         <div style="display:flex; align-items:center; gap:0.75rem; margin-left: auto; padding-left: 1rem;">
+          <!-- Campaign Gold Badge -->
+          <div class="campaign-gold-badge" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; padding: 0.45rem 0.8rem; border-radius: 8px; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; height: 34px; box-sizing: border-box;" title="Seu saldo de Ouro da Campanha">
+            <span>🪙</span>
+            <span id="hs-gold-count">${savedGold}</span>
+          </div>
+
+          <!-- Global Shop Button -->
+          <button id="btn-open-global-shop" style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;" title="Abrir Loja Global de Cartas">
+            <span style="font-size:1.1rem;">🛒</span> <span class="hs-btn-text">Loja</span>
+          </button>
+
           <button id="btn-open-album" style="background: rgba(124, 58, 237, 0.15); border: 1px solid #7c3aed; color: #d946ef; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; white-space: nowrap;" title="Ver Meu Álbum">
             <span style="font-size:1.1rem;">📚</span> <span class="hs-btn-text">Meu Álbum</span>
           </button>
@@ -657,11 +670,11 @@ function renderScreen() {
 
 
           <section>
-            <p class="hs-section-label">Modo Campanha Offline</p>
+            <p class="hs-section-label">Modo Campanha</p>
             <div style="margin-bottom: 1.5rem;">
               <button class="hs-btn-create" id="btn-campaign" style="width: 100%; min-height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #34d399; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); cursor: pointer;">
                 <span class="hs-btn-create-icon">🗺️</span>
-                Jornada de Kanto (Offline)
+                Jornada de Kanto
               </button>
             </div>
 
@@ -1142,6 +1155,14 @@ function attachEvents() {
     });
   }
 
+  const btnGlobalShop = container.querySelector('#btn-open-global-shop');
+  if (btnGlobalShop) {
+    btnGlobalShop.addEventListener('click', () => {
+      playSFX('click');
+      openGlobalShopModal();
+    });
+  }
+
   const btnAlbum = container.querySelector('#btn-open-album');
   if (btnAlbum) {
     btnAlbum.addEventListener('click', () => {
@@ -1372,3 +1393,479 @@ async function handleJoinRoom(code) {
 }
 
 export function destroy() {}
+
+// ===================================================
+// GLOBAL SHOP SYSTEM
+// ===================================================
+function getOrGenerateGlobalShopCards(userId) {
+  const key = `pkt_global_shop_cards_${userId}`;
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (_) {}
+  }
+  return generateNewGlobalShopCards(userId);
+}
+
+function generateNewGlobalShopCards(userId) {
+  const key = `pkt_global_shop_cards_${userId}`;
+  const cards = [];
+  
+  // Slot 1: Common card (cost 50)
+  const commonPoke = drawRandomPokemonByRarity(50);
+  cards.push({
+    id: commonPoke.id,
+    isShiny: false,
+    cost: 50,
+    rarityName: "Comum",
+    sold: false,
+    displayName: commonPoke.displayName
+  });
+
+  // Slot 2: Rare card (cost 150)
+  const rarePoke = drawRandomPokemonByRarity(150);
+  cards.push({
+    id: rarePoke.id,
+    isShiny: false,
+    cost: 150,
+    rarityName: "Raro",
+    sold: false,
+    displayName: rarePoke.displayName
+  });
+
+  // Slot 3: Foil Shiny card (cost 1000)
+  const shinyPoke = drawRandomPokemonByRarity(1000);
+  cards.push({
+    id: shinyPoke.id,
+    isShiny: true,
+    cost: 1000,
+    rarityName: "Foil Shiny",
+    sold: false,
+    displayName: shinyPoke.displayName + " ⭐"
+  });
+
+  localStorage.setItem(key, JSON.stringify(cards));
+  return cards;
+}
+
+function drawRandomPokemonByRarity(cost) {
+  const rPoke = pokemonData[Math.floor(Math.random() * pokemonData.length)];
+  return JSON.parse(JSON.stringify(rPoke));
+}
+
+function openGlobalShopModal() {
+  const user = profile;
+  if (!user) return;
+  const userId = user.id;
+
+  let userGold = 100;
+  const savedGold = localStorage.getItem(`pkt_campaign_gold_${userId}`);
+  if (savedGold !== null) {
+    userGold = parseInt(savedGold, 10);
+  }
+
+  let shopCards = getOrGenerateGlobalShopCards(userId);
+
+  let modal = document.getElementById('global-shop-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'global-shop-modal';
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.background = 'rgba(0,0,0,0.85)';
+    modal.style.zIndex = '99999';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justify = 'center';
+    document.body.appendChild(modal);
+  }
+
+  const getPokemonById = (id) => {
+    return pokemonData.find(x => x.id === id) || pokemonData[0];
+  };
+
+  const renderContent = () => {
+    modal.innerHTML = `
+      <style>
+        .gshop-card {
+          background: linear-gradient(180deg, #1b1b33 0%, #0d0d1a 100%);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
+          width: 95%;
+          max-width: 800px;
+          padding: 2rem;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,255,255,0.02);
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          color: white;
+          font-family: 'Inter', sans-serif;
+          animation: gshopFadeIn 0.3s ease;
+        }
+        @keyframes gshopFadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .gshop-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+          padding-bottom: 1rem;
+        }
+        .gshop-title {
+          font-size: 1.5rem;
+          font-weight: 800;
+          background: linear-gradient(90deg, #f59e0b, #fbbf24);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin: 0;
+        }
+        .gshop-close {
+          background: none;
+          border: none;
+          color: rgba(255,255,255,0.5);
+          font-size: 1.5rem;
+          cursor: pointer;
+          transition: color 0.2s;
+          padding: 0.5rem;
+          line-height: 1;
+        }
+        .gshop-close:hover { color: white; }
+        .gshop-balance {
+          background: rgba(245, 158, 11, 0.1);
+          border: 1px solid rgba(245, 158, 11, 0.25);
+          color: #fbbf24;
+          padding: 0.5rem 1rem;
+          border-radius: 10px;
+          font-weight: 800;
+          font-size: 1.1rem;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .gshop-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+        }
+        @media (max-width: 768px) {
+          .gshop-grid { grid-template-columns: repeat(2, 1fr); }
+          .gshop-card { max-height: 90vh; overflow-y: auto; }
+        }
+        @media (max-width: 480px) {
+          .gshop-grid { grid-template-columns: 1fr; }
+        }
+        .gshop-item {
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 12px;
+          padding: 1rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+          position: relative;
+          transition: border-color 0.2s, background 0.2s;
+        }
+        .gshop-item:hover {
+          border-color: rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.04);
+        }
+        .gshop-item-rarity {
+          font-size: 0.65rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+        .gshop-item-rarity.comum { background: rgba(255,255,255,0.1); color: white; }
+        .gshop-item-rarity.raro { background: rgba(37, 99, 235, 0.2); color: #60a5fa; border: 1px solid rgba(37, 99, 235, 0.4); }
+        .gshop-item-rarity.foil-shiny { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+        .gshop-item-rarity.booster { background: rgba(147, 51, 234, 0.2); color: #c084fc; border: 1px solid rgba(147, 51, 234, 0.4); }
+        
+        .gshop-buy-btn {
+          width: 100%;
+          padding: 0.5rem;
+          border-radius: 8px;
+          border: none;
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          color: black;
+          font-weight: bold;
+          cursor: pointer;
+          transition: transform 0.1s, opacity 0.2s;
+        }
+        .gshop-buy-btn:hover:not(:disabled) { transform: scale(1.02); }
+        .gshop-buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .gshop-sold-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(13,13,26,0.85);
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #34d399;
+          font-weight: 800;
+          font-size: 1.2rem;
+          border: 1px solid rgba(52, 211, 153, 0.3);
+          z-index: 20;
+          backdrop-filter: blur(2px);
+        }
+        
+        .gshop-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-top: 1px solid rgba(255,255,255,0.08);
+          padding-top: 1rem;
+        }
+        
+        .gshop-refresh-btn {
+          background: rgba(167, 139, 250, 0.1);
+          border: 1px solid rgba(167, 139, 250, 0.3);
+          color: #c4b5fd;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 0.85rem;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .gshop-refresh-btn:hover:not(:disabled) {
+          background: rgba(167, 139, 250, 0.2);
+          border-color: rgba(167, 139, 250, 0.5);
+        }
+        .gshop-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      </style>
+      <div class="gshop-card">
+        <div class="gshop-header">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.8rem;">🛒</span>
+            <h2 class="gshop-title">Loja Global de Cartas</h2>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="gshop-balance">
+              <span>🪙</span>
+              <span id="gshop-gold-val">${userGold} Gold</span>
+            </div>
+            <button class="gshop-close" id="btn-close-gshop">✕</button>
+          </div>
+        </div>
+        
+        <div class="gshop-grid">
+          <!-- Cartas de Oferta -->
+          ${shopCards.map((item, idx) => {
+            const poke = getPokemonById(item.id);
+            const cardPoke = { ...poke, isShiny: item.isShiny };
+            const isSold = item.sold;
+            const rarityClass = item.rarityName.toLowerCase().replace(" ", "-");
+            
+            return `
+              <div class="gshop-item">
+                ${isSold ? `
+                  <div class="gshop-sold-overlay">
+                    <span>✅ Comprado</span>
+                    <span style="font-size: 0.75rem; margin-top: 0.25rem; font-weight: normal; color: var(--text-3);">Adicionado ao Álbum</span>
+                  </div>
+                ` : ''}
+                
+                <span class="gshop-item-rarity ${rarityClass}">${item.rarityName}</span>
+                
+                <div style="transform: scale(0.9); margin: -10px 0;">
+                  ${PokemonCard(cardPoke, { small: true, showStats: false, showCost: false })}
+                </div>
+                
+                <button class="gshop-buy-btn btn-buy-gshop-card" data-idx="${idx}" ${userGold < item.cost ? 'disabled' : ''}>
+                  🪙 ${item.cost} Ouro
+                </button>
+              </div>
+            `;
+          }).join('')}
+          
+          <!-- Item 4: Booster Pack -->
+          <div class="gshop-item">
+            <span class="gshop-item-rarity booster">Pacote Booster</span>
+            
+            <div style="font-size: 3.5rem; margin: 1.5rem 0;">📦</div>
+            
+            <div style="text-align: center; font-size: 0.75rem; color: var(--text-3); margin-bottom: 0.5rem; height: 32px; line-height: 1.3;">
+              Contém 3 cartas aleatórias e 15-25 gold extra!
+            </div>
+            
+            <button class="gshop-buy-btn" id="btn-buy-gshop-booster" ${userGold < 100 ? 'disabled' : ''}>
+               🪙 100 Ouro
+            </button>
+          </div>
+        </div>
+        
+        <div class="gshop-footer">
+          <button class="gshop-refresh-btn" id="btn-refresh-gshop" ${userGold < 10 ? 'disabled' : ''}>
+            🔄 Ofertas (🪙 10)
+          </button>
+          
+          <button class="btn-primary" id="btn-close-gshop-footer" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); padding: 0.5rem 1.5rem; border-radius: 8px;">
+            Fechar Loja
+          </button>
+        </div>
+      </div>
+    `;
+    attachEventsLocal();
+  };
+
+  const attachEventsLocal = () => {
+    const closeShop = () => {
+      modal.style.display = 'none';
+      const goldCountEl = document.getElementById('hs-gold-count');
+      if (goldCountEl) {
+        goldCountEl.textContent = localStorage.getItem(`pkt_campaign_gold_${userId}`) || '0';
+      }
+      
+      const badge = document.getElementById('boosters-badge-count');
+      if (badge) {
+        badge.textContent = profile.boosters_count;
+        badge.style.display = profile.boosters_count > 0 ? 'inline-block' : 'none';
+      }
+      const btnBooster = document.getElementById('btn-open-boosters');
+      if (btnBooster) {
+        btnBooster.style.display = profile.boosters_count > 0 ? 'flex' : 'none';
+      }
+    };
+
+    modal.querySelector('#btn-close-gshop').addEventListener('click', () => {
+      playSFX('click');
+      closeShop();
+    });
+    modal.querySelector('#btn-close-gshop-footer').addEventListener('click', () => {
+      playSFX('click');
+      closeShop();
+    });
+
+    // Buy Card Offers
+    modal.querySelectorAll('.btn-buy-gshop-card').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        const item = shopCards[idx];
+        if (userGold < item.cost) return;
+
+        playSFX('click');
+        btn.disabled = true;
+
+        try {
+          userGold -= item.cost;
+          localStorage.setItem(`pkt_campaign_gold_${userId}`, String(userGold));
+
+          const isShinyForDB = !!item.isShiny;
+
+          const { data: existing, error: selErr } = await supabase
+            .from('user_cards')
+            .select('id, quantity')
+            .eq('user_id', userId)
+            .eq('pokemon_id', item.id)
+            .eq('is_shiny', isShinyForDB)
+            .maybeSingle();
+
+          if (selErr) throw selErr;
+
+          if (existing) {
+            const { error: updErr } = await supabase
+              .from('user_cards')
+              .update({ quantity: existing.quantity + 1 })
+              .eq('id', existing.id);
+            if (updErr) throw updErr;
+          } else {
+            const { error: insErr } = await supabase
+              .from('user_cards')
+              .insert({
+                user_id: userId,
+                pokemon_id: item.id,
+                is_shiny: isShinyForDB,
+                quantity: 1
+              });
+            if (insErr) throw insErr;
+          }
+
+          // Mark as sold
+          shopCards[idx].sold = true;
+          localStorage.setItem(`pkt_global_shop_cards_${userId}`, JSON.stringify(shopCards));
+
+          playSFX('click');
+          alert(`🎉 Carta ${item.displayName} comprada com sucesso e adicionada ao seu Álbum!`);
+
+        } catch (err) {
+          console.error(err);
+          alert('Erro ao processar compra de carta.');
+          userGold += item.cost;
+          localStorage.setItem(`pkt_campaign_gold_${userId}`, String(userGold));
+        } finally {
+          renderContent();
+        }
+      });
+    });
+
+    // Buy Booster
+    modal.querySelector('#btn-buy-gshop-booster').addEventListener('click', async () => {
+      if (userGold < 100) return;
+      playSFX('click');
+      modal.querySelector('#btn-buy-gshop-booster').disabled = true;
+
+      try {
+        userGold -= 100;
+        localStorage.setItem(`pkt_campaign_gold_${userId}`, String(userGold));
+
+        // Update database boosters_count
+        const { data: profData, error: getErr } = await supabase
+          .from('profiles')
+          .select('boosters_count')
+          .eq('id', userId)
+          .single();
+
+        if (getErr) throw getErr;
+
+        const nextCount = (profData?.boosters_count || 0) + 1;
+        const { error: updErr } = await supabase
+          .from('profiles')
+          .update({ boosters_count: nextCount })
+          .eq('id', userId);
+
+        if (updErr) throw updErr;
+
+        profile.boosters_count = nextCount;
+
+        playSFX('boosterOpen');
+        alert('🎉 Booster comprado com sucesso! O pacote foi adicionado à sua conta e pode ser aberto no menu principal.');
+
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao processar compra de booster.');
+        userGold += 100;
+        localStorage.setItem(`pkt_campaign_gold_${userId}`, String(userGold));
+      } finally {
+        renderContent();
+      }
+    });
+
+    // Refresh Shop Offers
+    modal.querySelector('#btn-refresh-gshop').addEventListener('click', () => {
+      if (userGold < 10) return;
+      playSFX('click');
+
+      userGold -= 10;
+      localStorage.setItem(`pkt_campaign_gold_${userId}`, String(userGold));
+
+      // Generate new cards
+      shopCards = generateNewGlobalShopCards(userId);
+      renderContent();
+    });
+  };
+
+  renderContent();
+}

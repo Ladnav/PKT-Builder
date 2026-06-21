@@ -3591,10 +3591,23 @@ input:checked + .toggle-slider:before {
 .campaign-map-canvas {
   flex: 1;
   position: relative;
-  background-color: #030712;
-  background-image: radial-gradient(rgba(31, 41, 55, 0.5) 1px, transparent 1px);
-  background-size: 20px 20px;
-  min-height: 480px;
+  background-color: #111827;
+  background-image: url('https://archives.bulbagarden.net/media/upload/c/c9/Kanto_FRLG_Map.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 520px;
+  border-radius: 0 0 16px 16px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.85);
+}
+
+.campaign-map-canvas::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(9, 9, 11, 0.45); /* Dark mask to highlight nodes & routes */
+  pointer-events: none;
+  z-index: 1;
 }
 
 .campaign-svg-connections {

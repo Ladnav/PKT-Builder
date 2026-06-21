@@ -24,7 +24,8 @@ function calcDamage(attacker, defender, move, weather) {
   if (defItem === 'assault-vest' && isSpecial) def *= 1.5;
 
   // Fórmula oficial Gen 4: floor(floor(floor(2*Lv/5+2)*Power*A/D)/50+2) * mods
-  let base = Math.floor(Math.floor(Math.floor(2 * LEVEL / 5 + 2) * move.power * atk / def) / 50 + 2);
+  const lvl = attacker.level || LEVEL;
+  let base = Math.floor(Math.floor(Math.floor(2 * lvl / 5 + 2) * move.power * atk / def) / 50 + 2);
 
   // Weather Base Power Modifiers
   let weatherMod = 1;
@@ -90,12 +91,28 @@ export function createBattleState(team1, team2, seed = Date.now(), settings = {}
     seed,
     weather,
     team1: t1.map(p => {
-      const maxHp = p.stats.hp * 2 + 50;
-      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0, mustRest: false };
+      const lvl = p.level || 50;
+      const scale = lvl / 50;
+      const pScaled = { ...p, stats: { ...p.stats } };
+      Object.keys(pScaled.stats).forEach(k => {
+        if (k !== 'hp') {
+          pScaled.stats[k] = Math.floor(pScaled.stats[k] * scale);
+        }
+      });
+      const maxHp = Math.floor((p.stats.hp * 2 + 50) * scale);
+      return { ...pScaled, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0, mustRest: false };
     }),
     team2: t2.map(p => {
-      const maxHp = p.stats.hp * 2 + 50;
-      return { ...p, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0, mustRest: false };
+      const lvl = p.level || 50;
+      const scale = lvl / 50;
+      const pScaled = { ...p, stats: { ...p.stats } };
+      Object.keys(pScaled.stats).forEach(k => {
+        if (k !== 'hp') {
+          pScaled.stats[k] = Math.floor(pScaled.stats[k] * scale);
+        }
+      });
+      const maxHp = Math.floor((p.stats.hp * 2 + 50) * scale);
+      return { ...pScaled, maxHp, currentHp: maxHp, fainted: false, kos: 0, damageDealt: 0, mustRest: false };
     }),
     active1: 0,
     active2: 0,
