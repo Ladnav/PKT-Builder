@@ -628,7 +628,7 @@ function renderScreen() {
         
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div class="campaign-gold-badge">
-            <span>🪙</span>
+            <span class="pkt-coin"></span>
             <span id="campaign-gold-count">${gold} Gold</span>
           </div>
           <button class="btn-primary" id="btn-campaign-album" style="background: rgba(124, 58, 237, 0.15); border: 1px solid #c084fc; color: #c084fc; font-size: 0.85rem; padding: 0.4rem 0.8rem;">
@@ -794,7 +794,7 @@ function attachEvents() {
       const cityId = node.dataset.city;
       if (!isCityUnlocked(cityId)) {
         playSFX('faint');
-        alert('Este ginásio está bloqueado! Derrote os líderes anteriores primeiro.');
+        showCampaignNoticeModal('Ginásio Bloqueado', 'Este ginásio está bloqueado! Derrote os líderes anteriores primeiro para liberar o acesso.', '🔒');
         return;
       }
       playSFX('click');
@@ -823,6 +823,89 @@ function attachEvents() {
 }
 
 // ===================================================
+// CUSTOM NOTICE MODAL SYSTEM
+// ===================================================
+function showCampaignNoticeModal(title, message, icon = '⚠️') {
+  const modalContainer = container.querySelector('#campaign-modal-container');
+  if (!modalContainer) return;
+
+  modalContainer.innerHTML = `
+    <div class="campaign-modal campaign-notice-modal-open" style="z-index: 20000; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; position: fixed; inset: 0;">
+      <style>
+        .campaign-notice-card {
+          background: linear-gradient(180deg, #1f1f3a 0%, #0d0d1a 100%);
+          border: 1px solid rgba(167, 139, 250, 0.3);
+          border-radius: 20px;
+          padding: 2rem;
+          width: 90%;
+          max-width: 400px;
+          text-align: center;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,255,255,0.02);
+          animation: noticeEntrance 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          color: white;
+          font-family: 'Inter', sans-serif;
+        }
+        @keyframes noticeEntrance {
+          0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+          100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .campaign-notice-icon {
+          font-size: 3rem;
+          margin-bottom: 0.75rem;
+          display: inline-block;
+          animation: noticePulse 2s infinite;
+        }
+        @keyframes noticePulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+        .campaign-notice-title {
+          font-size: 1.3rem;
+          font-weight: 800;
+          margin: 0 0 0.75rem 0;
+          background: linear-gradient(90deg, #f59e0b, #fbbf24);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .campaign-notice-msg {
+          font-size: 0.9rem;
+          color: rgba(255,255,255,0.7);
+          line-height: 1.5;
+          margin: 0 0 1.5rem 0;
+        }
+        .campaign-notice-ok-btn {
+          width: 100%;
+          padding: 0.75rem;
+          border-radius: 8px;
+          border: none;
+          background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+          color: white;
+          font-weight: bold;
+          cursor: pointer;
+          transition: transform 0.1s, box-shadow 0.2s;
+          box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+        .campaign-notice-ok-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 15px rgba(124, 58, 237, 0.5);
+        }
+      </style>
+      <div class="campaign-notice-card">
+        <span class="campaign-notice-icon">${icon}</span>
+        <h3 class="campaign-notice-title">${title}</h3>
+        <p class="campaign-notice-msg">${message}</p>
+        <button class="campaign-notice-ok-btn" id="btn-notice-ok">OK</button>
+      </div>
+    </div>
+  `;
+
+  modalContainer.querySelector('#btn-notice-ok').addEventListener('click', () => {
+    playSFX('click');
+    modalContainer.innerHTML = '';
+  });
+}
+
+// ===================================================
 // SHOP MODAL SYSTEM
 // ===================================================
 function openShopModal() {
@@ -845,7 +928,9 @@ function openShopModal() {
           <div class="campaign-modal-body">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: rgba(0,0,0,0.2); padding: 0.8rem 1.2rem; border-radius: 8px;">
               <span style="color: var(--text-2); font-size: 0.9rem;">Seu Saldo:</span>
-              <span style="color: #fbbf24; font-weight: 800; font-size: 1.2rem;">🪙 ${gold} Ouro</span>
+              <span style="color: #fbbf24; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 6px;">
+                <span class="pkt-coin coin-spin" style="width: 16px; height: 16px; border-width: 2px;"></span> ${gold} Ouro
+              </span>
             </div>
             
             <div class="shop-grid">
@@ -855,7 +940,7 @@ function openShopModal() {
                 <h3 style="font-size: 0.95rem; margin: 0.5rem 0 0.25rem 0; color: white;">Pacote Booster</h3>
                 <p style="font-size: 0.75rem; color: var(--text-3); margin: 0 0 1rem 0; height: 32px;">Contém 3 cartas de pokémons aleatórios para o álbum.</p>
                 <button class="shop-buy-btn" id="btn-buy-booster" ${gold < 100 ? 'disabled' : ''}>
-                  🪙 100 Ouro
+                  <span class="pkt-coin" style="border-color: rgba(0,0,0,0.5); margin-right: 4px;"></span> 100 Ouro
                 </button>
               </div>
               
@@ -873,7 +958,7 @@ function openShopModal() {
                       ${cardHtml}
                     </div>
                     <button class="shop-buy-btn btn-buy-card" data-idx="${idx}" ${gold < item.cost ? 'disabled' : ''}>
-                      🪙 ${item.cost} Ouro
+                      <span class="pkt-coin" style="border-color: rgba(0,0,0,0.5); margin-right: 4px;"></span> ${item.cost} Ouro
                     </button>
                   </div>
                 `;
@@ -939,11 +1024,11 @@ function openShopModal() {
         if (updErr) throw updErr;
 
         playSFX('boosterOpen');
-        alert('🎉 Booster comprado com sucesso! O pacote foi adicionado à sua conta online.');
+        showCampaignNoticeModal('Booster Comprado', 'Booster comprado com sucesso! O pacote foi adicionado à sua conta online e pode ser aberto no menu principal.', '📦');
 
       } catch (err) {
         console.error(err);
-        alert('Erro ao processar compra de booster.');
+        showCampaignNoticeModal('Erro na Compra', 'Ocorreu um erro ao processar a compra de booster. Tente novamente.', '❌');
         gold += 100; // Refund
         localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
       } finally {
@@ -1000,7 +1085,7 @@ function openShopModal() {
         }
 
         playSFX('click');
-        alert(`🎉 Carta ${item.displayName} comprada com sucesso e adicionada ao seu Álbum!`);
+        showCampaignNoticeModal('Carta Adquirida', `A carta ${item.displayName} foi comprada com sucesso e adicionada ao seu Álbum!`, '🎉');
 
         // Update local list
         const { data: cards } = await supabase
@@ -1011,7 +1096,7 @@ function openShopModal() {
 
       } catch (err) {
         console.error(err);
-        alert('Erro ao processar compra de carta.');
+        showCampaignNoticeModal('Erro na Compra', 'Ocorreu um erro ao processar a compra de carta. Tente novamente.', '❌');
         gold += item.cost; // Refund
         localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
       } finally {
@@ -1184,7 +1269,7 @@ function openPreMatchModal() {
         } else {
           if (selectedRoster.length >= 6) {
             playSFX('faint');
-            alert('Você já escolheu 6 Pokémons!');
+            showCampaignNoticeModal('Roster Completo', 'Você já escolheu o limite máximo de 6 Pokémons para sua equipe de batalha!', '⚠️');
             return;
           }
           playSFX('click');
@@ -1634,8 +1719,8 @@ function showCampaignOutcomeModal(playerWon, rewards, callback) {
               ${goldEarned > 0 ? `
                 <div class="reward-item" style="animation-delay: 0.1s;">
                   <span style="color: var(--text-2);">Ouro Concedido</span>
-                  <div class="reward-gold">
-                    <span class="coin-spin">🪙</span> +${goldEarned} Gold
+                  <div class="reward-gold" style="display: flex; align-items: center; gap: 4px; justify-content: flex-end;">
+                    <span class="pkt-coin coin-spin" style="width: 16px; height: 16px; border-width: 2px;"></span> +${goldEarned} Gold
                   </div>
                 </div>
               ` : ''}
@@ -1683,8 +1768,10 @@ function showCampaignOutcomeModal(playerWon, rewards, callback) {
         setTimeout(() => {
           if (!emitter) return;
           const coin = document.createElement('div');
-          coin.className = 'floating-coin';
-          coin.textContent = '🪙';
+          coin.className = 'floating-coin pkt-coin';
+          coin.style.width = '16px';
+          coin.style.height = '16px';
+          coin.style.borderWidth = '2px';
           coin.style.left = `${15 + Math.random() * 70}%`;
           coin.style.bottom = '0px';
           coin.style.setProperty('--x-shift', `${-40 + Math.random() * 80}px`);

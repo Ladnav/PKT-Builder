@@ -587,8 +587,8 @@ function renderScreen() {
 
         <div style="display:flex; align-items:center; gap:0.75rem; margin-left: auto; padding-left: 1rem;">
           <!-- Campaign Gold Badge -->
-          <div class="campaign-gold-badge" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; padding: 0.45rem 0.8rem; border-radius: 8px; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; height: 34px; box-sizing: border-box;" title="Seu saldo de Ouro da Campanha">
-            <span>🪙</span>
+          <div class="campaign-gold-badge" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; padding: 0.45rem 0.8rem; border-radius: 8px; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; height: 34px; box-sizing: border-box;" title="Seu saldo de Ouro da Campanha">
+            <span class="pkt-coin"></span>
             <span id="hs-gold-count">${savedGold}</span>
           </div>
 
@@ -1398,18 +1398,27 @@ export function destroy() {}
 // GLOBAL SHOP SYSTEM
 // ===================================================
 function getOrGenerateGlobalShopCards(userId) {
-  const key = `pkt_global_shop_cards_${userId}`;
-  const saved = localStorage.getItem(key);
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch (_) {}
+  const cardsKey = `pkt_global_shop_cards_${userId}`;
+  const timeKey = `pkt_global_shop_last_refresh_${userId}`;
+  const savedCards = localStorage.getItem(cardsKey);
+  const savedTime = localStorage.getItem(timeKey);
+  const now = Date.now();
+  const COOLDOWN_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+  if (savedCards && savedTime) {
+    const lastRefresh = parseInt(savedTime, 10);
+    if (now - lastRefresh < COOLDOWN_MS) {
+      try {
+        return JSON.parse(savedCards);
+      } catch (_) {}
+    }
   }
   return generateNewGlobalShopCards(userId);
 }
 
 function generateNewGlobalShopCards(userId) {
-  const key = `pkt_global_shop_cards_${userId}`;
+  const cardsKey = `pkt_global_shop_cards_${userId}`;
+  const timeKey = `pkt_global_shop_last_refresh_${userId}`;
   const cards = [];
   
   // Slot 1: Common card (cost 50)
@@ -1445,7 +1454,8 @@ function generateNewGlobalShopCards(userId) {
     displayName: shinyPoke.displayName + " ⭐"
   });
 
-  localStorage.setItem(key, JSON.stringify(cards));
+  localStorage.setItem(cardsKey, JSON.stringify(cards));
+  localStorage.setItem(timeKey, String(Date.now()));
   return cards;
 }
 
@@ -1477,13 +1487,17 @@ function openGlobalShopModal() {
     modal.style.zIndex = '99999';
     modal.style.display = 'flex';
     modal.style.alignItems = 'center';
-    modal.style.justify = 'center';
+    modal.style.justifyContent = 'center';
     document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
   }
 
   const getPokemonById = (id) => {
     return pokemonData.find(x => x.id === id) || pokemonData[0];
   };
+
+  let countdownInterval = null;
 
   const renderContent = () => {
     modal.innerHTML = `
@@ -1502,6 +1516,9 @@ function openGlobalShopModal() {
           color: white;
           font-family: 'Inter', sans-serif;
           animation: gshopFadeIn 0.3s ease;
+          box-sizing: border-box;
+          max-height: 90vh;
+          overflow-y: auto;
         }
         @keyframes gshopFadeIn {
           from { opacity: 0; transform: scale(0.95); }
@@ -1552,10 +1569,14 @@ function openGlobalShopModal() {
         }
         @media (max-width: 768px) {
           .gshop-grid { grid-template-columns: repeat(2, 1fr); }
-          .gshop-card { max-height: 90vh; overflow-y: auto; }
+          .gshop-card { max-height: 95vh; padding: 1.2rem; gap: 1rem; }
+          .gshop-title { font-size: 1.25rem; }
         }
         @media (max-width: 480px) {
           .gshop-grid { grid-template-columns: 1fr; }
+          .gshop-header { flex-direction: column; gap: 0.8rem; align-items: stretch; }
+          .gshop-header > div { justify-content: space-between; width: 100%; }
+          .gshop-balance { padding: 0.4rem 0.8rem; font-size: 0.95rem; }
         }
         .gshop-item {
           background: rgba(255,255,255,0.02);
@@ -1596,6 +1617,10 @@ function openGlobalShopModal() {
           font-weight: bold;
           cursor: pointer;
           transition: transform 0.1s, opacity 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
         }
         .gshop-buy-btn:hover:not(:disabled) { transform: scale(1.02); }
         .gshop-buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -1647,14 +1672,17 @@ function openGlobalShopModal() {
       </style>
       <div class="gshop-card">
         <div class="gshop-header">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span style="font-size: 1.8rem;">🛒</span>
-            <h2 class="gshop-title">Loja Global de Cartas</h2>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="font-size: 1.8rem; filter: drop-shadow(0 2px 5px rgba(245,158,11,0.3));">🛒</span>
+            <div style="display: flex; flex-direction: column;">
+              <h2 class="gshop-title">Loja Global de Cartas</h2>
+              <span id="gshop-countdown-val" style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 2px; font-family: monospace;">Calculando estoque...</span>
+            </div>
           </div>
           
           <div style="display: flex; align-items: center; gap: 1rem;">
             <div class="gshop-balance">
-              <span>🪙</span>
+              <span class="pkt-coin coin-spin" style="width: 16px; height: 16px; border-width: 2px;"></span>
               <span id="gshop-gold-val">${userGold} Gold</span>
             </div>
             <button class="gshop-close" id="btn-close-gshop">✕</button>
@@ -1685,7 +1713,7 @@ function openGlobalShopModal() {
                 </div>
                 
                 <button class="gshop-buy-btn btn-buy-gshop-card" data-idx="${idx}" ${userGold < item.cost ? 'disabled' : ''}>
-                  🪙 ${item.cost} Ouro
+                  <span class="pkt-coin" style="border-color: rgba(0,0,0,0.5);"></span> ${item.cost} Ouro
                 </button>
               </div>
             `;
@@ -1702,14 +1730,14 @@ function openGlobalShopModal() {
             </div>
             
             <button class="gshop-buy-btn" id="btn-buy-gshop-booster" ${userGold < 100 ? 'disabled' : ''}>
-               🪙 100 Ouro
+               <span class="pkt-coin" style="border-color: rgba(0,0,0,0.5);"></span> 100 Ouro
             </button>
           </div>
         </div>
         
         <div class="gshop-footer">
           <button class="gshop-refresh-btn" id="btn-refresh-gshop" ${userGold < 10 ? 'disabled' : ''}>
-            🔄 Ofertas (🪙 10)
+            🔄 Ofertas (<span class="pkt-coin" style="width: 11px; height: 11px; border-width: 1px;"></span> 10)
           </button>
           
           <button class="btn-primary" id="btn-close-gshop-footer" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); padding: 0.5rem 1.5rem; border-radius: 8px;">
@@ -1719,11 +1747,38 @@ function openGlobalShopModal() {
       </div>
     `;
     attachEventsLocal();
+    updateCountdown();
+  };
+
+  const updateCountdown = () => {
+    const timeKey = `pkt_global_shop_last_refresh_${userId}`;
+    const savedTime = localStorage.getItem(timeKey);
+    const countdownEl = modal.querySelector('#gshop-countdown-val');
+    if (!countdownEl) return;
+
+    const now = Date.now();
+    const lastRefresh = savedTime ? parseInt(savedTime, 10) : now;
+    const COOLDOWN_MS = 6 * 60 * 60 * 1000;
+    const timeLeft = (lastRefresh + COOLDOWN_MS) - now;
+
+    if (timeLeft <= 0) {
+      if (countdownInterval) clearInterval(countdownInterval);
+      shopCards = generateNewGlobalShopCards(userId);
+      renderContent();
+    } else {
+      const hours = Math.floor(timeLeft / (3600 * 1000));
+      const mins = Math.floor((timeLeft % (3600 * 1000)) / (60 * 1000));
+      const secs = Math.floor((timeLeft % (60 * 1000)) / 1000);
+      countdownEl.innerHTML = `Próximo estoque em: <strong>${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}</strong>`;
+    }
   };
 
   const attachEventsLocal = () => {
     const closeShop = () => {
       modal.style.display = 'none';
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
       const goldCountEl = document.getElementById('hs-gold-count');
       if (goldCountEl) {
         goldCountEl.textContent = localStorage.getItem(`pkt_campaign_gold_${userId}`) || '0';
@@ -1861,11 +1916,12 @@ function openGlobalShopModal() {
       userGold -= 10;
       localStorage.setItem(`pkt_campaign_gold_${userId}`, String(userGold));
 
-      // Generate new cards
+      // Generate new cards (which automatically updates timestamp)
       shopCards = generateNewGlobalShopCards(userId);
       renderContent();
     });
   };
 
+  countdownInterval = setInterval(updateCountdown, 1000);
   renderContent();
 }
