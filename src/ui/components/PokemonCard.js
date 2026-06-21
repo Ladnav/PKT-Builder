@@ -90,7 +90,7 @@ export function PokemonCard(pokemon, options = {}) {
         <span class="card-bst">BST ${bst}</span>
       </div>
       <div class="card-sprite-wrap">
-        <img class="card-sprite" src="${pokemon.sprite}" alt="${pokemon.displayName}" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png'">
+        <img class="card-sprite" src="${pokemon.isShiny ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png` : pokemon.sprite}" alt="${pokemon.displayName}" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.isShiny ? 'shiny/' : ''}${pokemon.id}.png'">
       </div>
       <div class="card-info">
         <h3 class="card-name">${pokemon.displayName}</h3>
@@ -109,8 +109,8 @@ export function PokemonMiniCard(pokemon, options = {}) {
   const gradColor = (pokemon.types && pokemon.types[0] && TYPE_COLORS[pokemon.types[0]]) || '#6c63ff';
 
   return `
-    <div class="pokemon-mini-card ${fainted ? 'fainted' : ''}" style="--card-color: ${gradColor}" data-tooltip-info='${JSON.stringify(pokemon).replace(/'/g, "&apos;")}'>
-      <img src="${pokemon.sprite || ''}" alt="${pokemon.displayName || ''}" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png'">
+    <div class="pokemon-mini-card ${fainted ? 'fainted' : ''} ${pokemon.isShiny ? 'shiny' : ''}" style="--card-color: ${gradColor}" data-tooltip-info='${JSON.stringify(pokemon).replace(/'/g, "&apos;")}'>
+      <img src="${pokemon.isShiny ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png` : (pokemon.sprite || '')}" alt="${pokemon.displayName || ''}" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.isShiny ? 'shiny/' : ''}${pokemon.id}.png'">
       <span class="mini-name">${pokemon.displayName || ''}</span>
     </div>
   `;
@@ -170,7 +170,7 @@ export function PokemonRosterCard(pokemon, options = {}) {
   return `
     <div class="pokemon-roster-card" style="--card-color: ${gradColor}" data-tooltip-info='${JSON.stringify(pokemon).replace(/'/g, "&apos;")}'>
       <div class="roster-card-header">
-        <img class="roster-card-sprite" src="${pokemon.sprite}" alt="${pokemon.displayName}" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png'">
+        <img class="roster-card-sprite" src="${pokemon.isShiny ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png` : pokemon.sprite}" alt="${pokemon.displayName}" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.isShiny ? 'shiny/' : ''}${pokemon.id}.png'">
         <div class="roster-card-info">
           <div class="roster-card-title-row">
             <span class="roster-card-name">${pokemon.displayName}</span>

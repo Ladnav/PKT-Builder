@@ -254,42 +254,42 @@ const CITY_SHOPS = {
   pewter: [
     { id: 76, name: 'golem', cost: 50, isShiny: false, displayName: 'Golem' },
     { id: 214, name: 'heracross', cost: 150, isShiny: false, displayName: 'Heracross' },
-    { id: 248, name: 'tyranitar', cost: 300, isShiny: true, displayName: 'Tyranitar ⭐' }
+    { id: 248, name: 'tyranitar', cost: 1000, isShiny: true, displayName: 'Tyranitar ⭐' }
   ],
   cerulean: [
     { id: 80, name: 'slowbro', cost: 50, isShiny: false, displayName: 'Slowbro' },
     { id: 131, name: 'lapras', cost: 150, isShiny: false, displayName: 'Lapras' },
-    { id: 350, name: 'milotic', cost: 300, isShiny: true, displayName: 'Milotic ⭐' }
+    { id: 350, name: 'milotic', cost: 1000, isShiny: true, displayName: 'Milotic ⭐' }
   ],
   vermilion: [
     { id: 25, name: 'pikachu', cost: 50, isShiny: false, displayName: 'Pikachu' },
     { id: 82, name: 'magneton', cost: 150, isShiny: false, displayName: 'Magneton' },
-    { id: 135, name: 'jolteon', cost: 300, isShiny: true, displayName: 'Jolteon ⭐' }
+    { id: 135, name: 'jolteon', cost: 1000, isShiny: true, displayName: 'Jolteon ⭐' }
   ],
   celadon: [
     { id: 154, name: 'meganium', cost: 50, isShiny: false, displayName: 'Meganium' },
     { id: 254, name: 'sceptile', cost: 150, isShiny: false, displayName: 'Sceptile' },
-    { id: 3, name: 'venusaur', cost: 300, isShiny: true, displayName: 'Venusaur ⭐' }
+    { id: 3, name: 'venusaur', cost: 1000, isShiny: true, displayName: 'Venusaur ⭐' }
   ],
   fuchsia: [
     { id: 461, name: 'weavile', cost: 50, isShiny: false, displayName: 'Weavile' },
     { id: 94, name: 'gengar', cost: 150, isShiny: false, displayName: 'Gengar' },
-    { id: 248, name: 'tyranitar', cost: 300, isShiny: true, displayName: 'Tyranitar ⭐' }
+    { id: 248, name: 'tyranitar', cost: 1000, isShiny: true, displayName: 'Tyranitar ⭐' }
   ],
   saffron: [
     { id: 196, name: 'espeon', cost: 50, isShiny: false, displayName: 'Espeon' },
     { id: 282, name: 'gardevoir', cost: 150, isShiny: false, displayName: 'Gardevoir' },
-    { id: 376, name: 'metagross', cost: 300, isShiny: true, displayName: 'Metagross ⭐' }
+    { id: 376, name: 'metagross', cost: 1000, isShiny: true, displayName: 'Metagross ⭐' }
   ],
   cinnabar: [
     { id: 136, name: 'flareon', cost: 50, isShiny: false, displayName: 'Flareon' },
     { id: 59, name: 'arcanine', cost: 150, isShiny: false, displayName: 'Arcanine' },
-    { id: 6, name: 'charizard', cost: 300, isShiny: true, displayName: 'Charizard ⭐' }
+    { id: 6, name: 'charizard', cost: 1000, isShiny: true, displayName: 'Charizard ⭐' }
   ],
   viridian: [
     { id: 76, name: 'golem', cost: 50, isShiny: false, displayName: 'Golem' },
     { id: 473, name: 'mamoswine', cost: 150, isShiny: false, displayName: 'Mamoswine' },
-    { id: 445, name: 'garchomp', cost: 300, isShiny: true, displayName: 'Garchomp ⭐' }
+    { id: 445, name: 'garchomp', cost: 1000, isShiny: true, displayName: 'Garchomp ⭐' }
   ]
 };
 

@@ -228,6 +228,13 @@ async function openSinglePack(currentCount) {
       }
     }
 
+    // Sorteia Gold extra no booster (15 a 25 gold)
+    const boosterGold = 15 + Math.floor(Math.random() * 11); // 15 a 25
+    const savedGoldStr = localStorage.getItem(`pkt_campaign_gold_${currentUserId}`);
+    let userGold = savedGoldStr ? parseInt(savedGoldStr, 10) : 100;
+    userGold += boosterGold;
+    localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(userGold));
+
     // Animação de rasgar e transição de revelação
     setTimeout(() => {
       if (packGraphic) {
@@ -238,7 +245,7 @@ async function openSinglePack(currentCount) {
       playSFX('boosterOpen');
 
       setTimeout(() => {
-        renderRevealedCards(chosenList, nextCount);
+        renderRevealedCards(chosenList, nextCount, boosterGold);
       }, 600);
     }, 1200);
 
@@ -295,7 +302,7 @@ function createCardDraw(pokemonId) {
   };
 }
 
-function renderRevealedCards(cardsList, nextCount) {
+function renderRevealedCards(cardsList, nextCount, goldGained = 0) {
   const modal = document.getElementById('booster-modal-wrapper');
   if (!modal) return;
 
@@ -307,7 +314,10 @@ function renderRevealedCards(cardsList, nextCount) {
     </div>
     
     <div class="booster-reveal-view" style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem; padding: 1rem 0.5rem; text-align: center; overflow-y: auto; flex: 1; width: 100%; box-sizing: border-box;">
-      <div style="font-size: 0.85rem; color: var(--text-2); flex-shrink: 0;">Clique nas cartas para revelá-las!</div>
+      <div style="font-size: 0.85rem; color: var(--text-2); flex-shrink: 0;">
+        Clique nas cartas para revelá-las!
+        ${goldGained > 0 ? `<div style="margin-top: 0.4rem; color: #fbbf24; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 4px;">🪙 Você ganhou +${goldGained} Gold!</div>` : ''}
+      </div>
 
       <!-- CARDS LIST -->
       <div class="booster-cards-reveal-grid" style="display: flex; gap: 1.5rem; justify-content: center; width: 100%; flex-wrap: wrap;">
