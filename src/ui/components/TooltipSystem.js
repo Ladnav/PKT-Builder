@@ -105,7 +105,7 @@ function renderTooltip(pokemon) {
       <div>SPE: <b style="color:var(--text-1)">${pokemon.stats.speed}</b></div>
     </div>
     <div class="tooltip-moves" style="margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.5rem;">
-      ${pokemon.moves.map(m => `
+      ${pokemon.moves.slice(0, 4).map(m => `
         <div style="display:flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.2rem;">
           <span><span style="color:${TYPE_COLORS[m.type]}">${TYPE_ICONS[m.type]}</span> ${m.displayName}</span>
           <span style="color:var(--text-3);">${m.power || '-'}</span>

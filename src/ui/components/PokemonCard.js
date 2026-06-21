@@ -1,6 +1,26 @@
 // src/ui/components/PokemonCard.js
 import { TypeBadge } from './TypeBadge.js';
 import { TYPE_COLORS, TYPE_ICONS } from '../../engine/types.js';
+import pokemonData from '../../data/pokemon-sample.json';
+
+export function getPokemonCost(pokemon) {
+  if (!pokemon) return 0;
+  const basePoke = pokemonData.find(p => p.id === pokemon.id) || pokemon;
+  if (!basePoke || !basePoke.stats) return 0;
+  const bst = Object.values(basePoke.stats).reduce((sum, val) => sum + val, 0);
+  let cost = 0;
+  if (bst >= 670) cost = 5;
+  else if (bst >= 580) cost = 4;
+  else if (bst >= 520) cost = 3;
+  else if (bst >= 470) cost = 2;
+  else if (bst >= 400) cost = 1;
+  else cost = 0;
+
+  if (pokemon.isShiny) {
+    cost += 1;
+  }
+  return cost;
+}
 
 export function getItemIconHtml(item, size = 16) {
   if (!item) return '';
@@ -11,7 +31,7 @@ export function getItemIconHtml(item, size = 16) {
 
 // Card completo do Pokémon para o draft
 export function PokemonCard(pokemon, options = {}) {
-  const { selectable = false, selected = false, small = false, showStats = true } = options;
+  const { selectable = false, selected = false, small = false, showStats = true, showCost = false } = options;
   const bst = Object.values(pokemon.stats).reduce((a, b) => a + b, 0);
   const gradColor = TYPE_COLORS[pokemon.types[0]] || '#6c63ff';
   const cls = [
@@ -19,7 +39,7 @@ export function PokemonCard(pokemon, options = {}) {
     selectable ? 'selectable' : '',
     selected ? 'selected' : '',
     small ? 'pokemon-card-sm' : '',
-    pokemon.isShiny ? 'shiny' : ''
+    pokemon.isShiny ? 'shiny shiny-holo' : ''
   ].filter(Boolean).join(' ');
 
   const statsHtml = showStats ? `
@@ -35,7 +55,7 @@ export function PokemonCard(pokemon, options = {}) {
 
   const movesHtml = !small ? `
     <div class="card-moves">
-      ${pokemon.moves.map(m => `
+      ${pokemon.moves.slice(0, 4).map(m => `
         <div class="move-pill" data-type="${m.type}">
           <div class="move-info">
             <span class="move-icon">${TYPE_ICONS[m.type] || '✨'}</span>
@@ -57,6 +77,11 @@ export function PokemonCard(pokemon, options = {}) {
       <div class="card-glow"></div>
       <div class="card-header">
         <span class="card-number">#${String(pokemon.id).padStart(3,'0')}</span>
+        ${showCost ? `
+          <span class="card-cost-badge" style="background: rgba(56,189,248,0.15); border: 1px solid var(--info); border-radius: 4px; padding: 1.5px 5px; font-size: 0.7rem; color: var(--info); font-weight: 800; display: inline-flex; align-items: center; gap: 2px;" title="Custo de Créditos">
+            🪙 ${getPokemonCost(pokemon)}
+          </span>
+        ` : ''}
         ${pokemon.item ? `
           <span class="card-item-badge" title="${pokemon.item.displayName}: ${pokemon.item.description}" style="background: rgba(251, 191, 36, 0.2); border: 1px solid var(--gold); border-radius: 4px; padding: 1px 4px; font-size: 0.7rem; color: var(--gold); font-weight: bold; display: flex; align-items: center; gap: 2px;">
             ${getItemIconHtml(pokemon.item)} ${pokemon.item.displayName}
@@ -130,7 +155,7 @@ export function PokemonRosterCard(pokemon, options = {}) {
 
   const movesHtml = `
     <div class="roster-card-moves">
-      ${pokemon.moves.map(m => `
+      ${pokemon.moves.slice(0, 4).map(m => `
         <div class="roster-move-pill" title="${m.displayName} (${m.damage_class === 'physical' ? 'Físico' : 'Especial'}, Power: ${m.power || '-'})">
           <span class="roster-move-icon">${TYPE_ICONS[m.type] || '✨'}</span>
           <span class="roster-move-name">${m.displayName}</span>

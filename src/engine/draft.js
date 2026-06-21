@@ -103,25 +103,47 @@ export function selectOptionsFromPool(available) {
     filtered = available;
   }
 
-  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, OPTIONS_COUNT);
+  let selected = [];
+  const zeroCostPool = filtered.filter(p => {
+    const bst = Object.values(p.stats).reduce((sum, val) => sum + val, 0);
+    return bst < 400;
+  });
 
-  // Aplica chance de Shiny (2% de chance, +15% status)
-  return selected.map(p => {
-    if (Math.random() > 0.005) return p;
+  if (zeroCostPool.length > 0) {
+    const forcedZero = zeroCostPool[Math.floor(Math.random() * zeroCostPool.length)];
+    selected.push(forcedZero);
+    const remainingPool = filtered.filter(p => p.id !== forcedZero.id);
+    const shuffledRemaining = [...remainingPool].sort(() => Math.random() - 0.5);
+    selected = selected.concat(shuffledRemaining.slice(0, OPTIONS_COUNT - 1));
+  } else {
+    const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+    selected = shuffled.slice(0, OPTIONS_COUNT);
+  }
 
+  const finalSelected = selected.sort(() => Math.random() - 0.5);
+
+  // Clona e randomiza os moves (escolhe 4 dentre os 8 disponíveis) e aplica chance de Shiny
+  return finalSelected.map(p => {
     const clone = JSON.parse(JSON.stringify(p));
-    clone.isShiny = true;
-    clone.displayName = `✨ ${clone.displayName}`;
-    
-    for (const stat in clone.stats) {
-      clone.stats[stat] = Math.round(clone.stats[stat] * 1.15);
+
+    if (clone.moves && clone.moves.length > 4) {
+      const shuffledMoves = [...clone.moves].sort(() => Math.random() - 0.5);
+      clone.moves = shuffledMoves.slice(0, 4);
     }
 
-    // Ajusta sprites para shiny (PokeAPI)
-    if (clone.sprite) clone.sprite = clone.sprite.replace('/official-artwork/', '/official-artwork/shiny/');
-    if (clone.spriteAnimated) clone.spriteAnimated = clone.spriteAnimated.replace('/animated/', '/animated/shiny/');
-    if (clone.spriteBack) clone.spriteBack = clone.spriteBack.replace('/back/', '/back/shiny/');
+    if (Math.random() <= 0.005) {
+      clone.isShiny = true;
+      clone.displayName = `✨ ${clone.displayName}`;
+      
+      for (const stat in clone.stats) {
+        clone.stats[stat] = Math.round(clone.stats[stat] * 1.15);
+      }
+
+      // Ajusta sprites para shiny (PokeAPI)
+      if (clone.sprite) clone.sprite = clone.sprite.replace('/official-artwork/', '/official-artwork/shiny/');
+      if (clone.spriteAnimated) clone.spriteAnimated = clone.spriteAnimated.replace('/animated/', '/animated/shiny/');
+      if (clone.spriteBack) clone.spriteBack = clone.spriteBack.replace('/back/', '/back/shiny/');
+    }
 
     return clone;
   });
@@ -183,14 +205,44 @@ export function botChooseType(team, allPokemon, usedIds) {
   return typeScores[0].type;
 }
 
+export function getPokemonCost(pokemon) {
+  if (!pokemon || !pokemon.stats) return 0;
+  let bst = Object.values(pokemon.stats).reduce((sum, val) => sum + val, 0);
+  const isShiny = pokemon.isShiny;
+  if (isShiny) {
+    bst = Math.round(bst / 1.15);
+  }
+  let cost = 0;
+  if (bst >= 670) cost = 5;
+  else if (bst >= 580) cost = 4;
+  else if (bst >= 520) cost = 3;
+  else if (bst >= 470) cost = 2;
+  else if (bst >= 400) cost = 1;
+  else cost = 0;
+
+  if (isShiny) {
+    cost += 1;
+  }
+  return cost;
+}
+
 // IA do BOT: escolhe o melhor Pokémon das opções
-export function botChoosePokemon(options, team) {
+export function botChoosePokemon(options, team, remainingCredits = null) {
   if (!options || options.length === 0) return null;
+
+  // Filtra opções acessíveis se houver limite de créditos
+  let pool = options;
+  if (remainingCredits !== null) {
+    const affordable = options.filter(p => getPokemonCost(p) <= remainingCredits);
+    if (affordable.length > 0) {
+      pool = affordable;
+    }
+  }
 
   // Cria score baseado em: BST total, cobertura de tipos, variedade
   const teamTypes = new Set(team.pokemon.flatMap(p => p.types));
 
-  const scored = options.map(p => {
+  const scored = pool.map(p => {
     const bst = Object.values(p.stats).reduce((a, b) => a + b, 0);
     const newTypes = p.types.filter(t => !teamTypes.has(t)).length;
     const score = bst + newTypes * 50 + Math.random() * 30;
@@ -198,7 +250,7 @@ export function botChoosePokemon(options, team) {
   });
 
   scored.sort((a, b) => b.score - a.score);
-  return scored[0].pokemon;
+  return scored[0]?.pokemon || null;
 }
 
 // Verifica se é o turno do jogador humano

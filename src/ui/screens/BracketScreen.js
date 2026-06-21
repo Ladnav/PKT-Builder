@@ -1081,8 +1081,31 @@ async function processEloPointsSilently() {
         await supabase.from('profiles').update({ elo_points: nextElo }).eq('id', currentUserId);
         console.log(`[Silent] ELO atualizado: ${currentElo} -> ${nextElo} (${pointsChange > 0 ? '+' : ''}${pointsChange} pts)`);
       }
+
+      // Salva os shinies do time do jogador antes de sair
+      const myParticipant = participants.find(p => p.user_id === currentUserId);
+      if (myParticipant && myParticipant.team) {
+        const shinies = myParticipant.team.filter(poke => poke.isShiny && poke.stats);
+        for (const shiny of shinies) {
+          const { data: existing } = await supabase
+            .from('user_shinies')
+            .select('id')
+            .eq('user_id', currentUserId)
+            .eq('pokemon_id', shiny.id)
+            .maybeSingle();
+
+          if (!existing) {
+            await supabase.from('user_shinies').insert({
+              user_id: currentUserId,
+              pokemon_id: shiny.id,
+              pokemon_data: shiny
+            });
+            console.log(`[Silent] Shiny salvo na coleção: ${shiny.displayName}`);
+          }
+        }
+      }
     } catch (e) {
-      console.error('Erro ao atualizar ELO de forma silenciosa:', e);
+      console.error('Erro ao atualizar ELO/shinies de forma silenciosa:', e);
     }
   }
 }

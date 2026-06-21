@@ -89,8 +89,27 @@ function renderParticles() {
       height: ${32 + Math.random() * 32}px;
       opacity: ${0.08 + Math.random() * 0.12};
       position: absolute;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
     `;
+
+    el.addEventListener('click', () => {
+      const masterVol = parseFloat(localStorage.getItem('masterVolume') ?? '0.5');
+      const audio = new Audio(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/cries/${pokeId}.ogg`);
+      audio.volume = masterVol;
+      audio.play().catch(e => console.log("Erro ao tocar cry:", e));
+
+      el.animate([
+        { transform: 'scale(1) rotate(0deg)' },
+        { transform: 'scale(1.4) rotate(-15deg)', offset: 0.3 },
+        { transform: 'scale(1.4) rotate(15deg)', offset: 0.6 },
+        { transform: 'scale(1) rotate(0deg)' }
+      ], {
+        duration: 500,
+        easing: 'ease-in-out'
+      });
+    });
+
     pContainer.appendChild(el);
   }
 }

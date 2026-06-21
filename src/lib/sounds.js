@@ -87,14 +87,14 @@ export function stopBGM() {
   }
 }
 
-export function playSFX(type) {
+export function playSFX(type, multiplier = 1.0) {
   if (isMuted) return;
   const url = SOUNDS[type];
   if (!url) return;
 
   try {
     const audio = new Audio(url);
-    audio.volume = sfxVolume;
+    audio.volume = Math.min(1.0, sfxVolume * multiplier);
     audio.play().catch(err => {
       // Falha silenciosa se for bloqueado
     });

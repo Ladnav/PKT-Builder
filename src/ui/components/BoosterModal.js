@@ -202,12 +202,13 @@ async function openSinglePack(currentCount) {
 
     // 3. Grava no banco de dados e aguarda
     for (const card of chosenList) {
+      const isShinyForDB = card.isShiny || card.isFoil;
       const { data: existing } = await supabase
         .from('user_cards')
         .select('id, quantity')
         .eq('user_id', currentUserId)
         .eq('pokemon_id', card.pokemon.id)
-        .eq('is_shiny', card.isShiny)
+        .eq('is_shiny', isShinyForDB)
         .maybeSingle();
 
       if (existing) {
@@ -221,7 +222,7 @@ async function openSinglePack(currentCount) {
           .insert({
             user_id: currentUserId,
             pokemon_id: card.pokemon.id,
-            is_shiny: card.isShiny,
+            is_shiny: isShinyForDB,
             quantity: 1
           });
       }
@@ -251,8 +252,31 @@ async function openSinglePack(currentCount) {
 
 function createCardDraw(pokemonId) {
   const pokemon = pokemonData.find(p => p.id === pokemonId);
-  // 2% de chance de virar Shiny (Foil)
-  const isShiny = Math.random() < 0.02;
+  
+  // Raridades:
+  // Normal: 90% (isShiny = false, isFoil = false, rarity = 'normal')
+  // Foil: 6% (isShiny = false, isFoil = true, rarity = 'foil')
+  // Shiny: 3% (isShiny = true, isFoil = false, rarity = 'shiny')
+  // Shiny Foiled: 1% (isShiny = true, isFoil = true, rarity = 'shiny-foiled')
+  
+  const rand = Math.random();
+  let isShiny = false;
+  let isFoil = false;
+  let rarity = 'normal';
+  
+  if (rand < 0.01) {
+    isShiny = true;
+    isFoil = true;
+    rarity = 'shiny-foiled';
+  } else if (rand < 0.04) {
+    isShiny = true;
+    isFoil = false;
+    rarity = 'shiny';
+  } else if (rand < 0.10) {
+    isShiny = false;
+    isFoil = true;
+    rarity = 'foil';
+  }
   
   // Customiza dados de exibição do sprite se for shiny
   let sprite = pokemon.sprite;
@@ -265,7 +289,9 @@ function createCardDraw(pokemonId) {
       ...pokemon,
       sprite: sprite
     },
-    isShiny
+    isShiny,
+    isFoil,
+    rarity
   };
 }
 
@@ -288,11 +314,23 @@ function renderRevealedCards(cardsList, nextCount) {
         ${cardsList.map((cardDraw, idx) => {
           const p = cardDraw.pokemon;
           const isShiny = cardDraw.isShiny;
+          const isFoil = cardDraw.isFoil;
           const bst = Object.values(p.stats).reduce((a, b) => a + b, 0);
           const color = TYPE_COLORS[p.types[0]] || '#6c63ff';
+          
+          let badgeHtml = '';
+          if (cardDraw.rarity === 'foil') {
+            badgeHtml = '<div style="font-size: 0.55rem; color: #3b82f6; font-weight: bold; margin-top: 4px; animation: pulse 1s infinite;">✨ FOIL ✨</div>';
+          } else if (cardDraw.rarity === 'shiny') {
+            badgeHtml = '<div style="font-size: 0.55rem; color: #a855f7; font-weight: bold; margin-top: 4px; animation: pulse 1s infinite;">✨ SHINY ✨</div>';
+          } else if (cardDraw.rarity === 'shiny-foiled') {
+            badgeHtml = '<div style="font-size: 0.55rem; color: var(--gold); font-weight: bold; margin-top: 4px; animation: pulse 1s infinite;">✨ FOIL SHINY ✨</div>';
+          }
+
+          const hasHolo = isShiny || isFoil;
 
           return `
-            <div class="booster-card-flip-container" data-idx="${idx}">
+            <div class="booster-card-flip-container rarity-${cardDraw.rarity}" data-idx="${idx}">
               <div class="booster-card-flip-inner">
                 <!-- CARD BACK -->
                 <div class="booster-card-flip-back">
@@ -301,17 +339,17 @@ function renderRevealedCards(cardsList, nextCount) {
                   </div>
                 </div>
                 <!-- CARD FRONT -->
-                <div class="booster-card-flip-front ${isShiny ? 'shiny-holo' : ''}" style="--slot-color: ${color}; border-top: 4px solid var(--slot-color);">
+                <div class="booster-card-flip-front ${hasHolo ? 'shiny-holo' : ''}" style="--slot-color: ${color}; border-top: 4px solid var(--slot-color);">
                   <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--text-3); width: 100%;">
                     <span>#${String(p.id).padStart(3, '0')}</span>
-                    <span style="font-weight: bold; color: ${isShiny ? 'var(--gold)' : 'var(--text-3)'};">BST ${bst}</span>
+                    <span style="font-weight: bold; color: ${hasHolo ? 'var(--gold)' : 'var(--text-3)'};">BST ${bst}</span>
                   </div>
                   <img src="${p.sprite}" alt="${p.displayName}" style="width: 75px; height: 75px; object-fit: contain; margin: 0.2rem 0;" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
                   <div style="font-size: 0.8rem; font-weight: bold; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-1);">${p.displayName}</div>
                   <div style="display: flex; gap: 2px; margin-top: 2px; scale: 0.75;">
                     ${p.types.map(t => TypeBadge(t)).join('')}
                   </div>
-                  ${isShiny ? '<div style="font-size: 0.55rem; color: var(--gold); font-weight: bold; margin-top: 4px; animation: pulse 1s infinite;">✨ FOIL SHINY ✨</div>' : ''}
+                  ${badgeHtml}
                 </div>
               </div>
             </div>
@@ -325,7 +363,6 @@ function renderRevealedCards(cardsList, nextCount) {
     </div>
   `;
 
-
   const containers = card.querySelectorAll('.booster-card-flip-container');
   let flippedCount = 0;
 
@@ -337,7 +374,7 @@ function renderRevealedCards(cardsList, nextCount) {
 
       const idx = parseInt(container.getAttribute('data-idx'));
       const cardDraw = cardsList[idx];
-      if (cardDraw && cardDraw.isShiny) {
+      if (cardDraw && (cardDraw.isShiny || cardDraw.isFoil)) {
         playSFX('shiny');
       } else {
         playSFX('cardFlip');

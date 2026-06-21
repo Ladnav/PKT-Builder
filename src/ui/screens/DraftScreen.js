@@ -1,7 +1,7 @@
 // src/ui/screens/DraftScreen.js
 import { navigate } from '../router.js';
 import { initEmotes, destroyEmotes } from '../components/Emotes.js';
-import { PokemonCard, PokemonMiniCard, PokemonRosterCard, getItemIconHtml } from '../components/PokemonCard.js';
+import { PokemonCard, PokemonMiniCard, PokemonRosterCard, getItemIconHtml, getPokemonCost } from '../components/PokemonCard.js';
 import { TypeBadge } from '../components/TypeBadge.js';
 import { TYPE_NAMES_PT, TYPE_ICONS, TYPE_COLORS, ALL_TYPES, getTotalEffectiveness } from '../../engine/types.js';
 import { DRAFT_MODES, botChooseType, botChoosePokemon, getDraftProgress, selectOptionsFromPool } from '../../engine/draft.js';
@@ -29,6 +29,7 @@ let roomSubscription = null;
 let loading = false;
 let errorMsg = '';
 let botTurnInProgress = false;
+let botItemsLoopInProgress = false;
 let pendingBotPart = null;
 let botTimerWorker = null;
 let turnTimerInterval = null;
@@ -70,6 +71,7 @@ export async function render(cont, params) {
   }
 
   botTurnInProgress = false;
+  botItemsLoopInProgress = false;
 
   renderLayout();
   playBGM('draft');
@@ -304,6 +306,12 @@ function updateUI() {
     } else {
       turnInfo.className = `draft-turn-info ${isPlayer ? 'your-turn' : 'bot-turn'}`;
       const name = currentPart.is_bot ? currentPart.bot_name : (currentPart.profile?.username || 'Treinador');
+      
+      const isCreditsEnabled = room?.settings?.credits === true;
+      const activeSpent = currentPart?.team ? currentPart.team.reduce((sum, poke) => sum + getPokemonCost(poke), 0) : 0;
+      const activeRemaining = 15 - activeSpent;
+      const creditsBadge = isCreditsEnabled ? ` <span style="color: ${isPlayer ? 'var(--gold)' : 'var(--info)'}; background: ${isPlayer ? 'rgba(251,191,36,0.15)' : 'rgba(56,189,248,0.15)'}; padding: 1.5px 6px; border-radius: 4px; border: 1px solid ${isPlayer ? 'var(--gold)' : 'var(--info)'}; font-size: 0.75rem; font-weight: bold; margin-left: 6px;" title="Saldo Restante">Saldo: ${activeRemaining} 🪙</span>` : '';
+
       if (isPlayer) {
         turnInfo.innerHTML = `
           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
@@ -311,7 +319,7 @@ function updateUI() {
               <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--gold); flex-shrink: 0;">
                 <img src="${getTrainerAvatar(currentPart)}" alt="Você" style="width: 100%; height: 100%; object-fit: cover;">
               </span>
-              <span>🎯 SUA VEZ!</span>
+              <span>🎯 SUA VEZ!${creditsBadge}</span>
               <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
             </div>
             <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
@@ -326,7 +334,7 @@ function updateUI() {
               <span style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid var(--accent-1); flex-shrink: 0;">
                 <img src="${getTrainerAvatar(currentPart)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
               </span>
-              <span>⌛ Vez de ${name}</span>
+              <span>⌛ Vez de ${name}${creditsBadge}</span>
               <span id="timer-display" style="font-weight:bold; color:var(--gold); margin-left:8px;"></span>
             </div>
             <div class="turn-timer-bar-container" style="width: 100%; max-width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 6px;">
@@ -342,6 +350,7 @@ function updateUI() {
   const teamsList = container.querySelector('#teams-list');
   if (teamsList) {
     const isBlindMode = room?.settings?.blind === true || room.mode === 'blind';
+    const isCreditsEnabled = room?.settings?.credits === true;
     const showTeams = !isBlindMode;
     teamsList.innerHTML = participants.map(p => {
       const hasItem = p.team && p.team.some(poke => poke.item !== undefined && poke.item !== null);
@@ -349,6 +358,14 @@ function updateUI() {
       const isMe = p.user_id === currentUserId;
       const name = p.is_bot ? p.bot_name : (p.profile?.username || 'Treinador');
       const teamList = p.team || [];
+
+      // Calcula os créditos restantes
+      let creditsInfo = '';
+      if (isCreditsEnabled) {
+        const spent = teamList.reduce((sum, poke) => sum + getPokemonCost(poke), 0);
+        const rem = 15 - spent;
+        creditsInfo = ` • <span style="color: var(--gold); font-size: 0.72rem; font-weight: bold;" title="Créditos Restantes">${rem} 🪙</span>`;
+      }
 
       let statusIcon = '';
       if (draftState.current_round === 7) {
@@ -361,7 +378,7 @@ function updateUI() {
             <span class="team-icon" style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background: var(--bg-3); border: 1px solid ${p.is_bot ? 'var(--accent-1)' : isMe ? 'var(--gold)' : 'var(--border)'}; flex-shrink: 0;">
               <img src="${getTrainerAvatar(p)}" alt="${name}" style="width: 100%; height: 100%; object-fit: cover;">
             </span>
-            <span class="team-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}${statusIcon}</span>
+            <span class="team-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}${statusIcon}${creditsInfo}</span>
             <span class="team-count" style="flex-shrink: 0;">${teamList.length}/6</span>
           </div>
           ${showTeams || isMe ? `
@@ -638,7 +655,22 @@ function renderPokemonOptions() {
           <div class="bot-thinking" style="grid-column: 1/-1">
             <p>Gerando opções de Pokémons...</p>
           </div>
-        ` : options.map(p => PokemonCard(p, { selectable: true })).join('')}
+        ` : (() => {
+          const isCreditsEnabled = room?.settings?.credits === true;
+          let remainingCredits = 15;
+          if (isCreditsEnabled) {
+            const playerPart = participants.find(p => p.user_id === currentUserId);
+            const playerTeam = playerPart?.team || [];
+            const spentCredits = playerTeam.reduce((sum, poke) => sum + getPokemonCost(poke), 0);
+            remainingCredits = 15 - spentCredits;
+          }
+          const cheapestCost = options.length > 0 ? Math.min(...options.map(getPokemonCost)) : 0;
+          return options.map(p => {
+            const cost = getPokemonCost(p);
+            const isAffordable = !isCreditsEnabled || (cost <= remainingCredits) || (cost === cheapestCost);
+            return PokemonCard(p, { selectable: isAffordable, showCost: isCreditsEnabled });
+          }).join('');
+        })()}
       </div>
     </div>
   `;
@@ -1004,6 +1036,22 @@ async function selectPokemon(pokemon) {
     console.log('Turno já processado por este cliente:', { currentSlot, currentRound });
     return;
   }
+
+  // Safety check for credit limit
+  const isCreditsEnabled = room?.settings?.credits === true;
+  if (isCreditsEnabled && currentRound !== 7) {
+    const currentTeam = currentPart?.team || [];
+    const spentCredits = currentTeam.reduce((sum, p) => sum + getPokemonCost(p), 0);
+    const remainingCredits = 15 - spentCredits;
+    const cost = getPokemonCost(pokemon);
+    const options = draftState.current_options || [];
+    const cheapestCost = options.length > 0 ? Math.min(...options.map(getPokemonCost)) : 0;
+    if (cost > remainingCredits && cost !== cheapestCost) {
+      console.warn('Block: Selection exceeds remaining credits, and is not the cheapest option.', { cost, remainingCredits, cheapestCost });
+      return;
+    }
+  }
+
   if (!isBot) {
     loading = true;
     lastProcessedSlot = currentSlot;
@@ -1163,7 +1211,24 @@ async function createBracketAndTransitionRoom() {
 function processTurn() {
   if (!room || !participants.length) return;
   const totalRounds = room?.settings?.items ? 7 : 6;
-  if (!draftState || draftState.current_round > totalRounds) return;
+  if (!draftState) return;
+
+  if (draftState.current_round > totalRounds) {
+    if (isHost && room.status === 'drafting') {
+      supabase
+        .from('brackets')
+        .select('id')
+        .eq('room_id', roomId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!data) {
+            console.log('Draft concluído detectado pelo Host via realtime. Criando bracket...');
+            createBracketAndTransitionRoom();
+          }
+        });
+    }
+    return;
+  }
 
   const currentSlot = draftState.current_slot;
   const currentRound = draftState.current_round;
@@ -1208,9 +1273,9 @@ function processTurn() {
   if (isNewTurn && isPlayer) {
     const hasShinyOption = draftState.current_options && draftState.current_options.some(p => p && p.isShiny);
     if (hasShinyOption) {
-      playSFX('shiny');
+      playSFX('shiny', 1.8);
     } else {
-      playSFX('turnAlert');
+      playSFX('turnAlert', 1.8);
     }
   }
 
@@ -1281,7 +1346,14 @@ function processTurn() {
             } else {
               let pool = draftState.current_options || [];
               if (!pool || pool.length === 0) pool = selectOptionsFromPool(getAvailablePool().map(id => pokemonData.find(x => x.id === id)).filter(p => p));
-              const p = botChoosePokemon(pool, { pokemon: currentPart.team || [] });
+              
+              const isCreditsEnabled = room?.settings?.credits === true;
+              let playerRemainingCredits = null;
+              if (isCreditsEnabled) {
+                const spent = (currentPart.team || []).reduce((sum, p) => sum + getPokemonCost(p), 0);
+                playerRemainingCredits = 15 - spent;
+              }
+              const p = botChoosePokemon(pool, { pokemon: currentPart.team || [] }, playerRemainingCredits);
               selectPokemon(p);
             }
           }
@@ -1306,73 +1378,93 @@ function processTurn() {
   if (draftState.current_round === 7 && draftState.current_options && draftState.current_options.length > 0 && isHost) {
     const botsNeedItem = participants.filter(p => p.is_bot && (!p.team || !p.team.some(poke => poke.item !== undefined && poke.item !== null)));
     if (botsNeedItem.length > 0) {
+      if (botItemsLoopInProgress) return;
+      botItemsLoopInProgress = true;
       (async () => {
-        let currentHistory = [...(draftState.picks_history || [])];
-        for (const bot of botsNeedItem) {
-          const pool = draftState.current_options;
-          const item = pool[Math.floor(Math.random() * pool.length)];
-          const botTeam = bot.team || [];
-          let bestPokeIdx = 0;
-          let highestBst = -1;
-          botTeam.forEach((poke, idx) => {
-            const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
-            if (bst > highestBst) {
-              highestBst = bst;
-              bestPokeIdx = idx;
+        try {
+          let currentHistory = [...(draftState.picks_history || [])];
+          const updatePromises = [];
+          for (const bot of botsNeedItem) {
+            const pool = draftState.current_options;
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            const botTeam = bot.team || [];
+            let bestPokeIdx = 0;
+            let highestBst = -1;
+            botTeam.forEach((poke, idx) => {
+              if (poke && poke.stats) {
+                const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
+                if (bst > highestBst) {
+                  highestBst = bst;
+                  bestPokeIdx = idx;
+                }
+              }
+            });
+            
+            const updatedTeam = [...botTeam];
+            if (updatedTeam[bestPokeIdx]) {
+              updatedTeam[bestPokeIdx] = {
+                ...updatedTeam[bestPokeIdx],
+                item: item
+              };
             }
-          });
-          
-          const updatedTeam = [...botTeam];
-          if (updatedTeam[bestPokeIdx]) {
-            updatedTeam[bestPokeIdx] = {
-              ...updatedTeam[bestPokeIdx],
-              item: item
-            };
+            
+            updatePromises.push(
+              supabase
+                .from('room_participants')
+                .update({ team: updatedTeam })
+                .eq('id', bot.id)
+            );
+              
+            currentHistory.push({
+              round: 7,
+              slot: bot.slot,
+              teamName: bot.bot_name,
+              pokemon: item,
+              isPlayer: false
+            });
           }
           
-          await supabase
-            .from('room_participants')
-            .update({ team: updatedTeam })
-            .eq('id', bot.id);
-            
-          currentHistory.push({
-            round: 7,
-            slot: bot.slot,
-            teamName: bot.bot_name,
-            pokemon: item,
-            isPlayer: false
-          });
-        }
-        
-        // Busca todos de novo para ver se todos (incluindo humanos) já escolheram
-        const { data: updatedParts } = await supabase
-          .from('room_participants')
-          .eq('room_id', roomId);
+          await Promise.all(updatePromises);
           
-        const allChosen = updatedParts && updatedParts.every(p => 
-          p.team && p.team.some(poke => poke.item !== undefined && poke.item !== null)
-        );
-        
-        if (allChosen) {
-          await supabase
-            .from('draft_state')
-            .update({
-              current_round: 8,
-              current_options: [],
-              picks_history: currentHistory,
-              updated_at: new Date().toISOString()
-            })
+          // Busca todos de novo para ver se todos (incluindo humanos) já escolheram
+          const { data: updatedParts, error: fetchErr } = await supabase
+            .from('room_participants')
             .eq('room_id', roomId);
             
-          await createBracketAndTransitionRoom();
-        } else {
-          await supabase
-            .from('draft_state')
-            .update({
-              picks_history: currentHistory,
-              updated_at: new Date().toISOString()
-            })
-            .eq('room_id', roomId);
+          if (fetchErr) throw fetchErr;
+            
+          const allChosen = updatedParts && updatedParts.every(p => 
+            p.team && p.team.some(poke => poke.item !== undefined && poke.item !== null)
+          );
+          
+          if (allChosen) {
+            const { error: draftErr } = await supabase
+              .from('draft_state')
+              .update({
+                current_round: 8,
+                current_options: [],
+                picks_history: currentHistory,
+                updated_at: new Date().toISOString()
+              })
+              .eq('room_id', roomId);
+              
+            if (draftErr) throw draftErr;
+            await createBracketAndTransitionRoom();
+          } else {
+            const { error: draftErr } = await supabase
+              .from('draft_state')
+              .update({
+                picks_history: currentHistory,
+                updated_at: new Date().toISOString()
+              })
+              .eq('room_id', roomId);
+              
+            if (draftErr) throw draftErr;
+          }
+        } catch (err) {
+          console.error('Erro no lote de itens do bot:', err);
+        } finally {
+          botItemsLoopInProgress = false;
         }
       })();
       return;
@@ -1458,23 +1550,6 @@ async function executeBotTurn(botParticipant) {
   try {
     const isItemRound = draftState.current_round === 7;
     if (isItemRound) {
-      let pool = draftState.current_options || [];
-      if (pool.length === 0) pool = itemsData;
-      const item = pool[Math.floor(Math.random() * pool.length)];
-
-      const botTeam = botParticipant.team || [];
-      let bestPokeIdx = 0;
-      let highestBst = -1;
-
-      botTeam.forEach((poke, idx) => {
-        const bst = Object.values(poke.stats).reduce((a, b) => a + b, 0);
-        if (bst > highestBst) {
-          highestBst = bst;
-          bestPokeIdx = idx;
-        }
-      });
-
-      await selectItemForPokemon(item, bestPokeIdx, botParticipant);
       botTurnInProgress = false;
       return;
     }
@@ -1517,7 +1592,13 @@ async function executeBotTurn(botParticipant) {
     }
 
     // Escolhe Pokémon
-    const picked = botChoosePokemon(options, { pokemon: botParticipant.team || [] });
+    const isCreditsEnabled = room?.settings?.credits === true;
+    let botRemainingCredits = null;
+    if (isCreditsEnabled) {
+      const spent = (botParticipant.team || []).reduce((sum, p) => sum + getPokemonCost(p), 0);
+      botRemainingCredits = 15 - spent;
+    }
+    const picked = botChoosePokemon(options, { pokemon: botParticipant.team || [] }, botRemainingCredits);
     if (!picked) {
       // Fallback se nada estiver disponível
       const any = pokemonData.find(p => getAvailablePool().includes(p.id));
@@ -1566,6 +1647,7 @@ function cleanup() {
   lastProcessedBotSlot = null;
   lastProcessedBotRound = null;
   lastProcessedBotPhase = null;
+  botItemsLoopInProgress = false;
 }
 
 export function destroy() {

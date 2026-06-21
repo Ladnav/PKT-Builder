@@ -894,6 +894,17 @@ function renderScreen() {
                 </label>
               </div>
 
+              <div class="setting-toggle-row">
+                <div class="setting-toggle-info">
+                  <span class="setting-toggle-title">🪙 Limite de Créditos</span>
+                  <span class="setting-toggle-desc">Define um orçamento de 15 créditos para montar a equipe, limitando o uso excessivo de lendários.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settings-credits">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
               <button class="hs-btn-create" id="btn-confirm-create" style="margin-top: 1rem; padding: 1rem; font-size: 1.1rem;">
                 Criar Sala
               </button>
@@ -937,8 +948,27 @@ function renderParticles() {
       height: ${32 + Math.random() * 32}px;
       opacity: ${0.08 + Math.random() * 0.12};
       position: absolute;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
     `;
+
+    el.addEventListener('click', () => {
+      const masterVol = parseFloat(localStorage.getItem('masterVolume') ?? '0.5');
+      const audio = new Audio(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/cries/${pokeId}.ogg`);
+      audio.volume = masterVol;
+      audio.play().catch(e => console.log("Erro ao tocar cry:", e));
+
+      el.animate([
+        { transform: 'scale(1) rotate(0deg)' },
+        { transform: 'scale(1.4) rotate(-15deg)', offset: 0.3 },
+        { transform: 'scale(1.4) rotate(15deg)', offset: 0.6 },
+        { transform: 'scale(1) rotate(0deg)' }
+      ], {
+        duration: 500,
+        easing: 'ease-in-out'
+      });
+    });
+
     containerParticles.appendChild(el);
   }
 }
@@ -1157,8 +1187,9 @@ async function handleCreateRoom() {
   const synergy = container.querySelector('#settings-synergy')?.checked ?? false;
   const items = container.querySelector('#settings-items')?.checked ?? false;
   const blind = container.querySelector('#settings-blind')?.checked ?? false;
+  const credits = container.querySelector('#settings-credits')?.checked ?? false;
 
-  const roomSettings = { size: maxPlayers, turnTimer, shinies, weather, synergy, items, blind };
+  const roomSettings = { size: maxPlayers, turnTimer, shinies, weather, synergy, items, blind, credits };
 
   const settingsModal = container.querySelector('#settings-modal');
   if (settingsModal) settingsModal.style.display = 'none';
