@@ -3,6 +3,7 @@ import { playSFX } from '../../lib/sounds.js';
 
 let container = null;
 let interval = null;
+let closeCallback = null;
 
 export function renderBattleModalLoading(match) {
   closeBattleModal();
@@ -75,10 +76,11 @@ export function renderBattleModalError(match) {
   container.querySelector('#btn-close-battle').addEventListener('click', closeBattleModal);
 }
 
-export function renderBattleModal(match) {
+export function renderBattleModal(match, onClose = null) {
   if (!match || !match.log) return;
   
   closeBattleModal();
+  closeCallback = onClose;
 
   container = document.createElement('div');
   container.id = 'battle-modal';
@@ -364,5 +366,10 @@ export function closeBattleModal() {
   if (container) {
     container.remove();
     container = null;
+  }
+  if (closeCallback) {
+    const cb = closeCallback;
+    closeCallback = null;
+    cb();
   }
 }

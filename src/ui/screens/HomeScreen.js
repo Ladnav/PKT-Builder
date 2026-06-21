@@ -657,6 +657,14 @@ function renderScreen() {
 
 
           <section>
+            <p class="hs-section-label">Modo Campanha Offline</p>
+            <div style="margin-bottom: 1.5rem;">
+              <button class="hs-btn-create" id="btn-campaign" style="width: 100%; min-height: 50px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #34d399; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); cursor: pointer;">
+                <span class="hs-btn-create-icon">🗺️</span>
+                Jornada de Kanto (Offline)
+              </button>
+            </div>
+
             <p class="hs-section-label">Entrar na Batalha</p>
 
             ${errorMsg ? `
@@ -979,6 +987,14 @@ function attachEvents() {
   if (btnMute && !btnMute.hasAttribute('data-audio-attached')) {
     btnMute.setAttribute('data-audio-attached', 'true');
     attachMuteToggleListener('btn-mute');
+  }
+
+  const btnCampaign = container.querySelector('#btn-campaign');
+  if (btnCampaign) {
+    btnCampaign.addEventListener('click', () => {
+      playSFX('click');
+      navigate('campaign');
+    });
   }
 
   container.querySelectorAll('.mode-card').forEach(card => {

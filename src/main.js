@@ -6,6 +6,7 @@ import * as HomeScreen     from './ui/screens/HomeScreen.js';
 import * as LobbyScreen    from './ui/screens/LobbyScreen.js';
 import * as DraftScreen    from './ui/screens/DraftScreen.js';
 import * as BracketScreen  from './ui/screens/BracketScreen.js';
+import * as CampaignScreen from './ui/screens/CampaignScreen.js';
 import { supabase }        from './lib/supabase.js';
 import { initSounds }      from './lib/sounds.js';
 
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   registerScreen('lobby',   LobbyScreen);
   registerScreen('draft',   DraftScreen);
   registerScreen('bracket', BracketScreen);
+  registerScreen('campaign', CampaignScreen);
 
   // Monitora alterações no estado de login
   supabase.auth.onAuthStateChange((event, session) => {
