@@ -3575,6 +3575,7 @@ input:checked + .toggle-slider:before {
   display: flex;
   flex-direction: column;
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+  padding-bottom: 1rem;
 }
 
 .campaign-map-title {
@@ -3586,19 +3587,37 @@ input:checked + .toggle-slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 0.5rem;
 }
 
 .campaign-map-canvas {
-  flex: 1;
   position: relative;
   background-color: #111827;
   background-image: url('../assets/kanto_map.png');
-  background-size: cover;
+  background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  min-height: 520px;
-  border-radius: 0 0 16px 16px;
-  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.85);
+  width: 100%;
+  max-width: 639px;
+  aspect-ratio: 639 / 600;
+  margin: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 900px) {
+  .campaign-layout {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow-y: auto !important;
+  }
+  .campaign-map-canvas {
+    max-width: 100% !important;
+  }
+  .campaign-side-panel {
+    width: 100% !important;
+  }
 }
 
 .campaign-map-canvas::before {
