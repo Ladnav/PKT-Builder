@@ -3728,6 +3728,42 @@ input:checked + .toggle-slider:before {
   opacity: 1;
 }
 
+.map-node.locked-node {
+  filter: grayscale(1) opacity(0.2) brightness(0.5);
+  pointer-events: none;
+}
+
+.map-node-selection-ring {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border: 3.5px solid var(--gold);
+  border-radius: 50%;
+  animation: mapPulse 1.8s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 100;
+}
+
+@keyframes mapPulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.5;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+    box-shadow: 0 0 0 12px rgba(245, 158, 11, 0);
+  }
+  100% {
+    transform: scale(0.85);
+    opacity: 0.5;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
 .campaign-side-panel {
   width: 360px;
   display: flex;
@@ -3825,6 +3861,21 @@ input:checked + .toggle-slider:before {
 
 .campaign-stage-item.locked {
   opacity: 0.4;
+}
+
+.campaign-stage-item.unlocked-stage {
+  cursor: pointer;
+}
+
+.campaign-stage-item.unlocked-stage:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.campaign-stage-item.selected-stage {
+  border-color: var(--gold) !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
 }
 
 .stage-badge {

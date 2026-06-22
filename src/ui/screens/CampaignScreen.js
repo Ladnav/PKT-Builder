@@ -123,6 +123,27 @@ const CITIES_CONFIG = {
       ]}
     ]
   },
+  lavender: {
+    name: "Vila de Lavender",
+    leader: "Fantasma de Marowak",
+    type: "ghost",
+    badge: null,
+    badgeName: "Prece de Lavender",
+    badgeIcon: "👻",
+    badgeColor: "#8b5cf6",
+    x: 85.0, y: 45.3,
+    stages: [
+      { name: "Exorcista Patricia", type: "NPC", team: [{ id: 94 }, { id: 80 }, { id: 197 }, { id: 76 }, { id: 94 }, { id: 80 }] },
+      { name: "Fantasma de Marowak", type: "Leader", team: [
+        { id: 94, item: 'spell-tag' },
+        { id: 197, item: 'leftovers' },
+        { id: 229, item: 'life-orb' },
+        { id: 76, item: 'rocky-helmet' },
+        { id: 94, item: 'choice-specs', isShiny: true },
+        { id: 143, item: 'sitrus-berry' }
+      ]}
+    ]
+  },
   celadon: {
     name: "Cidade de Celadon",
     leader: "Erika",
@@ -200,7 +221,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Vulcão",
     badgeIcon: "🔥",
     badgeColor: "#ef4444",
-    x: 24.7, y: 69.3,
+    x: 32.4, y: 83.5,
     stages: [
       { name: "Treinador Burt", type: "NPC", team: [{ id: 38 }, { id: 136 }, { id: 59 }, { id: 6 }, { id: 126 }, { id: 157 }] },
       { name: "Treinador Cole", type: "NPC", team: [{ id: 126 }, { id: 157 }, { id: 229 }, { id: 59 }, { id: 257 }, { id: 392 }] },
@@ -292,7 +313,7 @@ const CITIES_CONFIG = {
   }
 };
 
-const CITY_ORDER = ['pallet', 'viridian_visit', 'pewter', 'cerulean', 'vermilion', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'viridian', 'elite4'];
+const CITY_ORDER = ['pallet', 'viridian_visit', 'pewter', 'cerulean', 'vermilion', 'lavender', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'viridian', 'elite4'];
 
 const CITY_SHOPS = {
   viridian_visit: [
@@ -314,6 +335,11 @@ const CITY_SHOPS = {
     { id: 25, name: 'pikachu', cost: 50, isShiny: false, displayName: 'Pikachu' },
     { id: 82, name: 'magneton', cost: 150, isShiny: false, displayName: 'Magneton' },
     { id: 135, name: 'jolteon', cost: 1000, isShiny: true, displayName: 'Jolteon ⭐' }
+  ],
+  lavender: [
+    { id: 94, name: 'gengar', cost: 50, isShiny: false, displayName: 'Gengar' },
+    { id: 197, name: 'umbreon', cost: 150, isShiny: false, displayName: 'Umbreon' },
+    { id: 229, name: 'houndoom', cost: 1000, isShiny: true, displayName: 'Houndoom ⭐' }
   ],
   celadon: [
     { id: 154, name: 'meganium', cost: 50, isShiny: false, displayName: 'Meganium' },
@@ -347,6 +373,7 @@ const LEADER_AVATARS = {
   "Misty": "https://play.pokemonshowdown.com/sprites/trainers/misty.png",
   "Lt. Surge": "https://play.pokemonshowdown.com/sprites/trainers/lt_surge.png",
   "Lt.Surge": "https://play.pokemonshowdown.com/sprites/trainers/lt_surge.png",
+  "Fantasma de Marowak": "https://play.pokemonshowdown.com/sprites/trainers/medium.png",
   "Erika": "https://play.pokemonshowdown.com/sprites/trainers/erika.png",
   "Koga": "https://play.pokemonshowdown.com/sprites/trainers/koga.png",
   "Sabrina": "https://play.pokemonshowdown.com/sprites/trainers/sabrina.png",
@@ -386,13 +413,14 @@ let currentUserId = null;
 let profile = null;
 let gold = 100;
 let progress = {
-  currentCity: 'pewter',
+  currentCity: 'pallet',
   currentStage: 0, // 0-2 NPCs, 3 Gym Leader, 4 Completed
   completedCities: [],
   eliteFourIndex: 0 // 0-4 (Lorelei, Bruno, Agatha, Lance, Cynthia)
 };
 let ownedBadges = new Set();
-let selectedCityId = 'pewter';
+let selectedCityId = 'pallet';
+let selectedStageIdx = 0;
 let activeModal = null; // 'shop' | 'prematch' | null
 let selectedMode = 'album'; // 'album' | 'draft'
 let selectedRoster = []; // Coleção personal selection
@@ -443,6 +471,25 @@ export async function render(cont) {
     if (savedProgress) {
       try {
         progress = JSON.parse(savedProgress);
+        if (!progress.completedCities) {
+          progress.completedCities = [];
+        }
+        
+        // Auto-correct progression if currentCity got softlocked or set to a future city by default
+        let expectedCurrentCity = 'pallet';
+        for (const city of CITY_ORDER) {
+          if (!progress.completedCities.includes(city)) {
+            expectedCurrentCity = city;
+            break;
+          }
+        }
+        const currentIdx = CITY_ORDER.indexOf(progress.currentCity);
+        const expectedIdx = CITY_ORDER.indexOf(expectedCurrentCity);
+        if (currentIdx !== -1 && expectedIdx !== -1 && currentIdx > expectedIdx) {
+          progress.currentCity = expectedCurrentCity;
+          progress.currentStage = 0;
+          localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
+        }
       } catch (_) {}
     } else {
       progress = {
@@ -456,6 +503,13 @@ export async function render(cont) {
 
     // Set selected city to the current campaign city by default
     selectedCityId = progress.currentCity;
+    if (selectedCityId === 'elite4') {
+      selectedStageIdx = Math.min(progress.eliteFourIndex, 4);
+    } else if (progress.currentCity === selectedCityId) {
+      selectedStageIdx = Math.min(progress.currentStage, CITIES_CONFIG[selectedCityId].stages.length - 1);
+    } else {
+      selectedStageIdx = CITIES_CONFIG[selectedCityId].stages.length - 1;
+    }
 
     // Load badges from Supabase
     const { data: dbBadges, error: badgeErr } = await supabase
@@ -528,14 +582,42 @@ function isCityUnlocked(cityId) {
   if (cityId === 'pallet') return true;
   const idx = CITY_ORDER.indexOf(cityId);
   if (idx === -1) return false;
+  
+  const currentIdx = CITY_ORDER.indexOf(progress.currentCity);
+  if (currentIdx !== -1 && idx <= currentIdx) {
+    return true;
+  }
+  
   const prevCityId = CITY_ORDER[idx - 1];
   return progress.completedCities.includes(prevCityId);
+}
+
+function isStageUnlocked(cityId, stageIdx) {
+  if (!isCityUnlocked(cityId)) return false;
+  if (cityId === 'elite4') {
+    if (progress.eliteFourIndex >= 5) return true; // League completed, all are replayable
+    return stageIdx <= progress.eliteFourIndex;
+  }
+  
+  const cityIdx = CITY_ORDER.indexOf(cityId);
+  const currentCityIdx = CITY_ORDER.indexOf(progress.currentCity);
+  
+  if (progress.completedCities.includes(cityId) || (cityIdx !== -1 && currentCityIdx !== -1 && cityIdx < currentCityIdx)) {
+    return true; // City completed or in the past, all are replayable
+  }
+  
+  if (progress.currentCity === cityId) {
+    return stageIdx <= progress.currentStage;
+  }
+  return false;
 }
 
 function renderMapNodeHtml(cityId, label, emoji) {
   const config = CITIES_CONFIG[cityId];
   const status = getNodeStatusClass(cityId);
   const type = config.type;
+  const isSelected = (cityId === selectedCityId);
+  const isLocked = (status === 'locked');
   
   // Resolve color
   let typeColor = '#7c3aed';
@@ -558,8 +640,12 @@ function renderMapNodeHtml(cityId, label, emoji) {
     inlineStyle = `background: ${typeColor}; border-color: rgba(255, 255, 255, 0.25); color: #fff;`;
   }
 
+  const lockedClass = isLocked ? 'locked-node' : '';
+  const selectionHtml = isSelected ? `<div class="map-node-selection-ring"></div>` : '';
+
   return `
-    <div class="map-node ${status}" style="left: ${config.x}%; top: ${config.y}%;" data-city="${cityId}">
+    <div class="map-node ${status} ${lockedClass}" style="left: ${config.x}%; top: ${config.y}%;" data-city="${cityId}">
+      ${selectionHtml}
       <div class="map-node-inner" style="${inlineStyle}">
         ${emoji}
       </div>
@@ -586,14 +672,7 @@ function renderScreen() {
   const isCurrent = progress.currentCity === selectedCityId;
   const unlocked = isCityUnlocked(selectedCityId);
 
-  let activeStageIdx = 0;
-  if (selectedCityId === 'elite4') {
-    activeStageIdx = progress.eliteFourIndex;
-  } else if (isCurrent) {
-    activeStageIdx = progress.currentStage;
-  } else {
-    activeStageIdx = activeCity.stages.length - 1; // Replay del Leader
-  }
+  const activeStageIdx = selectedStageIdx;
 
   // Draw background roadmap SVG connections
   let svgPaths = '';
@@ -602,18 +681,41 @@ function renderScreen() {
     const c2 = CITIES_CONFIG[c2Id];
     const c1Unlocked = isCityUnlocked(c1Id);
     const c2Unlocked = isCityUnlocked(c2Id);
-    const color = (c1Unlocked && c2Unlocked) ? '#fbbf24' : '#374151';
-    const filter = (c1Unlocked && c2Unlocked) ? 'filter="drop-shadow(0 0 4px #fbbf24)"' : '';
-    return `<line x1="${c1.x}%" y1="${c1.y}%" x2="${c2.x}%" y2="${c2.y}%" class="campaign-svg-line" stroke="${color}" stroke-width="2.5" ${filter} />`;
+    
+    // Path segment is traversed if c1 is in completedCities or in the past
+    const c1Idx = CITY_ORDER.indexOf(c1Id);
+    const currentIdx = CITY_ORDER.indexOf(progress.currentCity);
+    const c1Completed = progress.completedCities.includes(c1Id) || (c1Idx !== -1 && currentIdx !== -1 && c1Idx < currentIdx);
+    const isTraversed = c1Completed && c2Unlocked;
+    
+    let color = '#1f2937'; // very dark slate
+    let width = '2';
+    let opacity = '0.35';
+    let filter = '';
+    
+    if (isTraversed) {
+      color = '#fbbf24'; // bright gold
+      width = '3.5';
+      opacity = '0.95';
+      filter = 'filter="drop-shadow(0 0 6px #fbbf24)"';
+    } else if (c1Unlocked && c2Unlocked) {
+      // Unlocked but not traversed yet (next path)
+      color = '#c084fc'; // purple/violet
+      width = '2.5';
+      opacity = '0.75';
+      filter = 'filter="drop-shadow(0 0 4px #c084fc)"';
+    }
+    
+    return `<line x1="${c1.x}%" y1="${c1.y}%" x2="${c2.x}%" y2="${c2.y}%" class="campaign-svg-line" stroke="${color}" stroke-width="${width}" opacity="${opacity}" ${filter} />`;
   };
-
 
   svgPaths += drawSvgLine('pallet', 'viridian_visit');
   svgPaths += drawSvgLine('viridian_visit', 'pewter');
   svgPaths += drawSvgLine('pewter', 'cerulean');
-  svgPaths += drawSvgLine('cerulean', 'saffron');
+  svgPaths += drawSvgLine('cerulean', 'lavender');
+  svgPaths += drawSvgLine('lavender', 'saffron');
+  svgPaths += drawSvgLine('lavender', 'vermilion');
   svgPaths += drawSvgLine('saffron', 'celadon');
-  svgPaths += drawSvgLine('saffron', 'vermilion');
   svgPaths += drawSvgLine('celadon', 'fuchsia');
   svgPaths += drawSvgLine('fuchsia', 'cinnabar');
   svgPaths += drawSvgLine('cinnabar', 'pallet');
@@ -639,16 +741,29 @@ function renderScreen() {
     stagesHtml = activeCity.stages.map((stg, i) => {
       let statusClass = 'locked';
       let statusText = 'Trancado';
-      if (i < progress.eliteFourIndex) {
-        statusClass = 'completed';
-        statusText = 'Derrotado';
-      } else if (i === progress.eliteFourIndex) {
+      
+      const stageUnlocked = isStageUnlocked(selectedCityId, i);
+      const isProgressionActive = (i === progress.eliteFourIndex);
+      const isReplay = stageUnlocked && !isProgressionActive;
+
+      if (isProgressionActive) {
         statusClass = 'active';
         statusText = 'Desafiar';
+      } else if (isReplay) {
+        statusClass = 'completed';
+        statusText = 'Replay';
+      } else if (stageUnlocked) {
+        statusClass = 'completed';
+        statusText = 'Derrotado';
       }
+
+      const isSelected = (i === selectedStageIdx);
+      const activeClass = isSelected ? 'selected-stage' : '';
+      const clickableClass = stageUnlocked ? 'unlocked-stage' : '';
       const avatarUrl = getTrainerAvatar(stg.name);
+
       return `
-        <div class="campaign-stage-item ${statusClass}">
+        <div class="campaign-stage-item ${statusClass} ${clickableClass} ${activeClass}" data-idx="${i}">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
               <img src="${avatarUrl}" style="height: 100%; width: 100%; object-fit: contain; image-rendering: pixelated;" />
@@ -666,19 +781,29 @@ function renderScreen() {
     stagesHtml = activeCity.stages.map((stg, i) => {
       let statusClass = 'locked';
       let statusText = 'Trancado';
-      if (isCompleted || (isCurrent && progress.currentStage > i)) {
-        statusClass = 'completed';
-        statusText = 'Vencido';
-      } else if (isCurrent && progress.currentStage === i) {
+      
+      const stageUnlocked = isStageUnlocked(selectedCityId, i);
+      const isProgressionActive = (progress.currentCity === selectedCityId && progress.currentStage === i);
+      const isReplay = stageUnlocked && !isProgressionActive;
+
+      if (isProgressionActive) {
         statusClass = 'active';
         statusText = 'Batalhar';
-      } else if (!isCurrent && i === activeCity.stages.length - 1) {
-        statusClass = 'active'; // Replay Leader
+      } else if (isReplay) {
+        statusClass = 'completed';
         statusText = 'Replay';
+      } else if (stageUnlocked) {
+        statusClass = 'completed';
+        statusText = 'Vencido';
       }
+
+      const isSelected = (i === selectedStageIdx);
+      const activeClass = isSelected ? 'selected-stage' : '';
+      const clickableClass = stageUnlocked ? 'unlocked-stage' : '';
       const avatarUrl = getTrainerAvatar(stg.name);
+
       return `
-        <div class="campaign-stage-item ${statusClass}">
+        <div class="campaign-stage-item ${statusClass} ${clickableClass} ${activeClass}" data-idx="${i}">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
               <img src="${avatarUrl}" style="height: 100%; width: 100%; object-fit: contain; image-rendering: pixelated;" />
@@ -696,17 +821,14 @@ function renderScreen() {
 
   // Active stage preview
   const currentStageObj = activeCity.stages[activeStageIdx] || activeCity.stages[activeCity.stages.length - 1];
-  const isChampionDefeated = selectedCityId === 'elite4' && progress.eliteFourIndex >= 5;
+  const isSelectedStageReplay = (selectedCityId === 'elite4')
+    ? (selectedStageIdx < progress.eliteFourIndex)
+    : (progress.completedCities.includes(selectedCityId) || (progress.currentCity === selectedCityId && progress.currentStage > selectedStageIdx));
+
   const hasEnoughCards = ownedCards.length >= 6;
 
   let btnBattleHtml = '';
-  if (isChampionDefeated) {
-    btnBattleHtml = `
-      <div style="text-align: center; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; color: #34d399; font-weight: bold; margin-bottom: 0.5rem;">
-        🏆 Liga Pokémon Concluída! Você é o Campeão de Kanto!
-      </div>
-    `;
-  } else if (!unlocked) {
+  if (!unlocked) {
     btnBattleHtml = `
       <button class="campaign-btn-primary" disabled style="width: 100%; margin-bottom: 0.5rem;">
         🔒 Desafio Trancado
@@ -721,10 +843,19 @@ function renderScreen() {
         ⚔️ Desafiar ${currentStageObj.name}
       </button>
     `;
-  } else if (selectedCityId === 'elite4' || isCurrent || activeStageIdx === activeCity.stages.length - 1) {
+  } else {
+    let completedBannerHtml = '';
+    if (selectedCityId === 'elite4' && progress.eliteFourIndex >= 5 && selectedStageIdx === 4) {
+      completedBannerHtml = `
+        <div style="text-align: center; padding: 0.8rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; color: #34d399; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.85rem;">
+          🏆 Liga Pokémon Concluída! Você é o Campeão de Kanto!
+        </div>
+      `;
+    }
     btnBattleHtml = `
+      ${completedBannerHtml}
       <button class="campaign-btn-primary" id="btn-challenge-stage" style="width: 100%; margin-bottom: 0.5rem;">
-        ⚔️ Desafiar ${currentStageObj.name}
+        ${isSelectedStageReplay ? '🔄 Rebatatalhar' : '⚔️ Desafiar'} ${currentStageObj.name}
       </button>
     `;
   }
@@ -776,6 +907,7 @@ function renderScreen() {
             ${renderMapNodeHtml('pewter', 'Pewter (Brock)', '🪨')}
             ${renderMapNodeHtml('cerulean', 'Cerulean (Misty)', '💧')}
             ${renderMapNodeHtml('vermilion', 'Vermilion (Lt. Surge)', '⚡')}
+            ${renderMapNodeHtml('lavender', 'Vila de Lavender', '👻')}
             ${renderMapNodeHtml('celadon', 'Celadon (Erika)', '🌿')}
             ${renderMapNodeHtml('fuchsia', 'Fuchsia (Koga)', '☠️')}
             ${renderMapNodeHtml('saffron', 'Saffron (Sabrina)', '🔮')}
@@ -874,7 +1006,29 @@ function attachEvents() {
       }
       playSFX('click');
       selectedCityId = cityId;
+
+      // Auto-set selectedStageIdx to the active progression stage for this city
+      if (selectedCityId === 'elite4') {
+        selectedStageIdx = Math.min(progress.eliteFourIndex, 4);
+      } else if (progress.currentCity === selectedCityId) {
+        selectedStageIdx = Math.min(progress.currentStage, CITIES_CONFIG[selectedCityId].stages.length - 1);
+      } else {
+        selectedStageIdx = CITIES_CONFIG[selectedCityId].stages.length - 1;
+      }
+
       renderScreen();
+      attachEvents();
+    });
+  });
+
+  // Stage click listeners
+  container.querySelectorAll('.campaign-stage-item.unlocked-stage').forEach(item => {
+    item.addEventListener('click', () => {
+      const idx = parseInt(item.getAttribute('data-idx'), 10);
+      playSFX('click');
+      selectedStageIdx = idx;
+      renderScreen();
+      attachEvents();
     });
   });
 
@@ -1497,6 +1651,9 @@ function startBattle(playerTeam) {
   renderBattleModal(match, async () => {
     // ON CLOSE CALLBACK
     const playerWon = state.winner === 1;
+    const isReplay = (cityId === 'elite4')
+      ? (activeStageIdx < progress.eliteFourIndex)
+      : (progress.completedCities.includes(cityId) || (progress.currentCity === cityId && activeStageIdx < progress.currentStage));
     const rewards = {
       gold: 0,
       badge: null,
@@ -1540,109 +1697,134 @@ function startBattle(playerTeam) {
 
     if (playerWon) {
       playBGM('victory');
-      if (cityId === 'elite4') {
-        const isCynthia = (progress.eliteFourIndex === 4);
-        if (isCynthia) {
-          // Beat Cynthia!
-          gold += 150;
-          localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
-
-          progress.completedCities.push('elite4');
-          progress.eliteFourIndex = 5;
-          localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
-
-          // Save championship to profiles (increment ELO / Championships)
-          try {
-            const nextChamps = (profile?.championships || 0) + 1;
-            const nextElo = (profile?.elo_points || 0) + 50;
-            await supabase
-              .from('profiles')
-              .update({ championships: nextChamps, elo_points: nextElo })
-              .eq('id', currentUserId);
-          } catch (e) {
-            console.error('Erro ao atualizar conquistas da liga no Supabase:', e);
+      if (isReplay) {
+        let reducedGold = 5;
+        const isLeader = (cityId !== 'elite4' && activeStageIdx === cityConfig.stages.length - 1);
+        
+        if (cityId === 'elite4') {
+          if (activeStageIdx === 4) {
+            reducedGold = 30; // Cynthia replay
+          } else {
+            reducedGold = 10; // Elite 4 member replay
           }
-
-          rewards.gold = 150;
-          rewards.message = "Você derrotou a Campeã Cynthia e se tornou o novo Campeão da Liga Pokémon! Parabéns!";
+        } else if (isLeader) {
+          reducedGold = 15; // Gym Leader replay
         } else {
-          // Beat Elite 4 member
-          gold += 30;
-          localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
-
-          progress.eliteFourIndex++;
-          localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
-
-          rewards.gold = 30;
-          rewards.message = `Você derrotou ${stage.name}! Preparando para o próximo desafio da Elite dos Quatro.`;
+          reducedGold = 5; // NPC replay
         }
-
+        
+        gold += reducedGold;
+        localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
+        
+        rewards.gold = reducedGold;
+        rewards.booster = false;
+        rewards.badge = null;
+        rewards.message = `Treino concluído! Você derrotou ${stage.name} novamente e ganhou uma recompensa reduzida (+${reducedGold} Gold).`;
       } else {
-        const isLeader = (activeStageIdx === cityConfig.stages.length - 1);
-        if (isLeader) {
-          // Beat Gym Leader
-          gold += 50;
-          localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
+        if (cityId === 'elite4') {
+          const isCynthia = (progress.eliteFourIndex === 4);
+          if (isCynthia) {
+            // Beat Cynthia!
+            gold += 150;
+            localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
 
-          // Save badge in Supabase
-          try {
-            if (cityConfig.badge && !ownedBadges.has(cityConfig.badge)) {
-              await supabase
-                .from('user_badges')
-                .insert({ user_id: currentUserId, badge_id: cityConfig.badge });
-              ownedBadges.add(cityConfig.badge);
-            }
-
-            // Award 1 booster
-            const { data: prof } = await supabase
-              .from('profiles')
-              .select('boosters_count')
-              .eq('id', currentUserId)
-              .single();
-
-            const nextCount = (prof?.boosters_count || 0) + 1;
-            await supabase
-              .from('profiles')
-              .update({ boosters_count: nextCount })
-              .eq('id', currentUserId);
-
-          } catch (e) {
-            console.error('Erro ao salvar insígnia / booster no Supabase:', e);
-          }
-
-          // Advance city
-          if (progress.currentCity === cityId) {
-            progress.completedCities.push(cityId);
-            progress.currentStage = 4; // Completed
-
-            // Unlock next city
-            const nextIdx = CITY_ORDER.indexOf(cityId) + 1;
-            if (nextIdx < CITY_ORDER.length) {
-              progress.currentCity = CITY_ORDER[nextIdx];
-              progress.currentStage = 0;
-            }
+            progress.completedCities.push('elite4');
+            progress.eliteFourIndex = 5;
             localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
-          }
 
-          rewards.gold = 50;
-          rewards.booster = true;
-          rewards.badge = cityConfig.badge;
-          rewards.badgeIcon = cityConfig.badgeIcon;
-          rewards.badgeName = cityConfig.badgeName;
-          rewards.message = `Você derrotou o Líder ${cityConfig.leader} e conquistou a ${cityConfig.badgeName}!`;
+            // Save championship to profiles (increment ELO / Championships)
+            try {
+              const nextChamps = (profile?.championships || 0) + 1;
+              const nextElo = (profile?.elo_points || 0) + 50;
+              await supabase
+                .from('profiles')
+                .update({ championships: nextChamps, elo_points: nextElo })
+                .eq('id', currentUserId);
+            } catch (e) {
+              console.error('Erro ao atualizar conquistas da liga no Supabase:', e);
+            }
+
+            rewards.gold = 150;
+            rewards.message = "Você derrotou a Campeã Cynthia e se tornou o novo Campeão da Liga Pokémon! Parabéns!";
+          } else {
+            // Beat Elite 4 member
+            gold += 30;
+            localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
+
+            progress.eliteFourIndex++;
+            localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
+
+            rewards.gold = 30;
+            rewards.message = `Você derrotou ${stage.name}! Preparando para o próximo desafio da Elite dos Quatro.`;
+          }
 
         } else {
-          // Beat NPC
-          gold += 15;
-          localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
+          const isLeader = (activeStageIdx === cityConfig.stages.length - 1);
+          if (isLeader) {
+            // Beat Gym Leader
+            gold += 50;
+            localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
 
-          if (progress.currentCity === cityId && progress.currentStage === activeStageIdx) {
-            progress.currentStage++;
-            localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
+            // Save badge in Supabase
+            try {
+              if (cityConfig.badge && !ownedBadges.has(cityConfig.badge)) {
+                await supabase
+                  .from('user_badges')
+                  .insert({ user_id: currentUserId, badge_id: cityConfig.badge });
+                ownedBadges.add(cityConfig.badge);
+              }
+
+              // Award 1 booster
+              const { data: prof } = await supabase
+                .from('profiles')
+                .select('boosters_count')
+                .eq('id', currentUserId)
+                .single();
+
+              const nextCount = (prof?.boosters_count || 0) + 1;
+              await supabase
+                .from('profiles')
+                .update({ boosters_count: nextCount })
+                .eq('id', currentUserId);
+
+            } catch (e) {
+              console.error('Erro ao salvar insígnia / booster no Supabase:', e);
+            }
+
+            // Advance city
+            if (progress.currentCity === cityId) {
+              progress.completedCities.push(cityId);
+              progress.currentStage = 4; // Completed
+
+              // Unlock next city
+              const nextIdx = CITY_ORDER.indexOf(cityId) + 1;
+              if (nextIdx < CITY_ORDER.length) {
+                progress.currentCity = CITY_ORDER[nextIdx];
+                progress.currentStage = 0;
+              }
+              localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
+            }
+
+            rewards.gold = 50;
+            rewards.booster = true;
+            rewards.badge = cityConfig.badge;
+            rewards.badgeIcon = cityConfig.badgeIcon;
+            rewards.badgeName = cityConfig.badgeName;
+            rewards.message = `Você derrotou o Líder ${cityConfig.leader} e conquistou a ${cityConfig.badgeName}!`;
+
+          } else {
+            // Beat NPC
+            gold += 15;
+            localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
+
+            if (progress.currentCity === cityId && progress.currentStage === activeStageIdx) {
+              progress.currentStage++;
+              localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
+            }
+
+            rewards.gold = 15;
+            rewards.message = `Você derrotou ${stage.name} e avançou no ginásio.`;
           }
-
-          rewards.gold = 15;
-          rewards.message = `Você derrotou ${stage.name} e avançou no ginásio.`;
         }
       }
     } else {
