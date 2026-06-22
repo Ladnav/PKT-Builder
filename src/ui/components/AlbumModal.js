@@ -858,17 +858,17 @@ function renderCardDetailModal(pokemon, collection) {
         <!-- Actions panel -->
         <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.6rem; box-sizing: border-box; width: 100%;">
           
-          <!-- Reciclar Normal duplicate -->
-          ${normalQty > 1 ? `
+          <!-- Reciclar Normal card -->
+          ${normalQty > 0 ? `
             <button class="btn-primary" id="btn-recycle-normal" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 0.55rem; font-size: 0.8rem; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border-radius: 8px;">
-              ♻️ Reciclar Duplicada Comum (+15 Gold)
+              ♻️ ${normalQty > 1 ? 'Reciclar Duplicada Comum (+15 Gold)' : 'Desencantar Última Comum (+15 Gold)'}
             </button>
           ` : ''}
           
-          <!-- Reciclar Shiny duplicate -->
-          ${shinyQty > 1 ? `
+          <!-- Reciclar Shiny card -->
+          ${shinyQty > 0 ? `
             <button class="btn-primary" id="btn-recycle-shiny" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 0.55rem; font-size: 0.8rem; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border-radius: 8px;">
-              ♻️ Reciclar Duplicada Shiny (+75 Gold)
+              ♻️ ${shinyQty > 1 ? 'Reciclar Duplicada Shiny (+75 Gold)' : 'Desencantar Última Shiny (+75 Gold)'}
             </button>
           ` : ''}
           
@@ -956,15 +956,28 @@ async function handleRecycleCard(pokemon, isShiny) {
       .single();
       
     if (fetchErr) throw fetchErr;
-    if (!card || card.quantity <= 1) return; // Segurança
+    if (!card || card.quantity <= 0) return; // Segurança
 
-    // 2. Decrementa quantidade
-    const { error: updateErr } = await supabase
-      .from('user_cards')
-      .update({ quantity: card.quantity - 1 })
-      .eq('id', card.id);
-      
-    if (updateErr) throw updateErr;
+    const isLastCopy = (card.quantity <= 1);
+    if (isLastCopy) {
+      const confirmDelete = confirm(`⚠️ Você está prestes a desencantar sua ÚLTIMA cópia de ${pokemon.displayName} (${isShiny ? 'Shiny' : 'Comum'}). Se fizer isso, perderá a carta e ela sumirá do seu álbum! Deseja continuar?`);
+      if (!confirmDelete) return;
+    }
+
+    // 2. Decrementa quantidade ou deleta se for a última
+    if (!isLastCopy) {
+      const { error: updateErr } = await supabase
+        .from('user_cards')
+        .update({ quantity: card.quantity - 1 })
+        .eq('id', card.id);
+      if (updateErr) throw updateErr;
+    } else {
+      const { error: deleteErr } = await supabase
+        .from('user_cards')
+        .delete()
+        .eq('id', card.id);
+      if (deleteErr) throw deleteErr;
+    }
 
     // 3. Atualiza Gold no localStorage
     const savedGoldStr = localStorage.getItem(`pkt_campaign_gold_${currentUserId}`);
@@ -984,7 +997,12 @@ async function handleRecycleCard(pokemon, isShiny) {
         else col.normal += c.quantity;
       }
     });
-    renderCardDetailModal(pokemon, col);
+
+    if (col.normal === 0 && col.shiny === 0) {
+      closeCardDetailModal();
+    } else {
+      renderCardDetailModal(pokemon, col);
+    }
     
     // Atualiza grid do álbum de fundo
     renderAlbumContent();

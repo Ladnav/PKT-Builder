@@ -33,27 +33,6 @@ const CITIES_CONFIG = {
       ]}
     ]
   },
-  viridian_visit: {
-    name: "Cidade de Viridian (Visita)",
-    leader: "Rival Azul",
-    type: "normal",
-    badge: null,
-    badgeName: "Visita a Viridian",
-    badgeIcon: "🟢",
-    badgeColor: "#22c55e",
-    x: 29.5, y: 57.5,
-    stages: [
-      { name: "Treinador da Rota 22", type: "NPC", team: [{ id: 25 }, { id: 143 }, { id: 59 }, { id: 25 }, { id: 143 }, { id: 59 }] },
-      { name: "Rival Azul (Rota 22)", type: "Leader", team: [
-        { id: 25, item: 'light-ball' },
-        { id: 143, item: 'leftovers' },
-        { id: 59, item: 'choice-band' },
-        { id: 3, item: 'leftovers' },
-        { id: 6, item: 'life-orb' },
-        { id: 9, item: 'assault-vest' }
-      ]}
-    ]
-  },
   pewter: {
     name: "Cidade de Pewter",
     leader: "Brock",
@@ -250,12 +229,12 @@ const CITIES_CONFIG = {
       { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 260 }, { id: 473 }, { id: 389 }, { id: 76 }, { id: 248 }, { id: 143 }] },
       { name: "Admin Petrel", type: "NPC", team: [{ id: 445 }, { id: 149 }, { id: 248 }, { id: 473 }, { id: 389 }, { id: 76 }] },
       { name: "Líder Giovanni", type: "Leader", team: [
-        { id: 445, item: 'life-orb' },
-        { id: 248, item: 'leftovers' },
-        { id: 260, item: 'rocky-helmet' },
-        { id: 473, item: 'choice-band' },
-        { id: 389, item: 'sitrus-berry' },
-        { id: 76, item: 'assault-vest', isShiny: true }
+        { id: 150, item: 'life-orb', isShiny: true },
+        { id: 34, item: 'choice-specs' },
+        { id: 31, item: 'leftovers' },
+        { id: 112, item: 'rocky-helmet' },
+        { id: 445, item: 'choice-band' },
+        { id: 248, item: 'assault-vest' }
       ]}
     ]
   },
@@ -313,14 +292,9 @@ const CITIES_CONFIG = {
   }
 };
 
-const CITY_ORDER = ['pallet', 'viridian_visit', 'pewter', 'cerulean', 'vermilion', 'lavender', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'viridian', 'elite4'];
+const CITY_ORDER = ['pallet', 'pewter', 'cerulean', 'vermilion', 'lavender', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'elite4', 'viridian'];
 
 const CITY_SHOPS = {
-  viridian_visit: [
-    { id: 76, name: 'golem', cost: 50, isShiny: false, displayName: 'Golem' },
-    { id: 473, name: 'mamoswine', cost: 150, isShiny: false, displayName: 'Mamoswine' },
-    { id: 445, name: 'garchomp', cost: 1000, isShiny: true, displayName: 'Garchomp ⭐' }
-  ],
   pewter: [
     { id: 76, name: 'golem', cost: 50, isShiny: false, displayName: 'Golem' },
     { id: 214, name: 'heracross', cost: 150, isShiny: false, displayName: 'Heracross' },
@@ -475,6 +449,15 @@ export async function render(cont) {
           progress.completedCities = [];
         }
         
+        // Migrate old viridian_visit order
+        if (progress.completedCities.includes('viridian_visit')) {
+          progress.completedCities = progress.completedCities.filter(c => c !== 'viridian_visit');
+        }
+        if (progress.currentCity === 'viridian_visit') {
+          progress.currentCity = 'pewter';
+          progress.currentStage = 0;
+        }
+        
         // Auto-correct progression if currentCity got softlocked or set to a future city by default
         let expectedCurrentCity = 'pallet';
         for (const city of CITY_ORDER) {
@@ -550,29 +533,7 @@ function getPokemonById(id) {
   return JSON.parse(JSON.stringify(p));
 }
 
-function getViridianActiveId() {
-  const hasCompletedVisit = progress.completedCities.includes('viridian_visit');
-  const isAtGiovanni = progress.currentCity === 'viridian' || progress.completedCities.includes('viridian');
-  if (isAtGiovanni) {
-    return 'viridian';
-  }
-  return 'viridian_visit';
-}
-
 function getNodeStatusClass(cityId) {
-  if (cityId === 'viridian') {
-    const hasCompletedGiovanni = progress.completedCities.includes('viridian');
-    const hasCompletedVisit = progress.completedCities.includes('viridian_visit');
-    const isAtGiovanni = progress.currentCity === 'viridian';
-    const isAtVisit = progress.currentCity === 'viridian_visit';
-
-    if (hasCompletedGiovanni) return 'completed';
-    if (isAtGiovanni) return 'active';
-    if (isAtVisit) return 'active';
-    if (hasCompletedVisit) return 'completed';
-    return isCityUnlocked('viridian_visit') ? '' : 'locked';
-  }
-
   if (progress.completedCities.includes(cityId)) return 'completed';
   if (progress.currentCity === cityId) return 'active';
   return isCityUnlocked(cityId) ? '' : 'locked';
@@ -643,11 +604,13 @@ function renderMapNodeHtml(cityId, label, emoji) {
   const lockedClass = isLocked ? 'locked-node' : '';
   const selectionHtml = isSelected ? `<div class="map-node-selection-ring"></div>` : '';
 
+  const displayEmoji = isLocked ? '🔒' : emoji;
+
   return `
     <div class="map-node ${status} ${lockedClass}" style="left: ${config.x}%; top: ${config.y}%;" data-city="${cityId}">
       ${selectionHtml}
       <div class="map-node-inner" style="${inlineStyle}">
-        ${emoji}
+        ${displayEmoji}
       </div>
       <div class="map-node-label">${label}</div>
     </div>
@@ -709,8 +672,7 @@ function renderScreen() {
     return `<line x1="${c1.x}%" y1="${c1.y}%" x2="${c2.x}%" y2="${c2.y}%" class="campaign-svg-line" stroke="${color}" stroke-width="${width}" opacity="${opacity}" ${filter} />`;
   };
 
-  svgPaths += drawSvgLine('pallet', 'viridian_visit');
-  svgPaths += drawSvgLine('viridian_visit', 'pewter');
+  svgPaths += drawSvgLine('pallet', 'pewter');
   svgPaths += drawSvgLine('pewter', 'cerulean');
   svgPaths += drawSvgLine('cerulean', 'lavender');
   svgPaths += drawSvgLine('lavender', 'saffron');
@@ -719,7 +681,7 @@ function renderScreen() {
   svgPaths += drawSvgLine('celadon', 'fuchsia');
   svgPaths += drawSvgLine('fuchsia', 'cinnabar');
   svgPaths += drawSvgLine('cinnabar', 'pallet');
-  svgPaths += drawSvgLine('viridian', 'elite4');
+  svgPaths += drawSvgLine('elite4', 'viridian');
 
   // Render badges list
   const BADGE_CITIES = ['pewter', 'cerulean', 'vermilion', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'viridian'];
@@ -912,7 +874,7 @@ function renderScreen() {
             ${renderMapNodeHtml('fuchsia', 'Fuchsia (Koga)', '☠️')}
             ${renderMapNodeHtml('saffron', 'Saffron (Sabrina)', '🔮')}
             ${renderMapNodeHtml('cinnabar', 'Cinnabar (Blaine)', '🔥')}
-            ${renderMapNodeHtml('viridian', progress.currentCity === 'viridian' || progress.completedCities.includes('viridian') ? 'Viridian (Giovanni)' : 'Viridian (Visita)', progress.currentCity === 'viridian' || progress.completedCities.includes('viridian') ? '🌍' : '🟢')}
+            ${renderMapNodeHtml('viridian', 'Viridian (Giovanni)', '🌍')}
             ${renderMapNodeHtml('elite4', 'Planalto Indigo', '🏆')}
           </div>
         </div>
@@ -996,9 +958,6 @@ function attachEvents() {
   container.querySelectorAll('.map-node').forEach(node => {
     node.addEventListener('click', () => {
       let cityId = node.dataset.city;
-      if (cityId === 'viridian') {
-        cityId = getViridianActiveId();
-      }
       if (!isCityUnlocked(cityId)) {
         playSFX('faint');
         showCampaignNoticeModal('Ginásio Bloqueado', 'Este ginásio está bloqueado! Derrote os líderes anteriores primeiro para liberar o acesso.', '🔒');
@@ -1354,16 +1313,8 @@ function openPreMatchModal() {
   const cityId = selectedCityId;
   const cityConfig = CITIES_CONFIG[cityId];
 
-  let activeStageIdx = 0;
-  if (selectedCityId === 'elite4') {
-    activeStageIdx = progress.eliteFourIndex;
-  } else if (progress.currentCity === selectedCityId) {
-    activeStageIdx = progress.currentStage;
-  } else {
-    activeStageIdx = 3;
-  }
-
-  const stage = cityConfig.stages[activeStageIdx] || cityConfig.stages[3];
+  const activeStageIdx = selectedStageIdx;
+  const stage = cityConfig.stages[activeStageIdx] || cityConfig.stages[cityConfig.stages.length - 1];
 
   // Resolve opponent team for display
   const opTeamPreview = stage.team.map(spec => {
@@ -1436,13 +1387,15 @@ function openPreMatchModal() {
     let levelText = "Nível 50";
     const isBoss = stage.type === 'Leader' || stage.type === 'Elite4' || stage.type === 'Champion' || stage.name.includes("Líder") || stage.name.includes("Elite") || stage.name.includes("Campeã") || stage.name.includes("Rival") || stage.name === "Fantasma de Marowak";
     if (isBoss) {
-      if (['pallet', 'viridian_visit', 'pewter', 'cerulean'].includes(cityId)) {
+      if (cityId === 'viridian' && stage.type === 'Leader') {
+        levelText = "Nível 100";
+      } else if (['pallet', 'pewter', 'cerulean'].includes(cityId)) {
         levelText = "Nível 55";
       } else if (['vermilion', 'lavender', 'celadon'].includes(cityId)) {
         levelText = "Nível 60";
       } else if (['fuchsia', 'saffron'].includes(cityId)) {
         levelText = "Nível 70";
-      } else if (['cinnabar', 'viridian', 'elite4'].includes(cityId)) {
+      } else if (['cinnabar', 'elite4', 'viridian'].includes(cityId)) {
         levelText = "Nível 80";
       }
     }
@@ -1590,16 +1543,8 @@ function startBattle(playerTeam) {
   const cityId = selectedCityId;
   const cityConfig = CITIES_CONFIG[cityId];
 
-  let activeStageIdx = 0;
-  if (cityId === 'elite4') {
-    activeStageIdx = progress.eliteFourIndex;
-  } else if (progress.currentCity === cityId) {
-    activeStageIdx = progress.currentStage;
-  } else {
-    activeStageIdx = 3;
-  }
-
-  const stage = cityConfig.stages[activeStageIdx] || cityConfig.stages[3];
+  const activeStageIdx = selectedStageIdx;
+  const stage = cityConfig.stages[activeStageIdx] || cityConfig.stages[cityConfig.stages.length - 1];
 
   // Resolve opponent team
   const opponentTeamRaw = stage.team.map(spec => {
@@ -1610,13 +1555,15 @@ function startBattle(playerTeam) {
     let lvl = 50;
     const isBoss = stage.type === 'Leader' || stage.type === 'Elite4' || stage.type === 'Champion' || stage.name.includes("Líder") || stage.name.includes("Elite") || stage.name.includes("Campeã") || stage.name.includes("Rival") || stage.name === "Fantasma de Marowak";
     if (isBoss) {
-      if (['pallet', 'viridian_visit', 'pewter', 'cerulean'].includes(cityId)) {
+      if (cityId === 'viridian' && stage.type === 'Leader') {
+        lvl = 100;
+      } else if (['pallet', 'pewter', 'cerulean'].includes(cityId)) {
         lvl = 55;
       } else if (['vermilion', 'lavender', 'celadon'].includes(cityId)) {
         lvl = 60;
       } else if (['fuchsia', 'saffron'].includes(cityId)) {
         lvl = 70;
-      } else if (['cinnabar', 'viridian', 'elite4'].includes(cityId)) {
+      } else if (['cinnabar', 'elite4', 'viridian'].includes(cityId)) {
         lvl = 80;
       } else {
         lvl = 70;
@@ -1755,6 +1702,8 @@ function startBattle(playerTeam) {
 
             progress.completedCities.push('elite4');
             progress.eliteFourIndex = 5;
+            progress.currentCity = 'viridian';
+            progress.currentStage = 0;
             localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
 
             // Save championship to profiles (increment ELO / Championships)
@@ -1835,7 +1784,14 @@ function startBattle(playerTeam) {
             rewards.badge = cityConfig.badge;
             rewards.badgeIcon = cityConfig.badgeIcon;
             rewards.badgeName = cityConfig.badgeName;
-            rewards.message = `Você derrotou o Líder ${cityConfig.leader} e conquistou a ${cityConfig.badgeName}!`;
+            if (cityId === 'viridian') {
+              rewards.message = `Você derrotou o Chefe da Equipe Rocket Giovanni e completou o Desafio Final! Você é o verdadeiro Mestre Pokémon!`;
+              rewards.gold = 200;
+              gold += 150; // extra 150 gold (total 200)
+              localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
+            } else {
+              rewards.message = `Você derrotou o Líder ${cityConfig.leader} e conquistou a ${cityConfig.badgeName}!`;
+            }
 
           } else {
             // Beat NPC

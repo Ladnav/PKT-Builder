@@ -72,6 +72,19 @@ export async function openBoosterModal() {
         border-color: rgba(251, 191, 36, 0.95);
       }
       
+      /* Vibration/tremble animation for face-down cards on hover */
+      @keyframes cardBackVibrate {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        20% { transform: translate(-2px, 2px) rotate(-1.2deg); }
+        40% { transform: translate(2px, -2px) rotate(1.2deg); }
+        60% { transform: translate(-2px, -2px) rotate(-1.2deg); }
+        80% { transform: translate(2px, 2px) rotate(1.2deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+      }
+      .booster-card-flip-container:not(.flipped):hover {
+        animation: cardBackVibrate 0.15s infinite linear;
+      }
+      
       /* Remove default vibration to support smooth mouse tilt */
       .booster-card-flip-container.flipped:hover .booster-card-flip-inner {
         animation: none !important;
@@ -461,6 +474,7 @@ function renderRevealedCards(cardsList, nextCount, goldGained = 0) {
     });
 
     container.addEventListener('mouseleave', () => {
+      if (!container.classList.contains('flipped')) return;
       const inner = container.querySelector('.booster-card-flip-inner');
       if (inner) {
         inner.style.transform = 'rotateY(180deg)';
