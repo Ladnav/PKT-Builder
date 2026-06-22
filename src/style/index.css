@@ -3592,7 +3592,7 @@ input:checked + .toggle-slider:before {
   flex: 1;
   position: relative;
   background-color: #111827;
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e0/Kanto_Map.png');
+  background-image: url('../assets/kanto_map.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

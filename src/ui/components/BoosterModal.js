@@ -53,6 +53,40 @@ export async function openBoosterModal() {
   }
 
   modal.innerHTML = `
+    <style>
+      /* Hover glow on face-down cards */
+      .booster-card-flip-container.rarity-normal:not(.flipped):hover .booster-card-flip-back {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.45);
+        border-color: rgba(255, 255, 255, 0.6);
+      }
+      .booster-card-flip-container.rarity-foil:not(.flipped):hover .booster-card-flip-back {
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+        border-color: rgba(59, 130, 246, 0.8);
+      }
+      .booster-card-flip-container.rarity-shiny:not(.flipped):hover .booster-card-flip-back {
+        box-shadow: 0 0 15px rgba(168, 85, 247, 0.65);
+        border-color: rgba(168, 85, 247, 0.85);
+      }
+      .booster-card-flip-container.rarity-shiny-foiled:not(.flipped):hover .booster-card-flip-back {
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+        border-color: rgba(251, 191, 36, 0.95);
+      }
+      
+      /* Remove default vibration to support smooth mouse tilt */
+      .booster-card-flip-container.flipped:hover .booster-card-flip-inner {
+        animation: none !important;
+      }
+      
+      /* Screen shake animation */
+      @keyframes modalShake {
+        0%, 100% { transform: translate(0, 0); }
+        10%, 30%, 50%, 70%, 90% { transform: translate(-3px, 1px); }
+        20%, 40%, 60%, 80% { transform: translate(3px, -1px); }
+      }
+      .booster-modal-card.shake-pack {
+        animation: modalShake 0.4s ease-in-out;
+      }
+    </style>
     <div class="battle-modal-inner booster-modal-card" style="max-width: 600px; width: 95%; max-height: 85vh; height: auto; position: relative; display: flex; flex-direction: column;">
       <button class="modal-close" id="btn-close-booster">✕</button>
       <div class="battle-modal-header" style="padding-right: 3.5rem; flex-shrink: 0;">
@@ -384,8 +418,22 @@ function renderRevealedCards(cardsList, nextCount, goldGained = 0) {
 
       const idx = parseInt(container.getAttribute('data-idx'));
       const cardDraw = cardsList[idx];
-      if (cardDraw && (cardDraw.isShiny || cardDraw.isFoil)) {
+      const p = cardDraw.pokemon;
+      const bst = Object.values(p.stats).reduce((a, b) => a + b, 0);
+      const isRare = cardDraw.isShiny || cardDraw.isFoil || bst >= 500;
+      
+      if (isRare) {
         playSFX('shiny');
+        
+        // Shake screen
+        const modalInner = card.querySelector('.booster-modal-card');
+        if (modalInner) {
+          modalInner.classList.add('shake-pack');
+          setTimeout(() => modalInner.classList.remove('shake-pack'), 400);
+        }
+        
+        // Particle burst
+        triggerParticleBurst(container, cardDraw.isShiny ? 'gold' : 'blue');
       } else {
         playSFX('cardFlip');
       }
@@ -394,7 +442,80 @@ function renderRevealedCards(cardsList, nextCount, goldGained = 0) {
         showRevealEndActions(nextCount);
       }
     });
+
+    // Mousemove for smooth 3D tilt
+    container.addEventListener('mousemove', (e) => {
+      if (!container.classList.contains('flipped')) return;
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -15;
+      const rotateY = ((x - centerX) / centerX) * 15;
+      
+      const inner = container.querySelector('.booster-card-flip-inner');
+      if (inner) {
+        inner.style.transform = `rotateY(180deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+      }
+    });
+
+    container.addEventListener('mouseleave', () => {
+      const inner = container.querySelector('.booster-card-flip-inner');
+      if (inner) {
+        inner.style.transform = 'rotateY(180deg)';
+      }
+    });
   });
+}
+
+function triggerParticleBurst(container, type) {
+  const rect = container.getBoundingClientRect();
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.style.position = 'fixed';
+    p.style.left = `${rect.left + rect.width / 2}px`;
+    p.style.top = `${rect.top + rect.height / 2}px`;
+    p.style.width = `${5 + Math.random() * 5}px`;
+    p.style.height = p.style.width;
+    p.style.borderRadius = '50%';
+    p.style.background = type === 'gold' 
+      ? 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)' 
+      : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+    p.style.pointerEvents = 'none';
+    p.style.zIndex = '99999';
+    p.style.boxShadow = type === 'gold' 
+      ? '0 0 8px rgba(251,191,36,0.8)' 
+      : '0 0 8px rgba(59,130,246,0.8)';
+    
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 5;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed;
+    
+    document.body.appendChild(p);
+    
+    let opacity = 1.0;
+    let posX = rect.left + rect.width / 2;
+    let posY = rect.top + rect.height / 2;
+    
+    const anim = () => {
+      posX += vx;
+      posY += vy + 0.15; // gravity
+      opacity -= 0.025;
+      p.style.left = `${posX}px`;
+      p.style.top = `${posY}px`;
+      p.style.opacity = opacity;
+      
+      if (opacity > 0) {
+        requestAnimationFrame(anim);
+      } else {
+        p.remove();
+      }
+    };
+    requestAnimationFrame(anim);
+  }
 }
 
 function showRevealEndActions(nextCount) {

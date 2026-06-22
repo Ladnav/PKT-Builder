@@ -42,6 +42,7 @@ let lastProcessedRound = null;
 let lastProcessedBotSlot = null;
 let lastProcessedBotRound = null;
 let lastProcessedBotPhase = null;
+let transitioningToTournament = false;
 
 function getAvailablePool() {
   return draftState?.available_pool || pokemonData.map(p => p.id);
@@ -72,6 +73,7 @@ export async function render(cont, params) {
 
   botTurnInProgress = false;
   botItemsLoopInProgress = false;
+  transitioningToTournament = false;
 
   renderLayout();
   playBGM('draft');
@@ -174,6 +176,34 @@ function setupSubscriptions() {
     }, async () => {
       await fetchParticipants();
       updateUI();
+
+      // Se for a rodada de itens (Round 7), o Host verifica se todos já escolheram
+      if (draftState && draftState.current_round === 7 && isHost) {
+        const allChosen = participants && participants.every(p => 
+          p.team && p.team.some(poke => poke.item !== undefined && poke.item !== null)
+        );
+        if (allChosen && !transitioningToTournament) {
+          transitioningToTournament = true;
+          console.log('Todos os participantes escolheram itens (via realtime). Avançando para rodada 8 e criando bracket...');
+          try {
+            // Avança rodada no draft_state
+            const { error: draftErr } = await supabase
+              .from('draft_state')
+              .update({
+                current_round: 8,
+                current_options: [],
+                updated_at: new Date().toISOString()
+              })
+              .eq('room_id', roomId);
+              
+            if (draftErr) throw draftErr;
+            await createBracketAndTransitionRoom();
+          } catch (err) {
+            console.error('Erro ao transicionar draft para torneio:', err);
+            transitioningToTournament = false;
+          }
+        }
+      }
     })
     .subscribe();
 
@@ -889,21 +919,24 @@ async function selectItemForPokemon(item, pokemonIdx, participant) {
       ];
 
       if (allChosen) {
-        // Todos escolheram! Avança a rodada para 8 (encerrando o draft) e limpa opções
-        const { error: draftErr } = await supabase
-          .from('draft_state')
-          .update({
-            current_round: 8,
-            current_options: [],
-            picks_history: nextHistory,
-            updated_at: new Date().toISOString()
-          })
-          .eq('room_id', roomId);
+        if (!transitioningToTournament) {
+          transitioningToTournament = true;
+          // Todos escolheram! Avança a rodada para 8 (encerrando o draft) e limpa opções
+          const { error: draftErr } = await supabase
+            .from('draft_state')
+            .update({
+              current_round: 8,
+              current_options: [],
+              picks_history: nextHistory,
+              updated_at: new Date().toISOString()
+            })
+            .eq('room_id', roomId);
 
-        if (draftErr) throw draftErr;
+          if (draftErr) throw draftErr;
 
-        if (isHost) {
-          await createBracketAndTransitionRoom();
+          if (isHost) {
+            await createBracketAndTransitionRoom();
+          }
         }
       } else {
         // Apenas atualiza o histórico no draft_state para propagar
@@ -1438,18 +1471,21 @@ function processTurn() {
           );
           
           if (allChosen) {
-            const { error: draftErr } = await supabase
-              .from('draft_state')
-              .update({
-                current_round: 8,
-                current_options: [],
-                picks_history: currentHistory,
-                updated_at: new Date().toISOString()
-              })
-              .eq('room_id', roomId);
-              
-            if (draftErr) throw draftErr;
-            await createBracketAndTransitionRoom();
+            if (!transitioningToTournament) {
+              transitioningToTournament = true;
+              const { error: draftErr } = await supabase
+                .from('draft_state')
+                .update({
+                  current_round: 8,
+                  current_options: [],
+                  picks_history: currentHistory,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('room_id', roomId);
+                
+              if (draftErr) throw draftErr;
+              await createBracketAndTransitionRoom();
+            }
           } else {
             const { error: draftErr } = await supabase
               .from('draft_state')
@@ -1648,6 +1684,7 @@ function cleanup() {
   lastProcessedBotRound = null;
   lastProcessedBotPhase = null;
   botItemsLoopInProgress = false;
+  transitioningToTournament = false;
 }
 
 export function destroy() {
