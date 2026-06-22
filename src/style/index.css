@@ -3729,7 +3729,7 @@ input:checked + .toggle-slider:before {
 }
 
 .map-node.locked-node {
-  filter: grayscale(1) opacity(0.2) brightness(0.5);
+  filter: grayscale(1) opacity(0.35) brightness(0.65);
   pointer-events: none;
 }
 
