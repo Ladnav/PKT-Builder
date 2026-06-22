@@ -20,16 +20,16 @@ const CITIES_CONFIG = {
     badgeName: "Começo da Jornada",
     badgeIcon: "🏡",
     badgeColor: "#94a3b8",
-    x: 31.5, y: 78.5,
+    x: 29.5, y: 69.0,
     stages: [
       { name: "Treinador de Rota 1", type: "NPC", team: [{ id: 25 }, { id: 143 }, { id: 59 }, { id: 25 }, { id: 143 }, { id: 59 }] },
       { name: "Rival Azul", type: "Leader", team: [
         { id: 6, item: 'life-orb' },
         { id: 9, item: 'assault-vest' },
         { id: 3, item: 'leftovers' },
-        { id: 65, item: 'choice-specs' },
-        { id: 59, item: 'choice-band' },
-        { id: 143, item: 'leftovers', isShiny: true }
+        { id: 64, item: 'choice-specs' },
+        { id: 58, item: 'choice-band' },
+        { id: 17, item: 'leftovers', isShiny: true }
       ]}
     ]
   },
@@ -41,7 +41,7 @@ const CITIES_CONFIG = {
     badgeName: "Visita a Viridian",
     badgeIcon: "🟢",
     badgeColor: "#22c55e",
-    x: 31.5, y: 57.5,
+    x: 29.5, y: 51.0,
     stages: [
       { name: "Treinador da Rota 22", type: "NPC", team: [{ id: 25 }, { id: 143 }, { id: 59 }, { id: 25 }, { id: 143 }, { id: 59 }] },
       { name: "Rival Azul (Rota 22)", type: "Leader", team: [
@@ -62,7 +62,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Rocha",
     badgeIcon: "🪨",
     badgeColor: "#9ca3af",
-    x: 31.5, y: 39.0,
+    x: 29.5, y: 33.5,
     stages: [
       { name: "Treinador Liam", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 473 }, { id: 389 }, { id: 214 }] },
       { name: "Treinador Jerry", type: "NPC", team: [{ id: 248 }, { id: 76 }, { id: 36 }, { id: 260 }, { id: 143 }, { id: 68 }] },
@@ -85,7 +85,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Cascata",
     badgeIcon: "💧",
     badgeColor: "#38bdf8",
-    x: 68.5, y: 36.5,
+    x: 68.5, y: 31.0,
     stages: [
       { name: "Treinador Daren", type: "NPC", team: [{ id: 134 }, { id: 9 }, { id: 25 }, { id: 131 }, { id: 160 }, { id: 230 }] },
       { name: "Treinador Luis", type: "NPC", team: [{ id: 395 }, { id: 230 }, { id: 80 }, { id: 350 }, { id: 134 }, { id: 9 }] },
@@ -108,7 +108,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Trovão",
     badgeIcon: "⚡",
     badgeColor: "#eab308",
-    x: 68.5, y: 64.5,
+    x: 68.5, y: 58.0,
     stages: [
       { name: "Treinador Jax", type: "NPC", team: [{ id: 25 }, { id: 82 }, { id: 143 }, { id: 26 }, { id: 125 }, { id: 135 }] },
       { name: "Treinador Ron", type: "NPC", team: [{ id: 125 }, { id: 26 }, { id: 123 }, { id: 82 }, { id: 25 }, { id: 135 }] },
@@ -131,7 +131,7 @@ const CITIES_CONFIG = {
     badgeName: "Prece de Lavender",
     badgeIcon: "👻",
     badgeColor: "#8b5cf6",
-    x: 85.5, y: 50.5,
+    x: 85.5, y: 45.0,
     stages: [
       { name: "Exorcista Patricia", type: "NPC", team: [{ id: 94 }, { id: 80 }, { id: 197 }, { id: 76 }, { id: 94 }, { id: 80 }] },
       { name: "Fantasma de Marowak", type: "Leader", team: [
@@ -152,7 +152,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Arco-Íris",
     badgeIcon: "🌈",
     badgeColor: "#10b981",
-    x: 52.0, y: 50.5,
+    x: 52.0, y: 45.0,
     stages: [
       { name: "Treinadora Tina", type: "NPC", team: [{ id: 154 }, { id: 143 }, { id: 134 }, { id: 3 }, { id: 254 }, { id: 389 }] },
       { name: "Treinador Clara", type: "NPC", team: [{ id: 389 }, { id: 254 }, { id: 36 }, { id: 154 }, { id: 3 }, { id: 214 }] },
@@ -175,7 +175,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Alma",
     badgeIcon: "💜",
     badgeColor: "#a855f7",
-    x: 59.0, y: 83.5,
+    x: 59.0, y: 77.5,
     stages: [
       { name: "Treinador Kirk", type: "NPC", team: [{ id: 94 }, { id: 3 }, { id: 197 }, { id: 461 }, { id: 229 }, { id: 359 }] },
       { name: "Treinador Ned", type: "NPC", team: [{ id: 461 }, { id: 94 }, { id: 65 }, { id: 197 }, { id: 3 }, { id: 229 }] },
@@ -198,7 +198,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Pântano",
     badgeIcon: "🔮",
     badgeColor: "#ec4899",
-    x: 68.5, y: 50.5,
+    x: 68.5, y: 45.0,
     stages: [
       { name: "Treinador Igor", type: "NPC", team: [{ id: 80 }, { id: 124 }, { id: 65 }, { id: 196 }, { id: 282 }, { id: 376 }] },
       { name: "Treinador Yuri", type: "NPC", team: [{ id: 196 }, { id: 282 }, { id: 475 }, { id: 65 }, { id: 80 }, { id: 376 }] },
@@ -221,7 +221,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Vulcão",
     badgeIcon: "🔥",
     badgeColor: "#ef4444",
-    x: 31.5, y: 89.5,
+    x: 29.5, y: 83.5,
     stages: [
       { name: "Treinador Burt", type: "NPC", team: [{ id: 38 }, { id: 136 }, { id: 59 }, { id: 6 }, { id: 126 }, { id: 157 }] },
       { name: "Treinador Cole", type: "NPC", team: [{ id: 126 }, { id: 157 }, { id: 229 }, { id: 59 }, { id: 257 }, { id: 392 }] },
@@ -244,7 +244,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Terra",
     badgeIcon: "🟢",
     badgeColor: "#22c55e",
-    x: 31.5, y: 57.5,
+    x: 29.5, y: 51.0,
     stages: [
       { name: "Recruta Team Rocket", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 445 }, { id: 260 }, { id: 473 }] },
       { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 260 }, { id: 473 }, { id: 389 }, { id: 76 }, { id: 248 }, { id: 143 }] },
@@ -267,7 +267,7 @@ const CITIES_CONFIG = {
     badgeName: "Troféu do Campeão",
     badgeIcon: "🏆",
     badgeColor: "#fbbf24",
-    x: 18.0, y: 41.5,
+    x: 16.5, y: 29.0,
     stages: [
       { name: "Lorelei (Elite Quatro)", type: "Elite4", team: [
         { id: 124, item: 'life-orb' },
@@ -1376,8 +1376,17 @@ function openPreMatchModal() {
 
   // Local helper to render modal layout
   const renderPreMatchContent = () => {
+    // Sort ownedCards by BST (Base Stat Total) descending
+    const sortedOwnedCards = [...ownedCards].sort((a, b) => {
+      const pA = getPokemonById(a.pokemon_id);
+      const pB = getPokemonById(b.pokemon_id);
+      const bstA = (pA.stats.hp || 0) + (pA.stats.attack || 0) + (pA.stats.defense || 0) + (pA.stats.spAtk || 0) + (pA.stats.spDef || 0) + (pA.stats.speed || 0);
+      const bstB = (pB.stats.hp || 0) + (pB.stats.attack || 0) + (pB.stats.defense || 0) + (pB.stats.spAtk || 0) + (pB.stats.spDef || 0) + (pB.stats.speed || 0);
+      return bstB - bstA;
+    });
+
     // Personal Album Selection View
-    const gridCardsHtml = ownedCards.map(c => {
+    const gridCardsHtml = sortedOwnedCards.map(c => {
       const p = getPokemonById(c.pokemon_id);
       p.isShiny = c.is_shiny;
       const isSelected = selectedRoster.some(x => x.id === p.id && x.isShiny === p.isShiny);
@@ -1425,10 +1434,17 @@ function openPreMatchModal() {
 
     // Resolve Level display text
     let levelText = "Nível 50";
-    if (stage.name.includes("Cynthia")) {
-      levelText = "Nível 75";
-    } else if (stage.type === 'Leader' || stage.type === 'Elite4') {
-      levelText = "Nível 70";
+    const isBoss = stage.type === 'Leader' || stage.type === 'Elite4' || stage.type === 'Champion' || stage.name.includes("Líder") || stage.name.includes("Elite") || stage.name.includes("Campeã") || stage.name.includes("Rival") || stage.name === "Fantasma de Marowak";
+    if (isBoss) {
+      if (['pallet', 'viridian_visit', 'pewter', 'cerulean'].includes(cityId)) {
+        levelText = "Nível 55";
+      } else if (['vermilion', 'lavender', 'celadon'].includes(cityId)) {
+        levelText = "Nível 60";
+      } else if (['fuchsia', 'saffron'].includes(cityId)) {
+        levelText = "Nível 70";
+      } else if (['cinnabar', 'viridian', 'elite4'].includes(cityId)) {
+        levelText = "Nível 80";
+      }
     }
 
     return `
@@ -1592,10 +1608,19 @@ function startBattle(playerTeam) {
 
     // Assign level based on stage type/leader status
     let lvl = 50;
-    if (stage.name.includes("Cynthia")) {
-      lvl = 75;
-    } else if (stage.type === 'Leader' || stage.type === 'Elite4' || stage.name.includes("Líder") || stage.name.includes("Elite Quatro")) {
-      lvl = 70;
+    const isBoss = stage.type === 'Leader' || stage.type === 'Elite4' || stage.type === 'Champion' || stage.name.includes("Líder") || stage.name.includes("Elite") || stage.name.includes("Campeã") || stage.name.includes("Rival") || stage.name === "Fantasma de Marowak";
+    if (isBoss) {
+      if (['pallet', 'viridian_visit', 'pewter', 'cerulean'].includes(cityId)) {
+        lvl = 55;
+      } else if (['vermilion', 'lavender', 'celadon'].includes(cityId)) {
+        lvl = 60;
+      } else if (['fuchsia', 'saffron'].includes(cityId)) {
+        lvl = 70;
+      } else if (['cinnabar', 'viridian', 'elite4'].includes(cityId)) {
+        lvl = 80;
+      } else {
+        lvl = 70;
+      }
     }
     p.level = lvl;
 
@@ -2012,7 +2037,7 @@ function showCampaignOutcomeModal(playerWon, rewards, callback) {
             </div>
           ` : `
             <p class="outcome-msg" style="color: #fca5a5; margin-bottom: 1.8rem;">
-              Não desanime! Ajuste a sua equipe na Loja, verifique se possui os melhores itens equipados e tente novamente.
+              Não desanime! Ajuste a sua equipe na Loja e tente novamente.
             </p>
           `}
           

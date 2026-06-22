@@ -3,6 +3,7 @@
 
 const screens = {};
 let currentScreen = null;
+let currentScreenName = null;
 let appContainer = null;
 
 export function initRouter(container) {
@@ -35,6 +36,7 @@ export function navigate(name, params = {}) {
   }
 
   currentScreen = screen;
+  currentScreenName = name;
   screen.render(appContainer, params);
 
   // Animação de entrada
@@ -49,4 +51,8 @@ export function navigate(name, params = {}) {
 
 export function getCurrentScreen() {
   return currentScreen;
+}
+
+export function getCurrentScreenName() {
+  return currentScreenName;
 }

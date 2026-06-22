@@ -1,6 +1,6 @@
 // src/main.js — Entry point do PokéChampion
 
-import { initRouter, registerScreen, navigate } from './ui/router.js';
+import { initRouter, registerScreen, navigate, getCurrentScreenName } from './ui/router.js';
 import * as AuthScreen     from './ui/screens/AuthScreen.js';
 import * as HomeScreen     from './ui/screens/HomeScreen.js';
 import * as LobbyScreen    from './ui/screens/LobbyScreen.js';
@@ -29,6 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Monitora alterações no estado de login
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN') {
+      const current = getCurrentScreenName();
+      if (current && current !== 'auth') {
+        // Se já está logado em outra tela, ignora para não fechar modais/reiniciar a tela
+        return;
+      }
       // Login explícito: tenta restaurar rota salva ou vai pra home
       const saved = sessionStorage.getItem('pkt_route');
       if (saved) {
@@ -46,6 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
       navigate('auth');
 
     } else if (event === 'INITIAL_SESSION') {
+      const current = getCurrentScreenName();
+      if (current && current !== 'auth') {
+        return;
+      }
       // Carga inicial da página (refresh, minimizar/restaurar)
       if (session) {
         const saved = sessionStorage.getItem('pkt_route');
