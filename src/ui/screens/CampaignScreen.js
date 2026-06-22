@@ -6,6 +6,7 @@ import { PokemonCard, PokemonMiniCard } from '../components/PokemonCard.js';
 import { renderBattleModal } from '../components/BattleModal.js';
 import { initAlbumModal, openAlbumModal } from '../components/AlbumModal.js';
 import { createBattleState, simulateBattle } from '../../engine/battle.js';
+import { TYPE_COLORS } from '../../engine/types.js';
 import pokemonData from '../../data/pokemon-sample.json';
 import itemsData from '../../data/items-sample.json';
 
@@ -531,6 +532,42 @@ function isCityUnlocked(cityId) {
   return progress.completedCities.includes(prevCityId);
 }
 
+function renderMapNodeHtml(cityId, label, emoji) {
+  const config = CITIES_CONFIG[cityId];
+  const status = getNodeStatusClass(cityId);
+  const type = config.type;
+  
+  // Resolve color
+  let typeColor = '#7c3aed';
+  if (type === 'league') {
+    typeColor = '#fbbf24';
+  } else if (type === 'normal') {
+    typeColor = '#475569'; // slate-600
+  } else {
+    typeColor = TYPE_COLORS[type] || '#7c3aed';
+  }
+  
+  let inlineStyle = '';
+  if (status === 'locked') {
+    inlineStyle = `background: #111827; border-color: #374151; color: #4b5563; opacity: 0.6; cursor: not-allowed;`;
+  } else if (status === 'active') {
+    inlineStyle = `background: ${typeColor}; border-color: #fbbf24; color: #fff; box-shadow: 0 0 20px ${typeColor}, inset 0 0 10px rgba(255,255,255,0.25);`;
+  } else if (status === 'completed') {
+    inlineStyle = `background: ${typeColor}; border-color: #34d399; color: #fff; box-shadow: 0 0 10px ${typeColor}80;`;
+  } else {
+    inlineStyle = `background: ${typeColor}; border-color: rgba(255, 255, 255, 0.25); color: #fff;`;
+  }
+
+  return `
+    <div class="map-node ${status}" style="left: ${config.x}%; top: ${config.y}%;" data-city="${cityId}">
+      <div class="map-node-inner" style="${inlineStyle}">
+        ${emoji}
+      </div>
+      <div class="map-node-label">${label}</div>
+    </div>
+  `;
+}
+
 function renderScreen() {
   if (!container) return;
 
@@ -735,65 +772,16 @@ function renderScreen() {
           <div class="campaign-map-canvas" id="campaign-map-canvas">
             ${svgPaths}
             
-            <!-- Pallet -->
-            <div class="map-node ${getNodeStatusClass('pallet')}" style="left: 28%; top: 70%;" data-city="pallet">
-              <div class="map-node-inner">🏡</div>
-              <div class="map-node-label">Vila de Pallet</div>
-            </div>
-
-            <!-- Pewter -->
-            <div class="map-node ${getNodeStatusClass('pewter')}" style="left: 30%; top: 25%;" data-city="pewter">
-              <div class="map-node-inner">🪨</div>
-              <div class="map-node-label">Pewter (Brock)</div>
-            </div>
-            
-            <!-- Cerulean -->
-            <div class="map-node ${getNodeStatusClass('cerulean')}" style="left: 65%; top: 15%;" data-city="cerulean">
-              <div class="map-node-inner">💧</div>
-              <div class="map-node-label">Cerulean (Misty)</div>
-            </div>
-            
-            <!-- Vermilion -->
-            <div class="map-node ${getNodeStatusClass('vermilion')}" style="left: 72%; top: 60%;" data-city="vermilion">
-              <div class="map-node-inner">⚡</div>
-              <div class="map-node-label">Vermilion (Lt. Surge)</div>
-            </div>
-            
-            <!-- Celadon -->
-            <div class="map-node ${getNodeStatusClass('celadon')}" style="left: 48%; top: 45%;" data-city="celadon">
-              <div class="map-node-inner">🌈</div>
-              <div class="map-node-label">Celadon (Erika)</div>
-            </div>
-            
-            <!-- Fuchsia -->
-            <div class="map-node ${getNodeStatusClass('fuchsia')}" style="left: 55%; top: 80%;" data-city="fuchsia">
-              <div class="map-node-inner">💜</div>
-              <div class="map-node-label">Fuchsia (Koga)</div>
-            </div>
-            
-            <!-- Saffron -->
-            <div class="map-node ${getNodeStatusClass('saffron')}" style="left: 65%; top: 45%;" data-city="saffron">
-              <div class="map-node-inner">🔮</div>
-              <div class="map-node-label">Saffron (Sabrina)</div>
-            </div>
-            
-            <!-- Cinnabar -->
-            <div class="map-node ${getNodeStatusClass('cinnabar')}" style="left: 28%; top: 85%;" data-city="cinnabar">
-              <div class="map-node-inner">🔥</div>
-              <div class="map-node-label">Cinnabar (Blaine)</div>
-            </div>
-            
-            <!-- Viridian -->
-            <div class="map-node ${getNodeStatusClass('viridian')}" style="left: 28%; top: 55%;" data-city="viridian">
-              <div class="map-node-inner">🟢</div>
-              <div class="map-node-label">${progress.currentCity === 'viridian' || progress.completedCities.includes('viridian') ? 'Viridian (Giovanni)' : 'Viridian (Visita)'}</div>
-            </div>
-            
-            <!-- Elite 4 -->
-            <div class="map-node ${getNodeStatusClass('elite4')}" style="left: 10%; top: 45%;" data-city="elite4">
-              <div class="map-node-inner">🏆</div>
-              <div class="map-node-label">Planalto Indigo</div>
-            </div>
+            ${renderMapNodeHtml('pallet', 'Vila de Pallet', '🏡')}
+            ${renderMapNodeHtml('pewter', 'Pewter (Brock)', '🪨')}
+            ${renderMapNodeHtml('cerulean', 'Cerulean (Misty)', '💧')}
+            ${renderMapNodeHtml('vermilion', 'Vermilion (Lt. Surge)', '⚡')}
+            ${renderMapNodeHtml('celadon', 'Celadon (Erika)', '🌿')}
+            ${renderMapNodeHtml('fuchsia', 'Fuchsia (Koga)', '☠️')}
+            ${renderMapNodeHtml('saffron', 'Saffron (Sabrina)', '🔮')}
+            ${renderMapNodeHtml('cinnabar', 'Cinnabar (Blaine)', '🔥')}
+            ${renderMapNodeHtml('viridian', progress.currentCity === 'viridian' || progress.completedCities.includes('viridian') ? 'Viridian (Giovanni)' : 'Viridian (Visita)', progress.currentCity === 'viridian' || progress.completedCities.includes('viridian') ? '🌍' : '🟢')}
+            ${renderMapNodeHtml('elite4', 'Planalto Indigo', '🏆')}
           </div>
         </div>
         
