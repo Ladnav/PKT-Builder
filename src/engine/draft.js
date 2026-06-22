@@ -91,10 +91,14 @@ export function advanceDraft(state) {
 }
 
 export function selectOptionsFromPool(available) {
-  // Aplica penalidade para lendários (BST >= 570 tem apenas 5% de chance de aparecer)
+  // Ajuste de probabilidade por BST:
+  // - Lendários Principais (BST >= 670): 5% de chance de passar no filtro (ultra-raros)
+  // - Pseudo-lendários / Lendários Menores (570 <= BST < 670): 30% de chance de passar (raridade moderada)
+  // - Pokémons normais (BST < 570): 100% de chance de passar (sem restrição)
   let filtered = available.filter(p => {
     const bst = Object.values(p.stats).reduce((sum, val) => sum + val, 0);
-    if (bst >= 570) return Math.random() < 0.05;
+    if (bst >= 670) return Math.random() < 0.05;
+    if (bst >= 570) return Math.random() < 0.30;
     return true;
   });
 
