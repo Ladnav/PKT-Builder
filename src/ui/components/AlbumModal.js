@@ -302,7 +302,13 @@ function renderAlbumContent() {
 
   const progressByGen = {};
   for (let gen = 1; gen <= 4; gen++) {
-    const pokes = pokemonData.filter(p => p.generation === gen);
+    const pokes = pokemonData.filter(p => {
+      if (gen === 1) return p.id >= 1 && p.id <= 151;
+      if (gen === 2) return p.id >= 152 && p.id <= 251;
+      if (gen === 3) return p.id >= 252 && p.id <= 386;
+      if (gen === 4) return p.id >= 387 && p.id <= 493;
+      return false;
+    });
     const total = pokes.length;
     const collected = pokes.filter(p => collectedMap[p.id]).length;
     const pct = total > 0 ? Math.round((collected / total) * 100) : 0;
