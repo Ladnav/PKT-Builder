@@ -20,16 +20,16 @@ const CITIES_CONFIG = {
     badgeName: "Começo da Jornada",
     badgeIcon: "🏡",
     badgeColor: "#94a3b8",
-    x: 32.5, y: 78.5,
+    x: 28.5, y: 83.0,
     stages: [
-      { name: "Treinador de Rota 1", type: "NPC", team: [{ id: 25 }, { id: 143 }, { id: 59 }, { id: 25 }, { id: 143 }, { id: 59 }] },
+      { name: "Treinador de Rota 1", type: "NPC", team: [{ id: 16 }, { id: 19 }, { id: 10 }, { id: 13 }, { id: 21 }, { id: 23 }] },
       { name: "Rival Azul", type: "Leader", team: [
-        { id: 6, item: 'life-orb' },
-        { id: 9, item: 'assault-vest' },
-        { id: 3, item: 'leftovers' },
+        { id: 17, item: 'expert-belt' },
+        { id: 20, item: 'sitrus-berry' },
+        { id: 58, item: 'sitrus-berry' },
         { id: 64, item: 'choice-specs' },
-        { id: 58, item: 'choice-band' },
-        { id: 17, item: 'leftovers', isShiny: true }
+        { id: 39, item: 'leftovers' },
+        { id: 23, item: 'choice-band', isShiny: true }
       ]}
     ]
   },
@@ -41,18 +41,18 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Rocha",
     badgeIcon: "🪨",
     badgeColor: "#9ca3af",
-    x: 32.5, y: 39.0,
+    x: 26.0, y: 41.0,
     stages: [
-      { name: "Treinador Liam", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 473 }, { id: 389 }, { id: 214 }] },
-      { name: "Treinador Jerry", type: "NPC", team: [{ id: 248 }, { id: 76 }, { id: 36 }, { id: 260 }, { id: 143 }, { id: 68 }] },
-      { name: "Treinadora Paula", type: "NPC", team: [{ id: 248 }, { id: 68 }, { id: 149 }, { id: 473 }, { id: 389 }, { id: 76 }] },
+      { name: "Treinador Liam", type: "NPC", team: [{ id: 74 }, { id: 95 }, { id: 111 }, { id: 27 }, { id: 75 }, { id: 66 }] },
+      { name: "Treinador Jerry", type: "NPC", team: [{ id: 75 }, { id: 111 }, { id: 140 }, { id: 28 }, { id: 74 }, { id: 67 }] },
+      { name: "Treinadora Paula", type: "NPC", team: [{ id: 76 }, { id: 112 }, { id: 139 }, { id: 28 }, { id: 141 }, { id: 68 }] },
       { name: "Líder Brock", type: "Leader", team: [
         { id: 76, item: 'rocky-helmet' },
-        { id: 248, item: 'leftovers' },
-        { id: 260, item: 'sitrus-berry' },
-        { id: 143, item: 'leftovers' },
-        { id: 214, item: 'expert-belt' },
-        { id: 9, item: 'assault-vest' }
+        { id: 112, item: 'leftovers' },
+        { id: 95, item: 'sitrus-berry' },
+        { id: 139, item: 'assault-vest' },
+        { id: 141, item: 'expert-belt' },
+        { id: 142, item: 'choice-band', isShiny: true }
       ]}
     ]
   },
@@ -64,17 +64,17 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Cascata",
     badgeIcon: "💧",
     badgeColor: "#38bdf8",
-    x: 71.5, y: 36.5,
+    x: 62.0, y: 30.0,
     stages: [
-      { name: "Treinador Daren", type: "NPC", team: [{ id: 134 }, { id: 9 }, { id: 25 }, { id: 131 }, { id: 160 }, { id: 230 }] },
-      { name: "Treinador Luis", type: "NPC", team: [{ id: 395 }, { id: 230 }, { id: 80 }, { id: 350 }, { id: 134 }, { id: 9 }] },
-      { name: "Treinadora Becky", type: "NPC", team: [{ id: 160 }, { id: 131 }, { id: 350 }, { id: 80 }, { id: 395 }, { id: 260 }] },
+      { name: "Treinador Daren", type: "NPC", team: [{ id: 116 }, { id: 118 }, { id: 54 }, { id: 86 }, { id: 120 }, { id: 72 }] },
+      { name: "Treinador Luis", type: "NPC", team: [{ id: 117 }, { id: 119 }, { id: 55 }, { id: 87 }, { id: 121 }, { id: 73 }] },
+      { name: "Treinadora Becky", type: "NPC", team: [{ id: 130 }, { id: 131 }, { id: 121 }, { id: 55 }, { id: 134 }, { id: 230 }] },
       { name: "Líder Misty", type: "Leader", team: [
-        { id: 9, item: 'leftovers' },
-        { id: 131, item: 'assault-vest' },
+        { id: 121, item: 'choice-specs' },
+        { id: 131, item: 'leftovers' },
         { id: 134, item: 'sitrus-berry' },
         { id: 230, item: 'life-orb' },
-        { id: 260, item: 'rocky-helmet' },
+        { id: 130, item: 'assault-vest' },
         { id: 350, item: 'shell-bell', isShiny: true }
       ]}
     ]
@@ -87,18 +87,18 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Trovão",
     badgeIcon: "⚡",
     badgeColor: "#eab308",
-    x: 71.5, y: 64.5,
+    x: 63.0, y: 63.0,
     stages: [
-      { name: "Treinador Jax", type: "NPC", team: [{ id: 25 }, { id: 82 }, { id: 143 }, { id: 26 }, { id: 125 }, { id: 135 }] },
-      { name: "Treinador Ron", type: "NPC", team: [{ id: 125 }, { id: 26 }, { id: 123 }, { id: 82 }, { id: 25 }, { id: 135 }] },
-      { name: "Treinadora Amy", type: "NPC", team: [{ id: 135 }, { id: 82 }, { id: 36 }, { id: 26 }, { id: 125 }, { id: 149 }] },
+      { name: "Treinador Jax", type: "NPC", team: [{ id: 25 }, { id: 81 }, { id: 100 }, { id: 309 }, { id: 170 }, { id: 172 }] },
+      { name: "Treinador Ron", type: "NPC", team: [{ id: 26 }, { id: 82 }, { id: 101 }, { id: 310 }, { id: 171 }, { id: 403 }] },
+      { name: "Treinadora Amy", type: "NPC", team: [{ id: 135 }, { id: 462 }, { id: 405 }, { id: 181 }, { id: 466 }, { id: 125 }] },
       { name: "Líder Lt. Surge", type: "Leader", team: [
-        { id: 26, item: 'choice-specs' },
-        { id: 82, item: 'assault-vest' },
-        { id: 125, item: 'life-orb' },
-        { id: 135, item: 'quick-claw' },
-        { id: 468, item: 'leftovers' },
-        { id: 149, item: 'rocky-helmet', isShiny: true }
+        { id: 26, item: 'choice-band' },
+        { id: 462, item: 'assault-vest' },
+        { id: 466, item: 'choice-specs' },
+        { id: 135, item: 'life-orb' },
+        { id: 405, item: 'leftovers' },
+        { id: 181, item: 'sitrus-berry', isShiny: true }
       ]}
     ]
   },
@@ -110,16 +110,16 @@ const CITIES_CONFIG = {
     badgeName: "Prece de Lavender",
     badgeIcon: "👻",
     badgeColor: "#8b5cf6",
-    x: 88.5, y: 50.5,
+    x: 82.0, y: 47.0,
     stages: [
-      { name: "Exorcista Patricia", type: "NPC", team: [{ id: 94 }, { id: 80 }, { id: 197 }, { id: 76 }, { id: 94 }, { id: 80 }] },
+      { name: "Exorcista Patricia", type: "NPC", team: [{ id: 92 }, { id: 93 }, { id: 200 }, { id: 353 }, { id: 355 }, { id: 96 }] },
       { name: "Fantasma de Marowak", type: "Leader", team: [
         { id: 94, item: 'spell-tag' },
-        { id: 197, item: 'leftovers' },
-        { id: 229, item: 'life-orb' },
-        { id: 76, item: 'rocky-helmet' },
-        { id: 94, item: 'choice-specs', isShiny: true },
-        { id: 143, item: 'sitrus-berry' }
+        { id: 429, item: 'life-orb' },
+        { id: 354, item: 'leftovers' },
+        { id: 477, item: 'expert-belt' },
+        { id: 442, item: 'rocky-helmet' },
+        { id: 94, item: 'choice-specs', isShiny: true }
       ]}
     ]
   },
@@ -131,18 +131,18 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Arco-Íris",
     badgeIcon: "🌈",
     badgeColor: "#10b981",
-    x: 55.0, y: 50.5,
+    x: 44.0, y: 50.0,
     stages: [
-      { name: "Treinadora Tina", type: "NPC", team: [{ id: 154 }, { id: 143 }, { id: 134 }, { id: 3 }, { id: 254 }, { id: 389 }] },
-      { name: "Treinador Clara", type: "NPC", team: [{ id: 389 }, { id: 254 }, { id: 36 }, { id: 154 }, { id: 3 }, { id: 214 }] },
-      { name: "Treinadora Rose", type: "NPC", team: [{ id: 3 }, { id: 254 }, { id: 154 }, { id: 389 }, { id: 131 }, { id: 468 }] },
+      { name: "Treinadora Tina", type: "NPC", team: [{ id: 43 }, { id: 69 }, { id: 46 }, { id: 102 }, { id: 114 }, { id: 152 }] },
+      { name: "Treinador Clara", type: "NPC", team: [{ id: 44 }, { id: 70 }, { id: 47 }, { id: 103 }, { id: 315 }, { id: 153 }] },
+      { name: "Treinadora Rose", type: "NPC", team: [{ id: 45 }, { id: 71 }, { id: 465 }, { id: 470 }, { id: 407 }, { id: 154 }] },
       { name: "Líder Erika", type: "Leader", team: [
-        { id: 3, item: 'leftovers' },
-        { id: 154, item: 'sitrus-berry' },
-        { id: 254, item: 'life-orb' },
-        { id: 389, item: 'rocky-helmet' },
-        { id: 468, item: 'assault-vest' },
-        { id: 350, item: 'shell-bell', isShiny: true }
+        { id: 470, item: 'leftovers' },
+        { id: 465, item: 'sitrus-berry' },
+        { id: 407, item: 'life-orb' },
+        { id: 45, item: 'assault-vest' },
+        { id: 154, item: 'rocky-helmet' },
+        { id: 254, item: 'shell-bell', isShiny: true }
       ]}
     ]
   },
@@ -154,18 +154,18 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Alma",
     badgeIcon: "💜",
     badgeColor: "#a855f7",
-    x: 62.0, y: 83.5,
+    x: 46.0, y: 72.0,
     stages: [
-      { name: "Treinador Kirk", type: "NPC", team: [{ id: 94 }, { id: 3 }, { id: 197 }, { id: 461 }, { id: 229 }, { id: 359 }] },
-      { name: "Treinador Ned", type: "NPC", team: [{ id: 461 }, { id: 94 }, { id: 65 }, { id: 197 }, { id: 3 }, { id: 229 }] },
-      { name: "Treinadora Sue", type: "NPC", team: [{ id: 94 }, { id: 229 }, { id: 68 }, { id: 461 }, { id: 197 }, { id: 359 }] },
+      { name: "Treinador Kirk", type: "NPC", team: [{ id: 109 }, { id: 88 }, { id: 41 }, { id: 72 }, { id: 316 }, { id: 167 }] },
+      { name: "Treinador Ned", type: "NPC", team: [{ id: 110 }, { id: 89 }, { id: 42 }, { id: 73 }, { id: 317 }, { id: 168 }] },
+      { name: "Treinadora Sue", type: "NPC", team: [{ id: 169 }, { id: 454 }, { id: 452 }, { id: 435 }, { id: 110 }, { id: 89 }] },
       { name: "Líder Koga", type: "Leader", team: [
-        { id: 94, item: 'life-orb' },
-        { id: 461, item: 'expert-belt' },
-        { id: 3, item: 'leftovers' },
-        { id: 248, item: 'rocky-helmet' },
-        { id: 229, item: 'choice-specs' },
-        { id: 197, item: 'sitrus-berry', isShiny: true }
+        { id: 169, item: 'life-orb' },
+        { id: 110, item: 'leftovers' },
+        { id: 49, item: 'expert-belt' },
+        { id: 89, item: 'rocky-helmet' },
+        { id: 452, item: 'assault-vest' },
+        { id: 454, item: 'sitrus-berry', isShiny: true }
       ]}
     ]
   },
@@ -177,17 +177,17 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Pântano",
     badgeIcon: "🔮",
     badgeColor: "#ec4899",
-    x: 71.5, y: 50.5,
+    x: 57.0, y: 50.0,
     stages: [
-      { name: "Treinador Igor", type: "NPC", team: [{ id: 80 }, { id: 124 }, { id: 65 }, { id: 196 }, { id: 282 }, { id: 376 }] },
-      { name: "Treinador Yuri", type: "NPC", team: [{ id: 196 }, { id: 282 }, { id: 475 }, { id: 65 }, { id: 80 }, { id: 376 }] },
-      { name: "Treinadora Miki", type: "NPC", team: [{ id: 376 }, { id: 282 }, { id: 196 }, { id: 475 }, { id: 124 }, { id: 65 }] },
+      { name: "Treinador Igor", type: "NPC", team: [{ id: 63 }, { id: 96 }, { id: 122 }, { id: 79 }, { id: 177 }, { id: 280 }] },
+      { name: "Treinador Yuri", type: "NPC", team: [{ id: 64 }, { id: 97 }, { id: 80 }, { id: 178 }, { id: 281 }, { id: 196 }] },
+      { name: "Treinadora Miki", type: "NPC", team: [{ id: 65 }, { id: 282 }, { id: 199 }, { id: 196 }, { id: 124 }, { id: 376 }] },
       { name: "Líder Sabrina", type: "Leader", team: [
         { id: 65, item: 'focus-sash' },
-        { id: 196, item: 'life-orb' },
-        { id: 124, item: 'expert-belt' },
-        { id: 282, item: 'choice-specs' },
+        { id: 282, item: 'life-orb' },
         { id: 376, item: 'leftovers' },
+        { id: 196, item: 'choice-specs' },
+        { id: 199, item: 'assault-vest' },
         { id: 475, item: 'rocky-helmet', isShiny: true }
       ]}
     ]
@@ -200,17 +200,17 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Vulcão",
     badgeIcon: "🔥",
     badgeColor: "#ef4444",
-    x: 32.5, y: 89.5,
+    x: 27.0, y: 89.0,
     stages: [
-      { name: "Treinador Burt", type: "NPC", team: [{ id: 38 }, { id: 136 }, { id: 59 }, { id: 6 }, { id: 126 }, { id: 157 }] },
-      { name: "Treinador Cole", type: "NPC", team: [{ id: 126 }, { id: 157 }, { id: 229 }, { id: 59 }, { id: 257 }, { id: 392 }] },
-      { name: "Treinador Ryan", type: "NPC", team: [{ id: 257 }, { id: 392 }, { id: 6 }, { id: 136 }, { id: 38 }, { id: 157 }] },
+      { name: "Treinador Burt", type: "NPC", team: [{ id: 58 }, { id: 77 }, { id: 37 }, { id: 218 }, { id: 155 }, { id: 255 }] },
+      { name: "Treinador Cole", type: "NPC", team: [{ id: 59 }, { id: 78 }, { id: 38 }, { id: 219 }, { id: 156 }, { id: 256 }] },
+      { name: "Treinador Ryan", type: "NPC", team: [{ id: 6 }, { id: 59 }, { id: 78 }, { id: 257 }, { id: 157 }, { id: 392 }] },
       { name: "Líder Blaine", type: "Leader", team: [
         { id: 6, item: 'life-orb' },
         { id: 59, item: 'choice-band' },
+        { id: 78, item: 'expert-belt' },
         { id: 38, item: 'leftovers' },
-        { id: 157, item: 'choice-specs' },
-        { id: 257, item: 'expert-belt' },
+        { id: 467, item: 'choice-specs' },
         { id: 392, item: 'sitrus-berry', isShiny: true }
       ]}
     ]
@@ -223,18 +223,18 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Terra",
     badgeIcon: "🟢",
     badgeColor: "#22c55e",
-    x: 32.5, y: 57.5,
+    x: 28.5, y: 68.0,
     stages: [
-      { name: "Recruta Team Rocket", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 445 }, { id: 260 }, { id: 473 }] },
-      { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 260 }, { id: 473 }, { id: 389 }, { id: 76 }, { id: 248 }, { id: 143 }] },
-      { name: "Admin Petrel", type: "NPC", team: [{ id: 445 }, { id: 149 }, { id: 248 }, { id: 473 }, { id: 389 }, { id: 76 }] },
+      { name: "Recruta Team Rocket", type: "NPC", team: [{ id: 23 }, { id: 41 }, { id: 109 }, { id: 52 }, { id: 88 }, { id: 19 }] },
+      { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 24 }, { id: 42 }, { id: 110 }, { id: 53 }, { id: 89 }, { id: 20 }] },
+      { name: "Admin Petrel", type: "NPC", team: [{ id: 42 }, { id: 110 }, { id: 89 }, { id: 24 }, { id: 229 }, { id: 197 }] },
       { name: "Líder Giovanni", type: "Leader", team: [
         { id: 150, item: 'life-orb', isShiny: true },
         { id: 34, item: 'choice-specs' },
-        { id: 31, item: 'leftovers' },
-        { id: 112, item: 'rocky-helmet' },
+        { id: 31, item: 'assault-vest' },
+        { id: 464, item: 'rocky-helmet' },
         { id: 445, item: 'choice-band' },
-        { id: 248, item: 'assault-vest' }
+        { id: 51, item: 'focus-sash' }
       ]}
     ]
   },
@@ -246,47 +246,47 @@ const CITIES_CONFIG = {
     badgeName: "Troféu do Campeão",
     badgeIcon: "🏆",
     badgeColor: "#fbbf24",
-    x: 19.5, y: 35.5,
+    x: 17.0, y: 34.0,
     stages: [
       { name: "Lorelei (Elite Quatro)", type: "Elite4", team: [
+        { id: 87, item: 'leftovers' },
+        { id: 91, item: 'assault-vest' },
+        { id: 131, item: 'sitrus-berry' },
         { id: 124, item: 'life-orb' },
-        { id: 131, item: 'leftovers' },
-        { id: 461, item: 'choice-band' },
-        { id: 473, item: 'rocky-helmet' },
-        { id: 9, item: 'assault-vest' },
-        { id: 395, item: 'sitrus-berry' }
+        { id: 144, item: 'expert-belt' },
+        { id: 473, item: 'rocky-helmet' }
       ]},
       { name: "Bruno (Elite Quatro)", type: "Elite4", team: [
+        { id: 106, item: 'choice-band' },
+        { id: 107, item: 'life-orb' },
+        { id: 237, item: 'assault-vest' },
         { id: 68, item: 'choice-band' },
-        { id: 106, item: 'life-orb' },
-        { id: 107, item: 'expert-belt' },
-        { id: 214, item: 'leftovers' },
-        { id: 257, item: 'life-orb' },
-        { id: 448, item: 'assault-vest' }
+        { id: 214, item: 'rocky-helmet' },
+        { id: 448, item: 'life-orb' }
       ]},
       { name: "Agatha (Elite Quatro)", type: "Elite4", team: [
         { id: 94, item: 'life-orb' },
-        { id: 197, item: 'leftovers' },
-        { id: 229, item: 'choice-specs' },
-        { id: 359, item: 'expert-belt' },
-        { id: 94, item: 'focus-sash' },
-        { id: 487, item: 'rocky-helmet' }
+        { id: 429, item: 'choice-specs' },
+        { id: 354, item: 'expert-belt' },
+        { id: 477, item: 'leftovers' },
+        { id: 442, item: 'assault-vest' },
+        { id: 487, item: 'sitrus-berry' }
       ]},
       { name: "Lance (Elite Quatro)", type: "Elite4", team: [
-        { id: 149, item: 'rocky-helmet' },
-        { id: 230, item: 'life-orb' },
-        { id: 373, item: 'choice-band' },
-        { id: 445, item: 'expert-belt' },
+        { id: 149, item: 'choice-band' },
+        { id: 373, item: 'life-orb' },
+        { id: 445, item: 'choice-band' },
         { id: 384, item: 'leftovers' },
+        { id: 230, item: 'assault-vest' },
         { id: 483, item: 'choice-specs' }
       ]},
       { name: "Campeã Cynthia", type: "Champion", team: [
-        { id: 491, item: 'life-orb' }, 
-        { id: 3, item: 'leftovers' }, 
-        { id: 350, item: 'shell-bell' },
+        { id: 445, item: 'life-orb', isShiny: true },
+        { id: 491, item: 'choice-specs' },
+        { id: 376, item: 'assault-vest' },
         { id: 448, item: 'expert-belt' },
         { id: 468, item: 'leftovers' },
-        { id: 445, item: 'life-orb', isShiny: true }
+        { id: 350, item: 'shell-bell' }
       ]}
     ]
   }
@@ -756,6 +756,33 @@ function renderScreen() {
       const isProgressionActive = (progress.currentCity === selectedCityId && progress.currentStage === i);
       const isReplay = stageUnlocked && !isProgressionActive;
 
+      const isSelected = (i === selectedStageIdx);
+      const activeClass = isSelected ? 'selected-stage' : '';
+      const clickableClass = stageUnlocked ? 'unlocked-stage' : '';
+      const avatarUrl = getTrainerAvatar(stg.name);
+
+      // Special case: locked Giovanni — show unlock hint
+      if (selectedCityId === 'viridian' && i === 3 && !stageUnlocked) {
+        return `
+          <div class="campaign-stage-item locked" data-idx="${i}">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(239,68,68,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <img src="${avatarUrl}" style="height: 100%; width: 100%; object-fit: contain; image-rendering: pixelated; opacity: 0.5;" />
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: bold; color: #9ca3af;">${stg.name}</span>
+                <span style="font-size: 0.72rem; color: #f87171;">🔒 Apenas após vencer a Liga</span>
+              </div>
+            </div>
+            <span class="stage-badge locked">Trancado</span>
+          </div>
+          <div style="margin-top: 0.5rem; padding: 0.7rem 0.85rem; background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(251,191,36,0.08)); border: 1px solid rgba(239,68,68,0.35); border-radius: 10px; font-size: 0.79rem; color: #fca5a5; line-height: 1.55; text-align: center;">
+            🏆 <b>Giovanni aguarda a sua derrota...</b><br>
+            Derrote a <span style="color:#fbbf24;"><b>Elite 4 e a Campeã Cynthia</b></span> no Planalto Indigo para desafiar o líder do ginásio Viridian — o confronto final!
+          </div>
+        `;
+      }
+
       if (isProgressionActive) {
         statusClass = 'active';
         statusText = 'Batalhar';
@@ -766,11 +793,6 @@ function renderScreen() {
         statusClass = 'completed';
         statusText = 'Vencido';
       }
-
-      const isSelected = (i === selectedStageIdx);
-      const activeClass = isSelected ? 'selected-stage' : '';
-      const clickableClass = stageUnlocked ? 'unlocked-stage' : '';
-      const avatarUrl = getTrainerAvatar(stg.name);
 
       return `
         <div class="campaign-stage-item ${statusClass} ${clickableClass} ${activeClass}" data-idx="${i}">
