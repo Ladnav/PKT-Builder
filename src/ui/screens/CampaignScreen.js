@@ -20,7 +20,7 @@ const CITIES_CONFIG = {
     badgeName: "Começo da Jornada",
     badgeIcon: "🏡",
     badgeColor: "#94a3b8",
-    x: 23.9, y: 75.8,
+    x: 32.6, y: 65.0,
     stages: [
       { name: "Treinador de Rota 1", type: "NPC", team: [{ id: 16 }, { id: 19 }, { id: 10 }, { id: 13 }, { id: 21 }, { id: 23 }] },
       { name: "Rival Azul", type: "Leader", team: [
@@ -41,7 +41,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Rocha",
     badgeIcon: "🪨",
     badgeColor: "#9ca3af",
-    x: 27.0, y: 29.8,
+    x: 32.6, y: 37.4,
     stages: [
       { name: "Treinador Liam", type: "NPC", team: [{ id: 74 }, { id: 95 }, { id: 111 }, { id: 27 }, { id: 75 }, { id: 66 }] },
       { name: "Treinador Jerry", type: "NPC", team: [{ id: 75 }, { id: 111 }, { id: 140 }, { id: 28 }, { id: 74 }, { id: 67 }] },
@@ -64,7 +64,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Cascata",
     badgeIcon: "💧",
     badgeColor: "#38bdf8",
-    x: 65.9, y: 22.3,
+    x: 69.8, y: 33.0,
     stages: [
       { name: "Treinador Daren", type: "NPC", team: [{ id: 116 }, { id: 118 }, { id: 54 }, { id: 86 }, { id: 120 }, { id: 72 }] },
       { name: "Treinador Luis", type: "NPC", team: [{ id: 117 }, { id: 119 }, { id: 55 }, { id: 87 }, { id: 121 }, { id: 73 }] },
@@ -87,7 +87,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Trovão",
     badgeIcon: "⚡",
     badgeColor: "#eab308",
-    x: 62.1, y: 61.0,
+    x: 69.8, y: 57.2,
     stages: [
       { name: "Treinador Jax", type: "NPC", team: [{ id: 25 }, { id: 81 }, { id: 100 }, { id: 309 }, { id: 170 }, { id: 172 }] },
       { name: "Treinador Ron", type: "NPC", team: [{ id: 26 }, { id: 82 }, { id: 101 }, { id: 310 }, { id: 171 }, { id: 403 }] },
@@ -110,7 +110,7 @@ const CITIES_CONFIG = {
     badgeName: "Prece de Lavender",
     badgeIcon: "👻",
     badgeColor: "#8b5cf6",
-    x: 93.3, y: 47.8,
+    x: 84.8, y: 45.2,
     stages: [
       { name: "Exorcista Patricia", type: "NPC", team: [{ id: 92 }, { id: 93 }, { id: 200 }, { id: 353 }, { id: 355 }, { id: 96 }] },
       { name: "Fantasma de Marowak", type: "Leader", team: [
@@ -131,7 +131,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Arco-Íris",
     badgeIcon: "🌈",
     badgeColor: "#10b981",
-    x: 43.5, y: 51.5,
+    x: 56.3, y: 45.0,
     stages: [
       { name: "Treinadora Tina", type: "NPC", team: [{ id: 43 }, { id: 69 }, { id: 46 }, { id: 102 }, { id: 114 }, { id: 152 }] },
       { name: "Treinador Clara", type: "NPC", team: [{ id: 44 }, { id: 70 }, { id: 47 }, { id: 103 }, { id: 315 }, { id: 153 }] },
@@ -154,7 +154,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Alma",
     badgeIcon: "💜",
     badgeColor: "#a855f7",
-    x: 60.3, y: 72.3,
+    x: 62.6, y: 70.7,
     stages: [
       { name: "Treinador Kirk", type: "NPC", team: [{ id: 109 }, { id: 88 }, { id: 41 }, { id: 72 }, { id: 316 }, { id: 167 }] },
       { name: "Treinador Ned", type: "NPC", team: [{ id: 110 }, { id: 89 }, { id: 42 }, { id: 73 }, { id: 317 }, { id: 168 }] },
@@ -177,7 +177,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Pântano",
     badgeIcon: "🔮",
     badgeColor: "#ec4899",
-    x: 62.1, y: 51.5,
+    x: 71.4, y: 45.2,
     stages: [
       { name: "Treinador Igor", type: "NPC", team: [{ id: 63 }, { id: 96 }, { id: 122 }, { id: 79 }, { id: 177 }, { id: 280 }] },
       { name: "Treinador Yuri", type: "NPC", team: [{ id: 64 }, { id: 97 }, { id: 80 }, { id: 178 }, { id: 281 }, { id: 196 }] },
@@ -200,7 +200,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Vulcão",
     badgeIcon: "🔥",
     badgeColor: "#ef4444",
-    x: 22.0, y: 87.0,
+    x: 32.4, y: 77.4,
     stages: [
       { name: "Treinador Burt", type: "NPC", team: [{ id: 58 }, { id: 77 }, { id: 37 }, { id: 218 }, { id: 155 }, { id: 255 }] },
       { name: "Treinador Cole", type: "NPC", team: [{ id: 59 }, { id: 78 }, { id: 38 }, { id: 219 }, { id: 156 }, { id: 256 }] },
@@ -223,7 +223,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Terra",
     badgeIcon: "🟢",
     badgeColor: "#22c55e",
-    x: 21.6, y: 67.1,
+    x: 32.4, y: 53.2,
     stages: [
       { name: "Recruta Team Rocket", type: "NPC", team: [{ id: 23 }, { id: 41 }, { id: 109 }, { id: 52 }, { id: 88 }, { id: 19 }] },
       { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 24 }, { id: 42 }, { id: 110 }, { id: 53 }, { id: 89 }, { id: 20 }] },
@@ -246,7 +246,7 @@ const CITIES_CONFIG = {
     badgeName: "Troféu do Campeão",
     badgeIcon: "🏆",
     badgeColor: "#fbbf24",
-    x: 10.8, y: 29.8,
+    x: 17.2, y: 39.0,
     stages: [
       { name: "Lorelei (Elite Quatro)", type: "Elite4", team: [
         { id: 87, item: 'leftovers' },
