@@ -3672,6 +3672,7 @@ input:checked + .toggle-slider:before {
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  opacity: 0.68;
 }
 
 .map-node.locked .map-node-inner {
@@ -3679,7 +3680,7 @@ input:checked + .toggle-slider:before {
   border-color: #374151;
   color: #4b5563;
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.45;
 }
 
 .map-node.active .map-node-inner {
@@ -3688,6 +3689,7 @@ input:checked + .toggle-slider:before {
   color: #fbbf24;
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), inset 0 0 8px rgba(245, 158, 11, 0.2);
   animation: nodeGlow 2s infinite alternate;
+  opacity: 1;
 }
 
 @keyframes nodeGlow {
@@ -3700,6 +3702,7 @@ input:checked + .toggle-slider:before {
   border-color: #34d399;
   color: #34d399;
   box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
+  opacity: 0.75;
 }
 
 .map-node-inner:hover:not(.locked) {
