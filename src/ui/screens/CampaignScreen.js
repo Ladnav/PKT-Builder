@@ -20,7 +20,7 @@ const CITIES_CONFIG = {
     badgeName: "Começo da Jornada",
     badgeIcon: "🏡",
     badgeColor: "#94a3b8",
-    x: 29.5, y: 78.5,
+    x: 32.5, y: 78.5,
     stages: [
       { name: "Treinador de Rota 1", type: "NPC", team: [{ id: 25 }, { id: 143 }, { id: 59 }, { id: 25 }, { id: 143 }, { id: 59 }] },
       { name: "Rival Azul", type: "Leader", team: [
@@ -41,7 +41,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Rocha",
     badgeIcon: "🪨",
     badgeColor: "#9ca3af",
-    x: 29.5, y: 39.0,
+    x: 32.5, y: 39.0,
     stages: [
       { name: "Treinador Liam", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 473 }, { id: 389 }, { id: 214 }] },
       { name: "Treinador Jerry", type: "NPC", team: [{ id: 248 }, { id: 76 }, { id: 36 }, { id: 260 }, { id: 143 }, { id: 68 }] },
@@ -64,7 +64,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Cascata",
     badgeIcon: "💧",
     badgeColor: "#38bdf8",
-    x: 68.5, y: 36.5,
+    x: 71.5, y: 36.5,
     stages: [
       { name: "Treinador Daren", type: "NPC", team: [{ id: 134 }, { id: 9 }, { id: 25 }, { id: 131 }, { id: 160 }, { id: 230 }] },
       { name: "Treinador Luis", type: "NPC", team: [{ id: 395 }, { id: 230 }, { id: 80 }, { id: 350 }, { id: 134 }, { id: 9 }] },
@@ -87,7 +87,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Trovão",
     badgeIcon: "⚡",
     badgeColor: "#eab308",
-    x: 68.5, y: 64.5,
+    x: 71.5, y: 64.5,
     stages: [
       { name: "Treinador Jax", type: "NPC", team: [{ id: 25 }, { id: 82 }, { id: 143 }, { id: 26 }, { id: 125 }, { id: 135 }] },
       { name: "Treinador Ron", type: "NPC", team: [{ id: 125 }, { id: 26 }, { id: 123 }, { id: 82 }, { id: 25 }, { id: 135 }] },
@@ -110,7 +110,7 @@ const CITIES_CONFIG = {
     badgeName: "Prece de Lavender",
     badgeIcon: "👻",
     badgeColor: "#8b5cf6",
-    x: 85.5, y: 50.5,
+    x: 88.5, y: 50.5,
     stages: [
       { name: "Exorcista Patricia", type: "NPC", team: [{ id: 94 }, { id: 80 }, { id: 197 }, { id: 76 }, { id: 94 }, { id: 80 }] },
       { name: "Fantasma de Marowak", type: "Leader", team: [
@@ -131,7 +131,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Arco-Íris",
     badgeIcon: "🌈",
     badgeColor: "#10b981",
-    x: 52.0, y: 50.5,
+    x: 55.0, y: 50.5,
     stages: [
       { name: "Treinadora Tina", type: "NPC", team: [{ id: 154 }, { id: 143 }, { id: 134 }, { id: 3 }, { id: 254 }, { id: 389 }] },
       { name: "Treinador Clara", type: "NPC", team: [{ id: 389 }, { id: 254 }, { id: 36 }, { id: 154 }, { id: 3 }, { id: 214 }] },
@@ -154,7 +154,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Alma",
     badgeIcon: "💜",
     badgeColor: "#a855f7",
-    x: 59.0, y: 83.5,
+    x: 62.0, y: 83.5,
     stages: [
       { name: "Treinador Kirk", type: "NPC", team: [{ id: 94 }, { id: 3 }, { id: 197 }, { id: 461 }, { id: 229 }, { id: 359 }] },
       { name: "Treinador Ned", type: "NPC", team: [{ id: 461 }, { id: 94 }, { id: 65 }, { id: 197 }, { id: 3 }, { id: 229 }] },
@@ -177,7 +177,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Pântano",
     badgeIcon: "🔮",
     badgeColor: "#ec4899",
-    x: 68.5, y: 50.5,
+    x: 71.5, y: 50.5,
     stages: [
       { name: "Treinador Igor", type: "NPC", team: [{ id: 80 }, { id: 124 }, { id: 65 }, { id: 196 }, { id: 282 }, { id: 376 }] },
       { name: "Treinador Yuri", type: "NPC", team: [{ id: 196 }, { id: 282 }, { id: 475 }, { id: 65 }, { id: 80 }, { id: 376 }] },
@@ -200,7 +200,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia do Vulcão",
     badgeIcon: "🔥",
     badgeColor: "#ef4444",
-    x: 29.5, y: 89.5,
+    x: 32.5, y: 89.5,
     stages: [
       { name: "Treinador Burt", type: "NPC", team: [{ id: 38 }, { id: 136 }, { id: 59 }, { id: 6 }, { id: 126 }, { id: 157 }] },
       { name: "Treinador Cole", type: "NPC", team: [{ id: 126 }, { id: 157 }, { id: 229 }, { id: 59 }, { id: 257 }, { id: 392 }] },
@@ -223,7 +223,7 @@ const CITIES_CONFIG = {
     badgeName: "Insígnia da Terra",
     badgeIcon: "🟢",
     badgeColor: "#22c55e",
-    x: 29.5, y: 57.5,
+    x: 32.5, y: 57.5,
     stages: [
       { name: "Recruta Team Rocket", type: "NPC", team: [{ id: 76 }, { id: 68 }, { id: 143 }, { id: 445 }, { id: 260 }, { id: 473 }] },
       { name: "Recruta Rocket Fêmea", type: "NPC", team: [{ id: 260 }, { id: 473 }, { id: 389 }, { id: 76 }, { id: 248 }, { id: 143 }] },
@@ -246,7 +246,7 @@ const CITIES_CONFIG = {
     badgeName: "Troféu do Campeão",
     badgeIcon: "🏆",
     badgeColor: "#fbbf24",
-    x: 16.5, y: 35.5,
+    x: 19.5, y: 35.5,
     stages: [
       { name: "Lorelei (Elite Quatro)", type: "Elite4", team: [
         { id: 124, item: 'life-orb' },
@@ -292,7 +292,7 @@ const CITIES_CONFIG = {
   }
 };
 
-const CITY_ORDER = ['pallet', 'pewter', 'cerulean', 'vermilion', 'lavender', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'elite4', 'viridian'];
+const CITY_ORDER = ['pallet', 'viridian', 'pewter', 'cerulean', 'vermilion', 'lavender', 'celadon', 'fuchsia', 'saffron', 'cinnabar', 'elite4'];
 
 const CITY_SHOPS = {
   pewter: [
@@ -461,6 +461,9 @@ export async function render(cont) {
         // Auto-correct progression if currentCity got softlocked or set to a future city by default
         let expectedCurrentCity = 'pallet';
         for (const city of CITY_ORDER) {
+          if (city === 'viridian' && !progress.completedCities.includes('elite4')) {
+            continue; // Skip Viridian if Elite 4 is not beaten yet
+          }
           if (!progress.completedCities.includes(city)) {
             expectedCurrentCity = city;
             break;
@@ -541,6 +544,7 @@ function getNodeStatusClass(cityId) {
 
 function isCityUnlocked(cityId) {
   if (cityId === 'pallet') return true;
+  if (progress.completedCities.includes('elite4')) return true; // All unlocked post-league!
   const idx = CITY_ORDER.indexOf(cityId);
   if (idx === -1) return false;
   
@@ -555,6 +559,9 @@ function isCityUnlocked(cityId) {
 
 function isStageUnlocked(cityId, stageIdx) {
   if (!isCityUnlocked(cityId)) return false;
+  if (cityId === 'viridian' && stageIdx === 3) {
+    return progress.completedCities.includes('elite4');
+  }
   if (cityId === 'elite4') {
     if (progress.eliteFourIndex >= 5) return true; // League completed, all are replayable
     return stageIdx <= progress.eliteFourIndex;
@@ -672,7 +679,8 @@ function renderScreen() {
     return `<line x1="${c1.x}%" y1="${c1.y}%" x2="${c2.x}%" y2="${c2.y}%" class="campaign-svg-line" stroke="${color}" stroke-width="${width}" opacity="${opacity}" ${filter} />`;
   };
 
-  svgPaths += drawSvgLine('pallet', 'pewter');
+  svgPaths += drawSvgLine('pallet', 'viridian');
+  svgPaths += drawSvgLine('viridian', 'pewter');
   svgPaths += drawSvgLine('pewter', 'cerulean');
   svgPaths += drawSvgLine('cerulean', 'lavender');
   svgPaths += drawSvgLine('lavender', 'saffron');
@@ -863,7 +871,9 @@ function renderScreen() {
           </div>
           
           <div class="campaign-map-canvas" id="campaign-map-canvas">
-            ${svgPaths}
+            <svg class="campaign-svg-connections">
+              ${svgPaths}
+            </svg>
             
             ${renderMapNodeHtml('pallet', 'Vila de Pallet', '🏡')}
             ${renderMapNodeHtml('pewter', 'Pewter (Brock)', '🪨')}
@@ -1703,7 +1713,7 @@ function startBattle(playerTeam) {
             progress.completedCities.push('elite4');
             progress.eliteFourIndex = 5;
             progress.currentCity = 'viridian';
-            progress.currentStage = 0;
+            progress.currentStage = 3;
             localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
 
             // Save championship to profiles (increment ELO / Championships)
@@ -1770,11 +1780,13 @@ function startBattle(playerTeam) {
               progress.completedCities.push(cityId);
               progress.currentStage = 4; // Completed
 
-              // Unlock next city
-              const nextIdx = CITY_ORDER.indexOf(cityId) + 1;
-              if (nextIdx < CITY_ORDER.length) {
-                progress.currentCity = CITY_ORDER[nextIdx];
-                progress.currentStage = 0;
+              if (cityId !== 'viridian') {
+                // Unlock next city
+                const nextIdx = CITY_ORDER.indexOf(cityId) + 1;
+                if (nextIdx < CITY_ORDER.length) {
+                  progress.currentCity = CITY_ORDER[nextIdx];
+                  progress.currentStage = 0;
+                }
               }
               localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
             }
@@ -1799,12 +1811,21 @@ function startBattle(playerTeam) {
             localStorage.setItem(`pkt_campaign_gold_${currentUserId}`, String(gold));
 
             if (progress.currentCity === cityId && progress.currentStage === activeStageIdx) {
-              progress.currentStage++;
+              if (cityId === 'viridian' && activeStageIdx === 2) {
+                progress.currentCity = 'pewter';
+                progress.currentStage = 0;
+              } else {
+                progress.currentStage++;
+              }
               localStorage.setItem(`pkt_campaign_progress_${currentUserId}`, JSON.stringify(progress));
             }
 
             rewards.gold = 15;
-            rewards.message = `Você derrotou ${stage.name} e avançou no ginásio.`;
+            if (cityId === 'viridian' && activeStageIdx === 2) {
+              rewards.message = `Você derrotou o Admin Petrel! A Equipe Rocket recuou temporariamente. Siga para a Cidade de Pewter!`;
+            } else {
+              rewards.message = `Você derrotou ${stage.name} e avançou no ginásio.`;
+            }
           }
         }
       }
